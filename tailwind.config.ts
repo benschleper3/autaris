@@ -52,6 +52,22 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				growth: {
+					primary: 'hsl(var(--growth-primary))',
+					'primary-light': 'hsl(var(--growth-primary-light))',
+					secondary: 'hsl(var(--growth-secondary))',
+					accent: 'hsl(var(--growth-accent))',
+					success: 'hsl(var(--growth-success))',
+					warning: 'hsl(var(--growth-warning))',
+					danger: 'hsl(var(--growth-danger))'
+				},
+				chart: {
+					'1': 'hsl(var(--chart-1))',
+					'2': 'hsl(var(--chart-2))',
+					'3': 'hsl(var(--chart-3))',
+					'4': 'hsl(var(--chart-4))',
+					'5': 'hsl(var(--chart-5))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
