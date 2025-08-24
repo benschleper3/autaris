@@ -59,7 +59,7 @@ export default function PlatformCards() {
           const PlatformIcon = platform.icon;
           
           return (
-            <Card key={platform.name} className="p-4 border-border/50 bg-card/50 backdrop-blur-sm hover:bg-card/70 transition-all duration-200">
+            <Card key={platform.name} className="p-4 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-growth-primary/20 hover:bg-card/80 cursor-pointer">
               <div className="flex items-center justify-between mb-3">
                 <div className={cn(
                   "w-10 h-10 rounded-lg bg-gradient-to-r flex items-center justify-center text-white",
