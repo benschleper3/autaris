@@ -2,16 +2,20 @@ import MetricCard from './MetricCard';
 import ActivityChart from './ActivityChart';
 import TopPosts from './TopPosts';
 import InsightsPreview from './InsightsPreview';
+import PlatformCards from './PlatformCards';
 import { Users, Eye, Heart, TrendingUp } from 'lucide-react';
 
 export default function Dashboard() {
   return (
     <div className="p-6 space-y-6">
+      {/* Platform Cards */}
+      <PlatformCards />
+
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           title="Total Followers"
-          value="12.4K"
+          value="26.4K"
           change="+8.2%"
           changeType="positive"
           icon={<Users className="w-5 h-5" />}
