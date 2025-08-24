@@ -22,7 +22,7 @@ export default function MetricCard({
   const TrendIcon = changeType === 'positive' ? TrendingUp : TrendingDown;
   
   return (
-    <Card className={cn("p-6 border-border/50 bg-card/50 backdrop-blur-sm", className)}>
+    <Card className={cn("p-6 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-growth-primary/20 hover:bg-card/80 cursor-pointer", className)}>
       <div className="flex items-center justify-between mb-2">
         <p className="text-sm font-medium text-muted-foreground">{title}</p>
         {icon && (

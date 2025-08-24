@@ -5,7 +5,7 @@ import { Brain, Clock, TrendingUp, Calendar } from 'lucide-react';
 
 export default function InsightsPreview() {
   return (
-    <Card className="p-6 border-border/50 bg-card/50 backdrop-blur-sm">
+    <Card className="p-6 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-growth-primary/20 hover:bg-card/80 cursor-pointer">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center">

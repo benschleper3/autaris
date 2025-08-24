@@ -13,7 +13,7 @@ const data = [
 
 export default function ActivityChart() {
   return (
-    <Card className="p-6 border-border/50 bg-card/50 backdrop-blur-sm">
+    <Card className="p-6 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-growth-primary/20 hover:bg-card/80 cursor-pointer">
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-foreground">Weekly Activity</h3>
         <p className="text-sm text-muted-foreground">Followers and engagement over time</p>

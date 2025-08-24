@@ -37,7 +37,7 @@ const topPosts = [
 
 export default function TopPosts() {
   return (
-    <Card className="p-6 border-border/50 bg-card/50 backdrop-blur-sm">
+    <Card className="p-6 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-growth-primary/20 hover:bg-card/80 cursor-pointer">
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-foreground">Top Performing Posts</h3>
         <p className="text-sm text-muted-foreground">Your best content from this week</p>
@@ -45,7 +45,7 @@ export default function TopPosts() {
       
       <div className="space-y-4">
         {topPosts.map((post, index) => (
-          <div key={post.id} className="p-4 rounded-lg bg-secondary/30 border border-border/30">
+          <div key={post.id} className="p-4 rounded-lg bg-secondary/30 border border-border/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-growth-primary/10 hover:bg-secondary/40 cursor-pointer">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-growth-primary">#{index + 1}</span>
