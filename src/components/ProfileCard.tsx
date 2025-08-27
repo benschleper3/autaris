@@ -5,50 +5,35 @@ import { supabase } from "@/lib/config"
 export default function ProfileCard() {
   const [profile, setProfile] = useState<any>(null)
   const [fullName, setFullName] = useState("")
-  const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState<string | null>(null)
 
   async function loadProfile() {
-    setLoading(true)
     setMessage(null)
-    try {
-      const { data: { user }, error: userErr } = await supabase.auth.getUser()
-      if (userErr) throw userErr
-      if (!user) {
-        setMessage("Not signed in.")
-        return
-      }
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, full_name, plan, timezone, created_at")
-        .eq("id", user.id)
-        .single()
-      if (error) throw error
+    const { data: { user }, error: userErr } = await supabase.auth.getUser()
+    if (userErr || !user) {
+      setMessage(userErr?.message || "Not signed in.")
+      return
+    }
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, full_name, plan, timezone, created_at")
+      .eq("id", user.id)
+      .single()
+    if (error) setMessage("❌ " + error.message)
+    else {
       setProfile(data)
-      setFullName(data.full_name || "")
-    } catch (err: any) {
-      setMessage("❌ " + err.message)
-    } finally {
-      setLoading(false)
+      setFullName(data?.full_name || "")
     }
   }
 
-  async function saveProfile() {
+  async function save() {
     if (!profile) return
     setMessage(null)
-    setLoading(true)
-    try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ full_name: fullName })
-        .eq("id", profile.id)
-      if (error) throw error
-      setMessage("✅ Profile updated!")
-    } catch (err: any) {
-      setMessage("❌ " + err.message)
-    } finally {
-      setLoading(false)
-    }
+    const { error } = await supabase
+      .from("profiles")
+      .update({ full_name: fullName })
+      .eq("id", profile.id)
+    setMessage(error ? "❌ " + error.message : "✅ Profile updated")
   }
 
   useEffect(() => { loadProfile() }, [])
@@ -59,28 +44,14 @@ export default function ProfileCard() {
       {message && <p className="text-sm">{message}</p>}
       {profile ? (
         <>
-          <p><strong>Plan:</strong> {profile.plan}</p>
-          <p><strong>Timezone:</strong> {profile.timezone}</p>
-          <p><strong>Created:</strong> {new Date(profile.created_at).toLocaleString()}</p>
-          <div className="space-y-1">
-            <label className="text-sm">Full Name</label>
-            <input
-              className="w-full rounded-lg border px-3 py-2"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-            />
-          </div>
-          <button
-            onClick={saveProfile}
-            disabled={loading}
-            className="w-full rounded-lg border px-3 py-2 hover:bg-black/5 disabled:opacity-50"
-          >
-            {loading ? "Saving..." : "Save"}
-          </button>
+          <p><b>Plan:</b> {profile.plan}</p>
+          <p><b>Timezone:</b> {profile.timezone}</p>
+          <p><b>Created:</b> {new Date(profile.created_at).toLocaleString()}</p>
+          <label className="text-sm">Full name</label>
+          <input className="w-full rounded-lg border px-3 py-2" value={fullName} onChange={e=>setFullName(e.target.value)} />
+          <button onClick={save} className="w-full rounded-lg border px-3 py-2 hover:bg-black/5">Save</button>
         </>
-      ) : (
-        <p>{loading ? "Loading..." : "No profile found"}</p>
-      )}
+      ) : <p>Loading…</p>}
     </div>
   )
 }
