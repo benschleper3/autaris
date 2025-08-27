@@ -134,10 +134,6 @@ export default function AuthForm() {
       </button>
 
       {message && <p className="text-sm">{message}</p>}
-
-      <p className="text-xs text-black/60">
-        After sign-in/up, we upsert your row in <code>public.profiles</code> with your <code>auth.users.id</code>.
-      </p>
     </div>
   )
 }
