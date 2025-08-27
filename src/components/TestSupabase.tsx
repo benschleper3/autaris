@@ -8,9 +8,8 @@ export default function TestSupabase() {
 
   useEffect(() => {
     async function testConnection() {
-      // IMPORTANT: do NOT wrap the table name in extra quotes
       const { data, error } = await supabase
-        .from(`benschleper3's Project`)
+        .from("profiles")
         .select("*")
         .limit(1)
 
@@ -24,7 +23,7 @@ export default function TestSupabase() {
   }, [])
 
   return (
-    <div className="p-4 bg-gray-100 rounded-lg">
+    <div className="p-4 rounded-xl border">
       <p>{message}</p>
     </div>
   )
