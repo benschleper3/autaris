@@ -23,8 +23,12 @@ export default function AuthForm() {
         email,
         password,
         options: {
-          data: { full_name: fullName || null }, // <-- metadata
-          emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
+          data: {
+            full_name: fullName || null,
+            plan: 'Starter',
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+          },
+          emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
         },
       })
       if (error) throw error
