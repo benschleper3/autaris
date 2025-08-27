@@ -8,7 +8,12 @@ export default function TestSupabase() {
 
   useEffect(() => {
     async function testConnection() {
-      const { data, error } = await supabase.from('"benschleper3\'s Project"').select("*").limit(1)
+      // IMPORTANT: do NOT wrap the table name in extra quotes
+      const { data, error } = await supabase
+        .from(`benschleper3's Project`)
+        .select("*")
+        .limit(1)
+
       if (error) {
         setMessage("❌ Supabase connection failed: " + error.message)
       } else {
