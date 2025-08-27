@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      healthchecks: {
+        Row: {
+          created_at: string
+          id: number
+          note: string
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          note: string
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          note?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
