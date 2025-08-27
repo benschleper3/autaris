@@ -1,16 +1,12 @@
-import Navigation from '@/components/Navigation';
-import Dashboard from '@/components/Dashboard';
+import AuthForm from '@/components/AuthForm';
 import TestSupabase from '@/components/TestSupabase';
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      <main className="max-w-7xl mx-auto">
-        <TestSupabase />
-        <Dashboard />
-      </main>
-    </div>
+    <main className="p-6 space-y-6">
+      <AuthForm />
+      <TestSupabase />
+    </main>
   );
 };
 
