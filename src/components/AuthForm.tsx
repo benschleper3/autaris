@@ -22,7 +22,10 @@ export default function AuthForm() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined },
+        options: {
+          data: { full_name: fullName || null }, // <-- metadata
+          emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
+        },
       })
       if (error) throw error
       setMessage("✅ Account created. If email confirmation is enabled, check your inbox, then sign in.")
