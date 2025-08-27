@@ -13,14 +13,6 @@ export default function AuthForm() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
 
-  async function ensureProfile(userId: string, name?: string) {
-    // Requires RLS policies: insert/update where auth.uid() = id
-    const { error } = await supabase.from("profiles").upsert({
-      id: userId,
-      full_name: name || null,
-    })
-    if (error) throw error
-  }
 
   async function handleSignUp(e: React.FormEvent) {
     e.preventDefault()
@@ -33,7 +25,7 @@ export default function AuthForm() {
         options: { emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined },
       })
       if (error) throw error
-      setMessage("✅ Sign-up successful. If confirmations are enabled, check your email, then sign in.")
+      setMessage("✅ Account created. If confirmations are enabled, check your email, then sign in.")
       setView("sign-in")
     } catch (err: any) {
       setMessage("❌ " + (err?.message || "Sign-up failed"))
@@ -49,12 +41,7 @@ export default function AuthForm() {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) throw error
-      if (data.user) {
-        await ensureProfile(data.user.id, fullName || undefined) // upsert after session exists
-        setMessage("✅ Signed in")
-      } else {
-        setMessage("⚠️ No user returned")
-      }
+      setMessage("✅ Signed in")
     } catch (err: any) {
       setMessage("❌ " + (err?.message || "Sign-in failed"))
     } finally {
