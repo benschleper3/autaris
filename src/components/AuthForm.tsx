@@ -25,7 +25,7 @@ export default function AuthForm() {
         options: { emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined },
       })
       if (error) throw error
-      setMessage("✅ Account created. If confirmations are enabled, check your email, then sign in.")
+      setMessage("✅ Account created. If email confirmation is enabled, check your inbox, then sign in.")
       setView("sign-in")
     } catch (err: any) {
       setMessage("❌ " + (err?.message || "Sign-up failed"))
@@ -41,7 +41,11 @@ export default function AuthForm() {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) throw error
-      setMessage("✅ Signed in")
+      if (data.user) {
+        setMessage("✅ Signed in")
+      } else {
+        setMessage("⚠️ No user returned")
+      }
     } catch (err: any) {
       setMessage("❌ " + (err?.message || "Sign-in failed"))
     } finally {
