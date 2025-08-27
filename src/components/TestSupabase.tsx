@@ -1,37 +1,26 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+"use client"
+
+import { useEffect, useState } from "react"
+import { supabase } from "@/lib/config"
 
 export default function TestSupabase() {
-  const [status, setStatus] = useState<'idle'|'ok'|'err'>('idle');
-  const [message, setMessage] = useState<string>('Initializing…');
+  const [message, setMessage] = useState("Testing Supabase...")
 
   useEffect(() => {
-    (async () => {
-      try {
-        // Try a safe read against profiles; ok if empty
-        const { data, error } = await supabase.from('profiles').select('id').limit(1);
-        if (error) throw error;
-        setStatus('ok');
-        setMessage(`Connected. Rows visible: ${data?.length ?? 0}`);
-      } catch (e:any) {
-        setStatus('err');
-        setMessage(e?.message ?? 'Unknown error');
+    async function testConnection() {
+      const { data, error } = await supabase.from('"benschleper3\'s Project"').select("*").limit(1)
+      if (error) {
+        setMessage("❌ Supabase connection failed: " + error.message)
+      } else {
+        setMessage("✅ Supabase connected! Rows fetched: " + data.length)
       }
-    })();
-  }, []);
+    }
+    testConnection()
+  }, [])
 
   return (
-    <div className="fixed bottom-4 right-4 rounded-lg border bg-card px-3 py-2 shadow-sm">
-      <div className="text-sm font-medium text-card-foreground">Supabase Test</div>
-      <div className={`text-xs ${
-        status === 'ok' 
-          ? 'text-green-600 dark:text-green-400' 
-          : status === 'err' 
-          ? 'text-destructive' 
-          : 'text-muted-foreground'
-      }`}>
-        {message}
-      </div>
+    <div className="p-4 bg-gray-100 rounded-lg">
+      <p>{message}</p>
     </div>
-  );
+  )
 }
