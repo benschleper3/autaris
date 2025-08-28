@@ -185,7 +185,7 @@ export default function AuthForm() {
           </button>
         )}
 
-        {(fullName.trim() || phone.trim() || email.trim()) && (
+        {view === "sign-up" && (fullName.trim() || phone.trim() || email.trim()) && (
           <div className="text-xs p-2 rounded bg-black/5 mb-2">
             <div className="font-semibold">Submitting metadata</div>
             <pre className="whitespace-pre-wrap">
