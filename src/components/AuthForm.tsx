@@ -116,6 +116,10 @@ export default function AuthForm() {
 
   return (
     <div className="p-5 rounded-2xl border max-w-md w-full space-y-4">
+      <div className="text-center mb-6">
+        <h1 className="text-2xl font-bold text-primary">Growth OS</h1>
+        <p className="text-sm text-muted-foreground">Your growth platform</p>
+      </div>
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">{view === "sign-in" ? "Sign in" : "Create account"}</h2>
         <button
