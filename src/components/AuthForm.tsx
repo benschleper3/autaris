@@ -10,6 +10,7 @@ export default function AuthForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [fullName, setFullName] = useState("")
+  const [phone, setPhone] = useState("")
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
 
@@ -25,6 +26,7 @@ export default function AuthForm() {
         options: {
           data: {
             full_name: fullName || null,
+            phone: phone || null,
             plan: 'Starter',
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
           },
@@ -87,15 +89,27 @@ export default function AuthForm() {
       </div>
 
       {view === "sign-up" && (
-        <div className="space-y-1">
-          <label className="text-sm">Full name (optional)</label>
-          <input
-            className="w-full rounded-lg border px-3 py-2"
-            placeholder="Ben Schleper"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-          />
-        </div>
+        <>
+          <div className="space-y-1">
+            <label className="text-sm">Full name (optional)</label>
+            <input
+              className="w-full rounded-lg border px-3 py-2"
+              placeholder="Ben Schleper"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm">Phone number (optional)</label>
+            <input
+              type="tel"
+              className="w-full rounded-lg border px-3 py-2"
+              placeholder="+1 (555) 123-4567"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </div>
+        </>
       )}
 
       <form onSubmit={view === "sign-in" ? handleSignIn : handleSignUp} className="space-y-3">
