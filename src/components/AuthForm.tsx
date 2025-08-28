@@ -45,16 +45,30 @@ export default function AuthForm() {
     e.preventDefault()
     setLoading(true)
     setMessage(null)
+    console.log("SIGN IN", { email });
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) throw error
-      if (data.user) {
-        setMessage("✅ Signed in")
-      } else {
-        setMessage("⚠️ No user returned")
-      }
+      if (data.user) setMessage("✅ Signed in")
     } catch (err: any) {
+      // Show exact error message
       setMessage("❌ " + (err?.message || "Sign-in failed"))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function sendReset() {
+    setLoading(true)
+    setMessage(null)
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: typeof window !== "undefined" ? `${window.location.origin}/auth/callback` : undefined,
+      })
+      if (error) throw error
+      setMessage("📧 Password reset email sent. Check your inbox.")
+    } catch (err: any) {
+      setMessage("❌ " + (err?.message || "Could not send reset email"))
     } finally {
       setLoading(false)
     }
@@ -108,6 +122,16 @@ export default function AuthForm() {
             required
           />
         </div>
+
+        {view === "sign-in" && (
+          <button
+            type="button"
+            onClick={sendReset}
+            className="text-sm underline"
+          >
+            Forgot password?
+          </button>
+        )}
 
         <button
           type="submit"
