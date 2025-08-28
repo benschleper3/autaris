@@ -1,9 +1,23 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import { supabase } from "@/lib/config"
 
 type View = "sign-in" | "sign-up"
+
+function buildMeta(fullName?: string, phone?: string) {
+  const name = (fullName ?? "").trim()
+  const phoneNumber = (phone ?? "").trim()
+  return {
+    full_name: name.length ? name : null,
+    phone: phoneNumber.length ? phoneNumber : null,
+    plan: "Starter",
+    timezone:
+      typeof window !== "undefined"
+        ? Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"
+        : "UTC",
+  }
+}
 
 export default function AuthForm() {
   const [view, setView] = useState<View>("sign-in")
@@ -20,23 +34,29 @@ export default function AuthForm() {
     setLoading(true)
     setMessage(null)
     try {
-      const { data, error } = await supabase.auth.signUp({
+      // 1) Sign up with metadata
+      const meta = buildMeta(fullName, phone)
+      console.log("SIGN UP → metadata", meta)
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: {
-            full_name: fullName || null,
-            phone: phone || null,
-            plan: 'Starter',
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
-          },
+          data: meta,
           emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
         },
       })
-      if (error) throw error
+      if (signUpError) throw signUpError
+
+      // 2) If a session exists (email confirmations off) or when user returns from confirm,
+      //    force-sync metadata again to trigger update trigger reliably.
+      if (signUpData?.user) {
+        await supabase.auth.updateUser({ data: meta })
+      }
+
       setMessage("✅ Account created. If email confirmation is enabled, check your inbox, then sign in.")
       setView("sign-in")
     } catch (err: any) {
+      console.error("SIGN UP ERROR", err)
       setMessage("❌ " + (err?.message || "Sign-up failed"))
     } finally {
       setLoading(false)
@@ -49,10 +69,28 @@ export default function AuthForm() {
     setMessage(null)
     console.log("SIGN IN", { email });
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) throw error
-      if (data.user) setMessage("✅ Signed in")
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+      if (signInError) throw signInError
+
+      // Force a metadata sync right after first sign in to cover older accounts
+      const meta = buildMeta(fullName, phone)
+      console.log("SIGN IN → metadata sync", meta)
+      await supabase.auth.updateUser({ data: meta })
+
+      // Optional: verify profile is populated now
+      const { data: userInfo } = await supabase.auth.getUser()
+      if (userInfo?.user?.id) {
+        const { data: profileRow, error: profileErr } = await supabase
+          .from("profiles")
+          .select("id,email,full_name,plan,timezone")
+          .eq("id", userInfo.user.id)
+          .maybeSingle()
+        console.log("PROFILE AFTER AUTH", { profileRow, profileErr })
+      }
+
+      if (signInData.user) setMessage("✅ Signed in")
     } catch (err: any) {
+      console.error("SIGN IN ERROR", err)
       // Show exact error message
       setMessage("❌ " + (err?.message || "Sign-in failed"))
     } finally {
@@ -145,6 +183,15 @@ export default function AuthForm() {
           >
             Forgot password?
           </button>
+        )}
+
+        {(fullName.trim() || phone.trim() || email.trim()) && (
+          <div className="text-xs p-2 rounded bg-black/5 mb-2">
+            <div className="font-semibold">Submitting metadata</div>
+            <pre className="whitespace-pre-wrap">
+              {JSON.stringify(buildMeta(fullName, phone), null, 2)}
+            </pre>
+          </div>
         )}
 
         <button
