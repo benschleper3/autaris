@@ -31,6 +31,10 @@ const Index = () => {
     );
   }
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-background/80">
@@ -51,6 +55,15 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-background/80">
+      <div className="p-4 flex justify-between items-center border-b">
+        <h1 className="text-xl font-semibold">Growth OS Dashboard</h1>
+        <button 
+          onClick={handleLogout}
+          className="px-4 py-2 text-sm bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors"
+        >
+          Sign Out
+        </button>
+      </div>
       <Navigation />
       <Dashboard />
     </div>
