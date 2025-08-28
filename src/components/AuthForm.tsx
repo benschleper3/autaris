@@ -60,20 +60,6 @@ export default function AuthForm() {
     }
   }
 
-  async function handleSignOut() {
-    setLoading(true)
-    setMessage(null)
-    try {
-      const { error } = await supabase.auth.signOut()
-      if (error) throw error
-      setMessage("👋 Signed out")
-    } catch (err: any) {
-      setMessage("❌ " + (err?.message || "Sign-out failed"))
-    } finally {
-      setLoading(false)
-    }
-  }
-
   return (
     <div className="p-5 rounded-2xl border max-w-md w-full space-y-4">
       <div className="flex items-center justify-between">
@@ -131,14 +117,6 @@ export default function AuthForm() {
           {loading ? "Working…" : view === "sign-in" ? "Sign in" : "Sign up"}
         </button>
       </form>
-
-      <button
-        onClick={handleSignOut}
-        disabled={loading}
-        className="w-full rounded-lg border px-3 py-2 hover:bg-black/5 disabled:opacity-50"
-      >
-        Sign out
-      </button>
 
       {message && <p className="text-sm">{message}</p>}
     </div>
