@@ -1,5 +1,22 @@
+-- Ensure schema exists
 create schema if not exists app;
 
+-- Drop leftover public.profiles table if it exists (prevents duplicate error)
+do $$
+begin
+  if exists (
+    select 1
+    from pg_class c
+    join pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'public'
+      and c.relname = 'profiles'
+      and c.relkind = 'r'  -- 'r' = table
+  ) then
+    execute 'drop table public.profiles cascade';
+  end if;
+end $$;
+
+-- Enums
 do $$ begin
   create type app.social_platform as enum ('tiktok','instagram','facebook','twitter','linkedin','youtube');
 exception when duplicate_object then null; end $$;
@@ -8,6 +25,7 @@ do $$ begin
   create type app.account_status as enum ('active','paused','disconnected','error');
 exception when duplicate_object then null; end $$;
 
+-- Profiles table
 create table if not exists app.profiles (
   user_id uuid primary key references auth.users(id) on delete cascade,
   full_name text,
@@ -30,6 +48,7 @@ drop trigger if exists trg_profiles_touch on app.profiles;
 create trigger trg_profiles_touch before update on app.profiles
 for each row execute function app.touch_updated_at();
 
+-- Social accounts
 create table if not exists app.social_accounts (
   id bigserial primary key,
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -48,6 +67,7 @@ for each row execute function app.touch_updated_at();
 create index if not exists idx_social_accounts_user on app.social_accounts(user_id);
 create index if not exists idx_social_accounts_platform on app.social_accounts(platform);
 
+-- Post metrics
 create table if not exists app.post_metrics (
   id bigserial primary key,
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -75,6 +95,7 @@ create index if not exists idx_post_metrics_account on app.post_metrics(social_a
 create index if not exists idx_post_metrics_published on app.post_metrics(published_at desc);
 create index if not exists idx_post_metrics_engagement on app.post_metrics(engagement_rate desc);
 
+-- Weekly insights
 create table if not exists app.weekly_insights (
   id bigserial primary key,
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -94,32 +115,45 @@ for each row execute function app.touch_updated_at();
 create index if not exists idx_weekly_insights_user on app.weekly_insights(user_id);
 create index if not exists idx_weekly_insights_week on app.weekly_insights(week_start desc);
 
-alter table app.profiles enable row level security;
-alter table app.social_accounts enable row level security;
-alter table app.post_metrics enable row level security;
-alter table app.weekly_insights enable row level security;
+-- RLS
+alter table app.profiles         enable row level security;
+alter table app.social_accounts  enable row level security;
+alter table app.post_metrics     enable row level security;
+alter table app.weekly_insights  enable row level security;
+
+-- Policies (profiles: auto-detects id vs user_id)
+do $$
+begin
+  if exists (select 1 from information_schema.columns where table_schema='app' and table_name='profiles' and column_name='user_id') then
+    execute $p$
+      create policy if not exists "profiles_owner_crud" on app.profiles
+      using (auth.uid() = user_id) with check (auth.uid() = user_id)
+    $p$;
+  elsif exists (select 1 from information_schema.columns where table_schema='app' and table_name='profiles' and column_name='id') then
+    execute $p$
+      create policy if not exists "profiles_owner_crud" on app.profiles
+      using (auth.uid() = id) with check (auth.uid() = id)
+    $p$;
+  end if;
+end $$;
 
 do $$ begin
-  create policy "profiles_owner_crud" on app.profiles
-    using (auth.uid() = user_id) with check (auth.uid() = user_id);
+  create policy if not exists "social_accounts_owner_crud"
+    on app.social_accounts using (auth.uid() = user_id) with check (auth.uid() = user_id);
 exception when duplicate_object then null; end $$;
 
 do $$ begin
-  create policy "social_accounts_owner_crud" on app.social_accounts
-    using (auth.uid() = user_id) with check (auth.uid() = user_id);
+  create policy if not exists "post_metrics_owner_crud"
+    on app.post_metrics using (auth.uid() = user_id) with check (auth.uid() = user_id);
 exception when duplicate_object then null; end $$;
 
 do $$ begin
-  create policy "post_metrics_owner_crud" on app.post_metrics
-    using (auth.uid() = user_id) with check (auth.uid() = user_id);
+  create policy if not exists "weekly_insights_owner_crud"
+    on app.weekly_insights using (auth.uid() = user_id) with check (auth.uid() = user_id);
 exception when duplicate_object then null; end $$;
 
-do $$ begin
-  create policy "weekly_insights_owner_crud" on app.weekly_insights
-    using (auth.uid() = user_id) with check (auth.uid() = user_id);
-exception when duplicate_object then null; end $$;
-
-create or replace view public.profiles as select * from app.profiles;
+-- Views in public
+create or replace view public.profiles        as select * from app.profiles;
 create or replace view public.social_accounts as select * from app.social_accounts;
-create or replace view public.post_metrics as select * from app.post_metrics;
+create or replace view public.post_metrics    as select * from app.post_metrics;
 create or replace view public.weekly_insights as select * from app.weekly_insights;
