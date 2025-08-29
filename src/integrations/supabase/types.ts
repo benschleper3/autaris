@@ -14,6 +14,77 @@ export type Database = {
   }
   public: {
     Tables: {
+      admins: {
+        Row: {
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      dashboard_items: {
+        Row: {
+          created_at: string
+          dashboard_id: number
+          data: Json
+          id: number
+          kind: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dashboard_id: number
+          data?: Json
+          id?: never
+          kind: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dashboard_id?: number
+          data?: Json
+          id?: never
+          kind?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dashboard_items_dashboard_id_fkey"
+            columns: ["dashboard_id"]
+            isOneToOne: false
+            referencedRelation: "dashboards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dashboards: {
+        Row: {
+          created_at: string
+          id: number
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          title?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       healthchecks: {
         Row: {
           created_at: string
@@ -34,23 +105,41 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           created_at: string | null
+          email: string | null
           full_name: string | null
           id: string
+          last_login_at: string | null
+          metadata: Json | null
+          onboarded_at: string | null
+          phone: string | null
           plan: string | null
           timezone: string | null
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string | null
+          email?: string | null
           full_name?: string | null
           id: string
+          last_login_at?: string | null
+          metadata?: Json | null
+          onboarded_at?: string | null
+          phone?: string | null
           plan?: string | null
           timezone?: string | null
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string | null
+          email?: string | null
           full_name?: string | null
           id?: string
+          last_login_at?: string | null
+          metadata?: Json | null
+          onboarded_at?: string | null
+          phone?: string | null
           plan?: string | null
           timezone?: string | null
         }
