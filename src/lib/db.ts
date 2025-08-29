@@ -1,13 +1,12 @@
-// WARNING: This file is for server-side use only and will not work in the browser
-// This is a Vite/React frontend project - pg Pool connections are for Node.js servers
-// If you need database access, use the Supabase client instead
+// Note: This is a Vite/React frontend project - pg Pool connections won't work in the browser
+// For database access, use the Supabase client instead: import { supabase } from './supabaseClient'
 
-// Commented out to avoid TypeScript errors in frontend project
+// Commented out to avoid errors - this would only work in a Node.js server environment
 // import { Pool } from 'pg';
+// export const db = new Pool({ connectionString: process.env.DATABASE_URL! });
 
-// export const db = new Pool({ 
-//   connectionString: process.env.DATABASE_URL 
-// });
+// For reference - this is what you'd use in a Node.js backend:
+export const dbConnectionString = 'postgresql://postgres:vqnNhBVDDNhs4xhY@db.gjfbxqsjxasubvnpeeie.supabase.co:5432/postgres';
 
 // Placeholder export to make this a valid module
 export const db = null;
