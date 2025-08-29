@@ -25,7 +25,9 @@ do $$ begin
   create type app.account_status as enum ('active','paused','disconnected','error');
 exception when duplicate_object then null; end $$;
 
--- Profiles table
+-- ========================
+-- PROFILES TABLE
+-- ========================
 create table if not exists app.profiles (
   user_id uuid primary key references auth.users(id) on delete cascade,
   full_name text,
@@ -42,13 +44,19 @@ create table if not exists app.profiles (
 
 create or replace function app.touch_updated_at() returns trigger
 language plpgsql as $$
-begin new.updated_at = now(); return new; end $$;
+begin
+  new.updated_at = now();
+  return new;
+end $$;
 
 drop trigger if exists trg_profiles_touch on app.profiles;
-create trigger trg_profiles_touch before update on app.profiles
+create trigger trg_profiles_touch
+before update on app.profiles
 for each row execute function app.touch_updated_at();
 
--- Social accounts
+-- ========================
+-- SOCIAL ACCOUNTS TABLE
+-- ========================
 create table if not exists app.social_accounts (
   id bigserial primary key,
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -61,13 +69,18 @@ create table if not exists app.social_accounts (
   updated_at timestamptz not null default now(),
   unique (user_id, platform, external_id)
 );
+
 drop trigger if exists trg_social_accounts_touch on app.social_accounts;
-create trigger trg_social_accounts_touch before update on app.social_accounts
+create trigger trg_social_accounts_touch
+before update on app.social_accounts
 for each row execute function app.touch_updated_at();
+
 create index if not exists idx_social_accounts_user on app.social_accounts(user_id);
 create index if not exists idx_social_accounts_platform on app.social_accounts(platform);
 
--- Post metrics
+-- ========================
+-- POST METRICS TABLE
+-- ========================
 create table if not exists app.post_metrics (
   id bigserial primary key,
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -82,20 +95,26 @@ create table if not exists app.post_metrics (
   shares bigint not null default 0,
   engagement_rate double precision
     generated always as (case when views > 0
-      then (likes + comments + shares)::double precision / views::double precision else 0 end) stored,
+      then (likes + comments + shares)::double precision / views::double precision
+      else 0 end) stored,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (social_account_id, post_id)
 );
+
 drop trigger if exists trg_post_metrics_touch on app.post_metrics;
-create trigger trg_post_metrics_touch before update on app.post_metrics
+create trigger trg_post_metrics_touch
+before update on app.post_metrics
 for each row execute function app.touch_updated_at();
+
 create index if not exists idx_post_metrics_user on app.post_metrics(user_id);
 create index if not exists idx_post_metrics_account on app.post_metrics(social_account_id);
 create index if not exists idx_post_metrics_published on app.post_metrics(published_at desc);
 create index if not exists idx_post_metrics_engagement on app.post_metrics(engagement_rate desc);
 
--- Weekly insights
+-- ========================
+-- WEEKLY INSIGHTS TABLE
+-- ========================
 create table if not exists app.weekly_insights (
   id bigserial primary key,
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -107,52 +126,77 @@ create table if not exists app.weekly_insights (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (user_id, week_start),
-  constraint chk_week_start_is_monday check (date_trunc('week', week_start)::date = week_start)
+  constraint chk_week_start_is_monday
+    check (date_trunc('week', week_start)::date = week_start)
 );
+
 drop trigger if exists trg_weekly_insights_touch on app.weekly_insights;
-create trigger trg_weekly_insights_touch before update on app.weekly_insights
+create trigger trg_weekly_insights_touch
+before update on app.weekly_insights
 for each row execute function app.touch_updated_at();
+
 create index if not exists idx_weekly_insights_user on app.weekly_insights(user_id);
 create index if not exists idx_weekly_insights_week on app.weekly_insights(week_start desc);
 
--- RLS
+-- ========================
+-- RLS & POLICIES
+-- ========================
 alter table app.profiles         enable row level security;
 alter table app.social_accounts  enable row level security;
 alter table app.post_metrics     enable row level security;
 alter table app.weekly_insights  enable row level security;
 
--- Policies (profiles: auto-detects id vs user_id)
+-- Profiles: auto-detect id vs user_id
 do $$
 begin
-  if exists (select 1 from information_schema.columns where table_schema='app' and table_name='profiles' and column_name='user_id') then
-    execute $p$
-      create policy if not exists "profiles_owner_crud" on app.profiles
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema='app' and table_name='profiles' and column_name='user_id'
+  ) then
+    execute '
+      drop policy if exists "profiles_owner_crud" on app.profiles;
+      create policy "profiles_owner_crud" on app.profiles
       using (auth.uid() = user_id) with check (auth.uid() = user_id)
-    $p$;
-  elsif exists (select 1 from information_schema.columns where table_schema='app' and table_name='profiles' and column_name='id') then
-    execute $p$
-      create policy if not exists "profiles_owner_crud" on app.profiles
+    ';
+  elsif exists (
+    select 1 from information_schema.columns
+    where table_schema='app' and table_name='profiles' and column_name='id'
+  ) then
+    execute '
+      drop policy if exists "profiles_owner_crud" on app.profiles;
+      create policy "profiles_owner_crud" on app.profiles
       using (auth.uid() = id) with check (auth.uid() = id)
-    $p$;
+    ';
   end if;
 end $$;
 
-do $$ begin
-  create policy if not exists "social_accounts_owner_crud"
-    on app.social_accounts using (auth.uid() = user_id) with check (auth.uid() = user_id);
-exception when duplicate_object then null; end $$;
+-- Social accounts
+do $$
+begin
+  drop policy if exists "social_accounts_owner_crud" on app.social_accounts;
+  create policy "social_accounts_owner_crud" on app.social_accounts
+    using (auth.uid() = user_id) with check (auth.uid() = user_id);
+end $$;
 
-do $$ begin
-  create policy if not exists "post_metrics_owner_crud"
-    on app.post_metrics using (auth.uid() = user_id) with check (auth.uid() = user_id);
-exception when duplicate_object then null; end $$;
+-- Post metrics
+do $$
+begin
+  drop policy if exists "post_metrics_owner_crud" on app.post_metrics;
+  create policy "post_metrics_owner_crud" on app.post_metrics
+    using (auth.uid() = user_id) with check (auth.uid() = user_id);
+end $$;
 
-do $$ begin
-  create policy if not exists "weekly_insights_owner_crud"
-    on app.weekly_insights using (auth.uid() = user_id) with check (auth.uid() = user_id);
-exception when duplicate_object then null; end $$;
+-- Weekly insights
+do $$
+begin
+  drop policy if exists "weekly_insights_owner_crud" on app.weekly_insights;
+  create policy "weekly_insights_owner_crud" on app.weekly_insights
+    using (auth.uid() = user_id) with check (auth.uid() = user_id);
+end $$;
 
--- Views in public
+-- ========================
+-- PUBLIC VIEWS
+-- ========================
 create or replace view public.profiles        as select * from app.profiles;
 create or replace view public.social_accounts as select * from app.social_accounts;
 create or replace view public.post_metrics    as select * from app.post_metrics;
