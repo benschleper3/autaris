@@ -50,41 +50,41 @@ const platforms: PlatformData[] = [
 
 export default function PlatformCards() {
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-foreground mb-4">Platform Analytics</h3>
+    <div className="space-y-3 sm:space-y-4">
+      <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2 sm:mb-4">Platform Analytics</h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
         {platforms.map((platform) => {
           const TrendIcon = platform.growthType === 'positive' ? TrendingUp : TrendingDown;
           const PlatformIcon = platform.icon;
           
           return (
-            <Card key={platform.name} className="p-4 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-growth-primary/20 hover:bg-card/80 cursor-pointer">
-              <div className="flex items-center justify-between mb-3">
+            <Card key={platform.name} className="p-3 sm:p-4 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-growth-primary/20 hover:bg-card/80 cursor-pointer">
+              <div className="flex items-center justify-between mb-2">
                 <div className={cn(
-                  "w-10 h-10 rounded-lg bg-gradient-to-r flex items-center justify-center text-white",
+                  "w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-r flex items-center justify-center text-white",
                   platform.color
                 )}>
-                  <PlatformIcon className="w-5 h-5" />
+                  <PlatformIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                 </div>
-                <Badge variant="secondary" className="text-xs font-medium">
+                <Badge variant="secondary" className="text-[10px] sm:text-xs font-medium px-1 py-0.5 sm:px-2 sm:py-1">
                   {platform.name}
                 </Badge>
               </div>
               
-              <div className="space-y-1">
-                <h4 className="text-2xl font-bold text-foreground">
+              <div className="space-y-0.5 sm:space-y-1">
+                <h4 className="text-sm sm:text-xl font-bold text-foreground">
                   {platform.followers}
                 </h4>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs text-muted-foreground hidden sm:block">
                   {platform.name === 'YOUTUBE' ? 'Subscribers' : 'Followers'}
                 </p>
                 
                 <div className={cn(
-                  "flex items-center gap-1 text-sm font-medium",
+                  "flex items-center gap-1 text-xs font-medium",
                   platform.growthType === 'positive' ? "text-growth-success" : "text-growth-danger"
                 )}>
-                  <TrendIcon className="w-3 h-3" />
+                  <TrendIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                   {platform.growth}
                 </div>
               </div>

@@ -7,12 +7,12 @@ import { Users, Eye, Heart, TrendingUp } from 'lucide-react';
 
 export default function Dashboard() {
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
       {/* Platform Cards */}
       <PlatformCards />
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
         <MetricCard
           title="Total Followers"
           value="26.4K"
@@ -44,7 +44,7 @@ export default function Dashboard() {
       </div>
 
       {/* Charts and Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Activity Chart - Takes up 2 columns */}
         <div className="lg:col-span-2">
           <ActivityChart />
