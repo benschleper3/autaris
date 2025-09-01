@@ -1,7 +1,7 @@
 -- Ensure schema exists
 create schema if not exists app;
 
--- Drop leftover public.profiles table if it exists (prevents duplicate error)
+-- Drop leftover public.profiles TABLE if it exists (prevents duplicate error)
 do $$
 begin
   if exists (
@@ -94,9 +94,11 @@ create table if not exists app.post_metrics (
   comments bigint not null default 0,
   shares bigint not null default 0,
   engagement_rate double precision
-    generated always as (case when views > 0
-      then (likes + comments + shares)::double precision / views::double precision
-      else 0 end) stored,
+    generated always as (
+      case when views > 0
+        then (likes + comments + shares)::double precision / views::double precision
+        else 0 end
+    ) stored,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (social_account_id, post_id)
@@ -146,15 +148,21 @@ alter table app.social_accounts  enable row level security;
 alter table app.post_metrics     enable row level security;
 alter table app.weekly_insights  enable row level security;
 
--- Profiles: auto-detect id vs user_id
+-- Profiles: auto-detect id vs user_id, drop then create
 do $$
 begin
+  if exists (
+    select 1 from pg_policies
+    where schemaname='app' and tablename='profiles' and policyname='profiles_owner_crud'
+  ) then
+    execute 'drop policy "profiles_owner_crud" on app.profiles';
+  end if;
+
   if exists (
     select 1 from information_schema.columns
     where table_schema='app' and table_name='profiles' and column_name='user_id'
   ) then
     execute '
-      drop policy if exists "profiles_owner_crud" on app.profiles;
       create policy "profiles_owner_crud" on app.profiles
       using (auth.uid() = user_id) with check (auth.uid() = user_id)
     ';
@@ -163,35 +171,60 @@ begin
     where table_schema='app' and table_name='profiles' and column_name='id'
   ) then
     execute '
-      drop policy if exists "profiles_owner_crud" on app.profiles;
       create policy "profiles_owner_crud" on app.profiles
       using (auth.uid() = id) with check (auth.uid() = id)
     ';
+  else
+    raise exception ''profiles table missing id/user_id'';
   end if;
 end $$;
 
--- Social accounts
+-- Social accounts: drop then create
 do $$
 begin
-  drop policy if exists "social_accounts_owner_crud" on app.social_accounts;
-  create policy "social_accounts_owner_crud" on app.social_accounts
-    using (auth.uid() = user_id) with check (auth.uid() = user_id);
+  if exists (
+    select 1 from pg_policies
+    where schemaname='app' and tablename='social_accounts' and policyname='social_accounts_owner_crud'
+  ) then
+    execute 'drop policy "social_accounts_owner_crud" on app.social_accounts';
+  end if;
+
+  execute '
+    create policy "social_accounts_owner_crud" on app.social_accounts
+    using (auth.uid() = user_id) with check (auth.uid() = user_id)
+  ';
 end $$;
 
--- Post metrics
+-- Post metrics: drop then create
 do $$
 begin
-  drop policy if exists "post_metrics_owner_crud" on app.post_metrics;
-  create policy "post_metrics_owner_crud" on app.post_metrics
-    using (auth.uid() = user_id) with check (auth.uid() = user_id);
+  if exists (
+    select 1 from pg_policies
+    where schemaname='app' and tablename='post_metrics' and policyname='post_metrics_owner_crud'
+  ) then
+    execute 'drop policy "post_metrics_owner_crud" on app.post_metrics';
+  end if;
+
+  execute '
+    create policy "post_metrics_owner_crud" on app.post_metrics
+    using (auth.uid() = user_id) with check (auth.uid() = user_id)
+  ';
 end $$;
 
--- Weekly insights
+-- Weekly insights: drop then create
 do $$
 begin
-  drop policy if exists "weekly_insights_owner_crud" on app.weekly_insights;
-  create policy "weekly_insights_owner_crud" on app.weekly_insights
-    using (auth.uid() = user_id) with check (auth.uid() = user_id);
+  if exists (
+    select 1 from pg_policies
+    where schemaname='app' and tablename='weekly_insights' and policyname='weekly_insights_owner_crud'
+  ) then
+    execute 'drop policy "weekly_insights_owner_crud" on app.weekly_insights';
+  end if;
+
+  execute '
+    create policy "weekly_insights_owner_crud" on app.weekly_insights
+    using (auth.uid() = user_id) with check (auth.uid() = user_id)
+  ';
 end $$;
 
 -- ========================
