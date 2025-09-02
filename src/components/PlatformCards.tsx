@@ -138,7 +138,7 @@ export default function PlatformCards() {
 
           return (
             <Link key={key} to={`/platform/${key}`} className="block">
-              <Card className="p-2 sm:p-3 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20 hover:bg-card/80">
+              <Card className="aspect-square p-2 sm:p-3 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20 hover:bg-card/80 flex flex-col">
                 <div className="flex items-center justify-between mb-1">
                   <div className={cn('w-5 h-5 sm:w-6 sm:h-6 rounded-md bg-gradient-to-r flex items-center justify-center text-white', meta.color)}>
                     <meta.icon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
@@ -146,7 +146,7 @@ export default function PlatformCards() {
                   <Badge variant="secondary" className="text-[9px] sm:text-[10px] font-medium px-1 py-0.5">{meta.name}</Badge>
                 </div>
 
-                <div className="space-y-0.5">
+                <div className="flex-1 flex flex-col justify-center space-y-0.5">
                   <h4 className="text-xs sm:text-lg font-bold text-foreground">
                     {fmt(eng)}
                   </h4>
