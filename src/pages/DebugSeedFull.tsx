@@ -2,6 +2,57 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 
+async function seedWeeklyInsightsPerPlatform(userId: string) {
+  // compute this week's Monday (yyyy-mm-dd)
+  const mondayISO = (() => {
+    const d = new Date(); 
+    d.setHours(0,0,0,0);
+    const diff = (d.getDay() === 0 ? 6 : d.getDay() - 1);
+    d.setDate(d.getDate() - diff);
+    return d.toISOString().slice(0,10);
+  })();
+
+  // simple demo narratives & recs per platform (customize anytime)
+  const insights = [
+    {
+      user_id: userId, week_start: mondayISO, platform: 'instagram' as const,
+      narrative: 'IG engagement is steady; Reels drive most interactions.',
+      recommendations: '- Post 1–2 Reels during peak hours (Tue/Thu 6–8pm)\n- Use 3–5 niche hashtags\n- Reuse best hook from last week'
+    },
+    {
+      user_id: userId, week_start: mondayISO, platform: 'youtube' as const,
+      narrative: 'YT watch time rose; shorts boost discovery.',
+      recommendations: '- Publish 2 Shorts + 1 Longform\n- Front-load value in first 15 seconds\n- Add end screens to push binge'
+    },
+    {
+      user_id: userId, week_start: mondayISO, platform: 'twitter' as const,
+      narrative: 'X impressions grew with threads.',
+      recommendations: '- Ship 1 thread (5–7 tweets)\n- Quote-tweet your best post\n- Ask 1 question to drive replies'
+    },
+    {
+      user_id: userId, week_start: mondayISO, platform: 'linkedin' as const,
+      narrative: 'LI saves & comments are up.',
+      recommendations: '- Post 1 carousel with a how-to\n- Add a CTA question\n- Reply to all comments within 2h'
+    },
+    {
+      user_id: userId, week_start: mondayISO, platform: 'facebook' as const,
+      narrative: 'FB shares correlate with link posts at lunch.',
+      recommendations: '- Publish 1 link post between 12–1pm\n- Reuse top image + headline variant\n- Ask for shares explicitly'
+    },
+    {
+      user_id: userId, week_start: mondayISO, platform: 'tiktok' as const,
+      narrative: 'TT velocity good; hooks matter most.',
+      recommendations: '- Test 2 hook variants on same idea\n- Keep cuts <2s for first 10s\n- Leverage trending sound quietly'
+    }
+  ];
+
+  // idempotent upsert — requires unique(user_id,week_start,platform)
+  const { error } = await supabase
+    .from('weekly_insights')
+    .upsert(insights, { onConflict: 'user_id,week_start,platform' });
+  if (error) throw error;
+}
+
 export default function DebugSeedFull() {
   const [msg, setMsg] = useState<string>('');
 
@@ -58,23 +109,10 @@ export default function DebugSeedFull() {
         ]);
       if (pmErr) { setMsg('Post metrics error: ' + pmErr.message); return; }
 
-      // Weekly insight (current week Monday)
-      const monday = new Date(); monday.setHours(0,0,0,0);
-      const day = monday.getDay(); const diff = (day === 0 ? 6 : day - 1);
-      monday.setDate(monday.getDate() - diff);
-      const { error: wiErr } = await (supabase as any)
-        .from('weekly_insights')
-        .upsert({
-          user_id: userId,
-          week_start: monday.toISOString().slice(0,10),
-          narrative: 'Solid growth this week driven by strong hooks.',
-          recommendations: 'Double down on high-retention hooks; test Tue/Thu 9–11am.',
-          best_times: [{ day:'Tue', time:'09:00', platform:'tiktok' }, { day:'Thu', time:'11:00', platform:'instagram' }],
-          top_posts: [{ post_id:'post_1', url:'https://tiktok.com/@autaris/video/1', score:0.92 }]
-        });
-      if (wiErr) { setMsg('Weekly insights error: ' + wiErr.message); return; }
+      // Seed per-platform weekly insights
+      await seedWeeklyInsightsPerPlatform(userId);
 
-      setMsg('Done! Go check the dashboard.');
+      setMsg('Done! Go check the dashboard with per-platform insights.');
     } catch (error: any) {
       setMsg('Error: ' + error.message);
     }

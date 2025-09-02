@@ -103,51 +103,229 @@ export type Database = {
         }
         Relationships: []
       }
+    }
+    Views: {
+      post_metrics: {
+        Row: {
+          comments: number | null
+          created_at: string | null
+          engagement_rate: number | null
+          id: number | null
+          likes: number | null
+          post_id: string | null
+          published_at: string | null
+          shares: number | null
+          social_account_id: number | null
+          title: string | null
+          updated_at: string | null
+          url: string | null
+          user_id: string | null
+          views: number | null
+        }
+        Insert: {
+          comments?: number | null
+          created_at?: string | null
+          engagement_rate?: number | null
+          id?: number | null
+          likes?: number | null
+          post_id?: string | null
+          published_at?: string | null
+          shares?: number | null
+          social_account_id?: number | null
+          title?: string | null
+          updated_at?: string | null
+          url?: string | null
+          user_id?: string | null
+          views?: number | null
+        }
+        Update: {
+          comments?: number | null
+          created_at?: string | null
+          engagement_rate?: number | null
+          id?: number | null
+          likes?: number | null
+          post_id?: string | null
+          published_at?: string | null
+          shares?: number | null
+          social_account_id?: number | null
+          title?: string | null
+          updated_at?: string | null
+          url?: string | null
+          user_id?: string | null
+          views?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_metrics_social_account_id_fkey"
+            columns: ["social_account_id"]
+            isOneToOne: false
+            referencedRelation: "social_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string | null
           email: string | null
           full_name: string | null
-          id: string
           last_login_at: string | null
           metadata: Json | null
           onboarded_at: string | null
           phone: string | null
           plan: string | null
           timezone: string | null
+          updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string | null
           email?: string | null
           full_name?: string | null
-          id: string
           last_login_at?: string | null
           metadata?: Json | null
           onboarded_at?: string | null
           phone?: string | null
           plan?: string | null
           timezone?: string | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           avatar_url?: string | null
           created_at?: string | null
           email?: string | null
           full_name?: string | null
-          id?: string
           last_login_at?: string | null
           metadata?: Json | null
           onboarded_at?: string | null
           phone?: string | null
           plan?: string | null
           timezone?: string | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
-    }
-    Views: {
-      [_ in never]: never
+      social_accounts: {
+        Row: {
+          created_at: string | null
+          external_id: string | null
+          handle: string | null
+          id: number | null
+          last_synced_at: string | null
+          platform:
+            | "tiktok"
+            | "instagram"
+            | "facebook"
+            | "twitter"
+            | "linkedin"
+            | "youtube"
+            | null
+          status: "active" | "paused" | "disconnected" | "error" | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          external_id?: string | null
+          handle?: string | null
+          id?: number | null
+          last_synced_at?: string | null
+          platform?:
+            | "tiktok"
+            | "instagram"
+            | "facebook"
+            | "twitter"
+            | "linkedin"
+            | "youtube"
+            | null
+          status?: "active" | "paused" | "disconnected" | "error" | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          external_id?: string | null
+          handle?: string | null
+          id?: number | null
+          last_synced_at?: string | null
+          platform?:
+            | "tiktok"
+            | "instagram"
+            | "facebook"
+            | "twitter"
+            | "linkedin"
+            | "youtube"
+            | null
+          status?: "active" | "paused" | "disconnected" | "error" | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      weekly_insights: {
+        Row: {
+          best_times: Json | null
+          created_at: string | null
+          id: number | null
+          narrative: string | null
+          platform:
+            | "tiktok"
+            | "instagram"
+            | "facebook"
+            | "twitter"
+            | "linkedin"
+            | "youtube"
+            | null
+          recommendations: string | null
+          top_posts: Json | null
+          updated_at: string | null
+          user_id: string | null
+          week_start: string | null
+        }
+        Insert: {
+          best_times?: Json | null
+          created_at?: string | null
+          id?: number | null
+          narrative?: string | null
+          platform?:
+            | "tiktok"
+            | "instagram"
+            | "facebook"
+            | "twitter"
+            | "linkedin"
+            | "youtube"
+            | null
+          recommendations?: string | null
+          top_posts?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+          week_start?: string | null
+        }
+        Update: {
+          best_times?: Json | null
+          created_at?: string | null
+          id?: number | null
+          narrative?: string | null
+          platform?:
+            | "tiktok"
+            | "instagram"
+            | "facebook"
+            | "twitter"
+            | "linkedin"
+            | "youtube"
+            | null
+          recommendations?: string | null
+          top_posts?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+          week_start?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
