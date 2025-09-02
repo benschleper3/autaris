@@ -128,7 +128,7 @@ export default function PlatformCards() {
         Platform Analytics (last 7 days)
       </h3>
 
-      <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
         {(Object.keys(PLATFORM_META) as PlatformKey[]).map((key) => {
           const meta = PLATFORM_META[key];
           const t: Totals = totals?.[key] ?? { views: 0, likes: 0, comments: 0, shares: 0 };
@@ -138,21 +138,21 @@ export default function PlatformCards() {
 
           return (
             <Link key={key} to={`/platform/${key}`} className="block">
-              <Card className="p-3 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20 hover:bg-card/80">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className={cn('w-6 h-6 rounded-lg bg-gradient-to-r flex items-center justify-center text-white', meta.color)}>
-                    <meta.icon className="w-3 h-3" />
+              <Card className="p-2 sm:p-3 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20 hover:bg-card/80">
+                <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                  <div className={cn('w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg bg-gradient-to-r flex items-center justify-center text-white', meta.color)}>
+                    <meta.icon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                   </div>
-                  <span className="text-xs font-medium text-muted-foreground">{meta.name}</span>
+                  <span className="text-[10px] sm:text-xs font-medium text-muted-foreground">{meta.name}</span>
                 </div>
 
-                <div className="space-y-1">
-                  <h4 className="text-lg font-bold text-foreground">
+                <div className="space-y-0.5 sm:space-y-1">
+                  <h4 className="text-sm sm:text-lg font-bold text-foreground">
                     {fmt(eng)}
                   </h4>
-                  <div className={cn('flex items-center gap-1 text-xs font-medium', g.direction === 'negative' ? 'text-red-600' : 'text-green-600')}>
-                    <span>Engagement</span>
-                    <TrendIcon className="w-3 h-3" />
+                  <div className={cn('flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs font-medium', g.direction === 'negative' ? 'text-red-600' : 'text-green-600')}>
+                    <span className="hidden sm:inline">Engagement</span>
+                    <TrendIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                     <span>{g.direction === 'positive' ? '+' : ''}{g.pct.toFixed(1)}%</span>
                   </div>
                 </div>
