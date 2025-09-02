@@ -32,35 +32,9 @@ export default function Navigation() {
           </span>
         </div>
 
-        {/* Navigation Items */}
-        <div className="flex items-center gap-1">
-          {navigationItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
-            
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all",
-                  isActive 
-                    ? "bg-growth-primary text-white" 
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                )}
-              >
-                <Icon className="w-4 h-4" />
-                {item.label}
-              </button>
-            );
-          })}
-        </div>
+        {/* Dashboard Text */}
+        <span className="text-muted-foreground">Dashboard</span>
       </div>
-
-      {/* Settings */}
-      <button className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
-        <Settings className="w-5 h-5" />
-      </button>
     </nav>
   );
 }
