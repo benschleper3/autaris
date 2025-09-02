@@ -13,13 +13,13 @@ const data = [
 
 export default function ActivityChart() {
   return (
-    <Card className="p-6 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-growth-primary/20 hover:bg-card/80 cursor-pointer">
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-foreground">Weekly Activity</h3>
-        <p className="text-sm text-muted-foreground">Followers and engagement over time</p>
+    <Card className="p-3 sm:p-4 lg:p-6 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-growth-primary/20 hover:bg-card/80 cursor-pointer">
+      <div className="mb-3 sm:mb-4">
+        <h3 className="text-base sm:text-lg font-semibold text-foreground">Weekly Activity</h3>
+        <p className="text-xs sm:text-sm text-muted-foreground">Followers and engagement over time</p>
       </div>
       
-      <div className="h-64">
+      <div className="h-48 sm:h-56 lg:h-64">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data}>
             <defs>

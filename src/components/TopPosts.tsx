@@ -34,37 +34,37 @@ export default function TopPosts() {
   if (err) return <div className="rounded-lg border p-4 text-sm text-red-600">Error: {err}</div>;
 
   return (
-    <section className="space-y-2">
-      <h2 className="text-xl font-semibold">Top posts (7d)</h2>
+    <section className="space-y-2 sm:space-y-3">
+      <h2 className="text-lg sm:text-xl font-semibold">Top posts (7d)</h2>
       <div className="overflow-x-auto rounded-2xl border">
-        <table className="w-full text-sm">
+        <table className="w-full text-xs sm:text-sm">
           <thead>
             <tr className="text-left">
-              <th className="p-3">Title</th>
-              <th className="p-3">Views</th>
-              <th className="p-3">Likes</th>
-              <th className="p-3">Comments</th>
-              <th className="p-3">Shares</th>
-              <th className="p-3">Eng. rate</th>
+              <th className="p-2 sm:p-3 min-w-[120px]">Title</th>
+              <th className="p-2 sm:p-3 text-center">Views</th>
+              <th className="p-2 sm:p-3 text-center">Likes</th>
+              <th className="p-2 sm:p-3 text-center hidden sm:table-cell">Comments</th>
+              <th className="p-2 sm:p-3 text-center hidden sm:table-cell">Shares</th>
+              <th className="p-2 sm:p-3 text-center">Eng. rate</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((p, i) => (
               <tr key={i} className="border-t">
-                <td className="p-3">
-                  <a href={p.url ?? '#'} target="_blank" rel="noreferrer" className="underline">
-                    {p.title ?? 'Untitled'}
+                <td className="p-2 sm:p-3">
+                  <a href={p.url ?? '#'} target="_blank" rel="noreferrer" className="underline text-xs sm:text-sm hover:text-primary">
+                    {p.title ? (p.title.length > 30 ? p.title.substring(0, 30) + '...' : p.title) : 'Untitled'}
                   </a>
                 </td>
-                <td className="p-3">{p.views ?? 0}</td>
-                <td className="p-3">{p.likes ?? 0}</td>
-                <td className="p-3">{p.comments ?? 0}</td>
-                <td className="p-3">{p.shares ?? 0}</td>
-                <td className="p-3">{((p.engagement_rate ?? 0)).toFixed(3)}</td>
+                <td className="p-2 sm:p-3 text-center">{p.views ?? 0}</td>
+                <td className="p-2 sm:p-3 text-center">{p.likes ?? 0}</td>
+                <td className="p-2 sm:p-3 text-center hidden sm:table-cell">{p.comments ?? 0}</td>
+                <td className="p-2 sm:p-3 text-center hidden sm:table-cell">{p.shares ?? 0}</td>
+                <td className="p-2 sm:p-3 text-center">{((p.engagement_rate ?? 0) * 100).toFixed(1)}%</td>
               </tr>
             ))}
             {rows.length === 0 && (
-              <tr><td className="p-3" colSpan={6}>No data yet. Try the **Full Seed** and refresh.</td></tr>
+              <tr><td className="p-2 sm:p-3 text-center text-muted-foreground" colSpan={6}>No data yet. Try the **Full Seed** and refresh.</td></tr>
             )}
           </tbody>
         </table>
