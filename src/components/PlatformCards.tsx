@@ -138,29 +138,29 @@ export default function PlatformCards() {
 
           return (
             <Link key={key} to={`/platform/${key}`} className="block">
-              <Card className="p-3 sm:p-4 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20 hover:bg-card/80">
-                <div className="flex items-center justify-between mb-2">
-                  <div className={cn('w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-r flex items-center justify-center text-white', meta.color)}>
-                    <meta.icon className="w-3 h-3 sm:w-4 sm:h-4" />
+              <Card className="p-2 sm:p-3 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20 hover:bg-card/80">
+                <div className="flex items-center justify-between mb-1">
+                  <div className={cn('w-5 h-5 sm:w-6 sm:h-6 rounded-md bg-gradient-to-r flex items-center justify-center text-white', meta.color)}>
+                    <meta.icon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                   </div>
-                  <Badge variant="secondary" className="text-[10px] sm:text-xs font-medium px-1 py-0.5 sm:px-2 sm:py-1">{meta.name}</Badge>
+                  <Badge variant="secondary" className="text-[9px] sm:text-[10px] font-medium px-1 py-0.5">{meta.name}</Badge>
                 </div>
 
-                <div className="space-y-0.5 sm:space-y-1">
-                  <h4 className="text-sm sm:text-xl font-bold text-foreground">
+                <div className="space-y-0.5">
+                  <h4 className="text-xs sm:text-lg font-bold text-foreground">
                     {fmt(eng)}
                   </h4>
-                  <p className="text-xs text-muted-foreground hidden sm:block">
-                    Engagement (likes + comments + shares)
+                  <p className="text-[10px] text-muted-foreground hidden sm:block">
+                    Engagement
                   </p>
-                  <div className={cn('flex items-center gap-1 text-xs font-medium', g.direction === 'negative' ? 'text-red-600' : 'text-green-600')}>
-                    <TrendIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                  <div className={cn('flex items-center gap-1 text-[10px] font-medium', g.direction === 'negative' ? 'text-red-600' : 'text-green-600')}>
+                    <TrendIcon className="w-2 h-2" />
                     {`${g.pct.toFixed(1)}%`}
                   </div>
                 </div>
 
-                <div className="mt-2 text-[11px] sm:text-xs text-muted-foreground">
-                  Views: {fmt(t.views)} · Likes: {fmt(t.likes)} · Comments: {fmt(t.comments)} · Shares: {fmt(t.shares)}
+                <div className="mt-1 text-[9px] sm:text-[10px] text-muted-foreground">
+                  Views: {fmt(t.views)} · Likes: {fmt(t.likes)}
                 </div>
               </Card>
             </Link>
