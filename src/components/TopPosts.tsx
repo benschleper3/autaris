@@ -1,90 +1,74 @@
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Heart, MessageCircle, Share, Eye } from 'lucide-react';
+// src/components/TopPosts.tsx
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
-const topPosts = [
-  {
-    id: 1,
-    content: "Just launched my new coaching program! 🚀 Transform your business in 90 days with proven strategies...",
-    platform: "LinkedIn",
-    likes: 342,
-    comments: 89,
-    shares: 45,
-    views: 12500,
-    engagement: "8.2%"
-  },
-  {
-    id: 2,
-    content: "3 mindset shifts that changed everything for my consulting business. Thread 🧵",
-    platform: "Twitter",
-    likes: 189,
-    comments: 34,
-    shares: 67,
-    views: 8900,
-    engagement: "6.8%"
-  },
-  {
-    id: 3,
-    content: "Behind the scenes of building a 6-figure coaching business. What they don't tell you...",
-    platform: "Instagram",
-    likes: 256,
-    comments: 43,
-    shares: 28,
-    views: 9800,
-    engagement: "7.1%"
-  }
-];
+type PostRow = {
+  title: string | null;
+  url: string | null;
+  published_at: string | null;
+  views: number | null;
+  likes: number | null;
+  comments: number | null;
+  shares: number | null;
+  engagement_rate: number | null;
+};
 
 export default function TopPosts() {
+  const [rows, setRows] = useState<PostRow[]>([]);
+  const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    supabase
+      .from('post_metrics')
+      .select('title,url,published_at,views,likes,comments,shares,engagement_rate')
+      .gte('published_at', since)
+      .order('engagement_rate', { ascending: false })
+      .limit(5)
+      .then(({ data, error }) => {
+        if (error) setErr(error.message);
+        else setRows(data ?? []);
+      });
+  }, []);
+
+  if (err) return <div className="rounded-lg border p-4 text-sm text-red-600">Error: {err}</div>;
+
   return (
-    <Card className="p-6 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-growth-primary/20 hover:bg-card/80 cursor-pointer">
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-foreground">Top Performing Posts</h3>
-        <p className="text-sm text-muted-foreground">Your best content from this week</p>
+    <section className="space-y-2">
+      <h2 className="text-xl font-semibold">Top posts (7d)</h2>
+      <div className="overflow-x-auto rounded-2xl border">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-left">
+              <th className="p-3">Title</th>
+              <th className="p-3">Views</th>
+              <th className="p-3">Likes</th>
+              <th className="p-3">Comments</th>
+              <th className="p-3">Shares</th>
+              <th className="p-3">Eng. rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((p, i) => (
+              <tr key={i} className="border-t">
+                <td className="p-3">
+                  <a href={p.url ?? '#'} target="_blank" rel="noreferrer" className="underline">
+                    {p.title ?? 'Untitled'}
+                  </a>
+                </td>
+                <td className="p-3">{p.views ?? 0}</td>
+                <td className="p-3">{p.likes ?? 0}</td>
+                <td className="p-3">{p.comments ?? 0}</td>
+                <td className="p-3">{p.shares ?? 0}</td>
+                <td className="p-3">{((p.engagement_rate ?? 0)).toFixed(3)}</td>
+              </tr>
+            ))}
+            {rows.length === 0 && (
+              <tr><td className="p-3" colSpan={6}>No data yet. Try the **Full Seed** and refresh.</td></tr>
+            )}
+          </tbody>
+        </table>
       </div>
-      
-      <div className="space-y-4">
-        {topPosts.map((post, index) => (
-          <div key={post.id} className="p-4 rounded-lg bg-secondary/30 border border-border/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-growth-primary/10 hover:bg-secondary/40 cursor-pointer">
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-growth-primary">#{index + 1}</span>
-                <Badge variant="secondary" className="text-xs">
-                  {post.platform}
-                </Badge>
-                <span className="text-xs text-growth-success font-medium">
-                  {post.engagement} engagement
-                </span>
-              </div>
-            </div>
-            
-            <p className="text-sm text-foreground mb-3 line-clamp-2">
-              {post.content}
-            </p>
-            
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1">
-                  <Heart className="w-3 h-3" />
-                  {post.likes}
-                </div>
-                <div className="flex items-center gap-1">
-                  <MessageCircle className="w-3 h-3" />
-                  {post.comments}
-                </div>
-                <div className="flex items-center gap-1">
-                  <Share className="w-3 h-3" />
-                  {post.shares}
-                </div>
-              </div>
-              <div className="flex items-center gap-1">
-                <Eye className="w-3 h-3" />
-                {post.views.toLocaleString()} views
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </Card>
+    </section>
   );
 }
