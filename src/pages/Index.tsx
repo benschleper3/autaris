@@ -3,72 +3,27 @@ import { supabase } from '@/lib/config';
 import AuthForm from '@/components/AuthForm';
 import Dashboard from '@/components/Dashboard';
 import Navigation from '@/components/Navigation';
-import Onboarding from '@/components/Onboarding';
-import UGCDashboard from '@/components/ugc/UGCDashboard';
-import { Toaster } from '@/components/ui/toaster';
 
 const Index = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState(null);
-  const [needsOnboarding, setNeedsOnboarding] = useState(false);
 
   useEffect(() => {
     const initializeAuth = async () => {
       // Get initial session
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        await fetchUserProfile(session.user.id);
-      }
-      
       setLoading(false);
     };
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        await fetchUserProfile(session.user.id);
-      } else {
-        setProfile(null);
-        setNeedsOnboarding(false);
-      }
     });
 
     initializeAuth();
     return () => subscription.unsubscribe();
   }, []);
-
-  const fetchUserProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
-
-      if (error) {
-        console.error('Error fetching profile:', error);
-        return;
-      }
-
-      setProfile(data);
-      setNeedsOnboarding(!data?.onboarded);
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-    }
-  };
-
-  const handleOnboardingComplete = () => {
-    setNeedsOnboarding(false);
-    // Refetch profile to get updated role
-    if (user) {
-      fetchUserProfile(user.id);
-    }
-  };
 
   if (loading) {
     return (
@@ -77,10 +32,6 @@ const Index = () => {
       </div>
     );
   }
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
 
   if (!user) {
     return (
@@ -100,16 +51,10 @@ const Index = () => {
     );
   }
 
-  // Show onboarding if user needs it
-  if (needsOnboarding) {
-    return <Onboarding onComplete={handleOnboardingComplete} />;
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-background/80">
       <Navigation />
-      {profile?.role === 'ugc_creator' ? <UGCDashboard /> : <Dashboard />}
-      <Toaster />
+      <Dashboard />
     </div>
   );
 };

@@ -1,23 +1,19 @@
-import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { 
-  BarChart3, 
-  Brain, 
-  Home, 
-  Link,
-  Settings,
-  TrendingUp 
+  TrendingUp,
+  Home,
+  Palette
 } from 'lucide-react';
-
-const navigationItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: Home, active: true },
-  { id: 'connect', label: 'Connect', icon: Link, active: false },
-  { id: 'insights', label: 'Insights', icon: Brain, active: false },
-  { id: 'analytics', label: 'Analytics', icon: BarChart3, active: false },
-];
+import { Link, useLocation } from 'react-router-dom';
 
 export default function Navigation() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const location = useLocation();
+  const currentPath = location.pathname;
+
+  const navigationItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/' },
+    { id: 'creator-tools', label: 'Creator Tools', icon: Palette, path: '/creator-tools' },
+  ];
 
   return (
     <nav className="flex items-center justify-between w-full px-6 py-4 border-b border-border/50">
@@ -32,8 +28,29 @@ export default function Navigation() {
           </span>
         </div>
 
-        {/* Dashboard Text */}
-        <span className="text-muted-foreground">Dashboard</span>
+        {/* Navigation Tabs */}
+        <div className="flex items-center gap-1">
+          {navigationItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = currentPath === item.path;
+            
+            return (
+              <Link
+                key={item.id}
+                to={item.path}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                  isActive 
+                    ? "bg-primary/10 text-primary" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                )}
+              >
+                <Icon className="w-4 h-4" />
+                {item.label}
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </nav>
   );
