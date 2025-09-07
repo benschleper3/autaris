@@ -1,4 +1,3 @@
-import Dashboard from '../Dashboard';
 import ContentPerformanceTracker from './ContentPerformanceTracker';
 import BrandReportGenerator from './BrandReportGenerator';
 import PortfolioBuilder from './PortfolioBuilder';
@@ -9,9 +8,6 @@ import CampaignDashboard from './CampaignDashboard';
 export default function UGCDashboard() {
   return (
     <div className="space-y-6">
-      {/* Standard Growth OS Dashboard */}
-      <Dashboard />
-      
       {/* UGC-Specific Modules */}
       <div className="p-2 sm:p-4 lg:p-6 space-y-3 sm:space-y-4 lg:space-y-6">
         {/* UGC Header */}
