@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/config';
 import AuthForm from '@/components/AuthForm';
 import UGCDashboard from '@/components/ugc/UGCDashboard';
+import Dashboard from '@/components/Dashboard';
 import Navigation from '@/components/Navigation';
 
 const Index = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [dashboardView, setDashboardView] = useState('creator'); // 'creator' or 'coach'
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -53,8 +55,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-background/80">
-      <Navigation />
-      <UGCDashboard />
+      <Navigation 
+        dashboardView={dashboardView} 
+        onViewChange={setDashboardView} 
+      />
+      {dashboardView === 'creator' ? <UGCDashboard /> : <Dashboard />}
     </div>
   );
 };
