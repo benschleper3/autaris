@@ -8,6 +8,7 @@ import Platform from "./pages/Platform";
 import DebugSeed from "./pages/DebugSeed";
 import DebugSeedFull from "./pages/DebugSeedFull";
 import DebugRunSql from "./pages/DebugRunSql";
+import WiringExport from "./pages/WiringExport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/debug/seed" element={<DebugSeed />} />
           <Route path="/debug/seed-full" element={<DebugSeedFull />} />
           <Route path="/debug/run-sql" element={<DebugRunSql />} />
+          <Route path="/dev/wiring-export" element={<WiringExport />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
