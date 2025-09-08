@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
-import CreatorTools from "./pages/CreatorTools";
 import Platform from "./pages/Platform";
 import DebugSeed from "./pages/DebugSeed";
 import DebugSeedFull from "./pages/DebugSeedFull";
@@ -21,7 +20,6 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/creator-tools" element={<CreatorTools />} />
           <Route path="/platform/:platform" element={<Platform />} />
           <Route path="/debug/seed" element={<DebugSeed />} />
           <Route path="/debug/seed-full" element={<DebugSeedFull />} />
