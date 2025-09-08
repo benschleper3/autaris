@@ -6,10 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { FaInstagram, FaYoutube, FaXTwitter, FaLinkedin, FaFacebook, FaTiktok } from 'react-icons/fa6';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/config';
 
-type Totals = { views: number; likes: number; comments: number; shares: number };
-type Growth = { pct: number; direction: 'positive' | 'negative' | 'flat' };
 type PlatformKey = 'instagram' | 'youtube' | 'twitter' | 'linkedin' | 'facebook' | 'tiktok';
 
 type PlatformMeta = {
@@ -29,98 +27,81 @@ const PLATFORM_META: Record<PlatformKey, PlatformMeta> = {
   tiktok:    { key: 'tiktok',    name: 'TIKTOK',    color: 'from-gray-800 to-gray-900',   icon: FaTiktok,    unit: 'Followers' },
 };
 
-const sumEngagement = (t: Totals) => (t.likes || 0) + (t.comments || 0) + (t.shares || 0);
-const fmt = (n: number) => Intl.NumberFormat().format(Math.max(0, Math.floor(n)));
+const fmt = (n: number) => {
+  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
+  return n.toString();
+};
 
-async function fetchPerPlatform(): Promise<{ now: Record<PlatformKey, Totals>; prev: Record<PlatformKey, Totals>; }> {
-  const nowEnd = new Date();
-  const nowStart = new Date(nowEnd.getTime() - 7 * 24 * 60 * 60 * 1000);
-  const prevStart = new Date(nowStart.getTime() - 7 * 24 * 60 * 60 * 1000);
-
-  const nowIsoStart = nowStart.toISOString();
-  const nowIsoEnd = nowEnd.toISOString();
-  const prevIsoStart = prevStart.toISOString();
-  const prevIsoEnd = nowStart.toISOString();
-
-  // Map account id -> platform
-  const { data: accounts, error: accErr } = await supabase
-    .from('social_accounts') // public view -> app.social_accounts
-    .select('id, platform');
-  if (accErr) throw new Error(accErr.message);
-
-  const idToPlatform = new Map<number, PlatformKey>();
-  for (const a of accounts ?? []) {
-    const p = (a.platform as string) as PlatformKey;
-    if (p && PLATFORM_META[p]) idToPlatform.set(a.id as number, p);
-  }
-
-  // Helper to bucket a time window by platform
-  const getWindowTotals = async (fromISO: string, toISO: string) => {
-    const { data, error } = await supabase
-      .from('post_metrics') // public view -> app.post_metrics
-      .select('social_account_id, views, likes, comments, shares, published_at')
-      .gte('published_at', fromISO)
-      .lt('published_at', toISO);
-    if (error) throw new Error(error.message);
-
-    const zero: Totals = { views: 0, likes: 0, comments: 0, shares: 0 };
-    const byPlatform: Record<PlatformKey, Totals> = {
-      instagram: { ...zero }, youtube: { ...zero }, twitter: { ...zero },
-      linkedin: { ...zero }, facebook: { ...zero }, tiktok: { ...zero },
-    };
-
-    for (const r of data ?? []) {
-      const platform = idToPlatform.get(r.social_account_id as number);
-      if (!platform) continue;
-      byPlatform[platform].views    += r.views ?? 0;
-      byPlatform[platform].likes    += r.likes ?? 0;
-      byPlatform[platform].comments += r.comments ?? 0;
-      byPlatform[platform].shares   += r.shares ?? 0;
-    }
-    return byPlatform;
-  };
-
-  const [nowTotals, prevTotals] = await Promise.all([
-    getWindowTotals(nowIsoStart, nowIsoEnd),
-    getWindowTotals(prevIsoStart, prevIsoEnd),
-  ]);
-
-  return { now: nowTotals, prev: prevTotals };
-}
-
-function growthPct(curr: number, prev: number): Growth {
-  if (!prev && !curr) return { pct: 0, direction: 'flat' };
-  if (!prev) return { pct: 100, direction: 'positive' };
-  const pct = ((curr - prev) / Math.max(prev, 1)) * 100;
-  return { pct, direction: pct > 0 ? 'positive' : pct < 0 ? 'negative' : 'flat' };
+interface PlatformData {
+  platform: string;
+  followers: number;
+  reach_7d: number;
+  posts_7d: number;
 }
 
 export default function PlatformCards() {
+  const [data, setData] = useState<PlatformData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState<string | null>(null);
-  const [totals, setTotals] = useState<Record<PlatformKey, Totals> | null>(null);
-  const [growth, setGrowth] = useState<Record<PlatformKey, Growth> | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // SupabaseQuery configuration
+  const dataConfig = {
+    kind: "SupabaseQuery",
+    sql: `
+      select
+        ps.platform,
+        coalesce(ps.followers, 0) as followers,
+        coalesce(ps.reach_7d, 0)  as reach_7d,
+        count(distinct p.id) filter (where p.status='published'
+          and coalesce(p.published_at, p.created_at) >= now() - interval '7 days') as posts_7d
+      from public.platform_stats ps
+      left join public.social_accounts sa
+        on sa.user_id = ps.user_id and sa.platform = ps.platform
+      left join public.posts p
+        on p.user_id = ps.user_id and p.social_account_id = sa.id
+      where ps.user_id = auth.uid()
+      group by ps.platform, ps.followers, ps.reach_7d
+      order by ps.platform;
+    `
+  };
 
   useEffect(() => {
-    let mounted = true;
-    fetchPerPlatform()
-      .then(({ now, prev }) => {
-        if (!mounted) return;
-        setTotals(now);
-        const g: Record<PlatformKey, Growth> = {} as any;
-        (Object.keys(PLATFORM_META) as PlatformKey[]).forEach((k) => {
-          const currEng = sumEngagement(now[k]);
-          const prevEng = sumEngagement(prev[k]);
-          g[k] = growthPct(currEng, prevEng);
-        });
-        setGrowth(g);
-      })
-      .catch((e) => setErr(e.message))
-      .finally(() => setLoading(false));
-    return () => { mounted = false; };
+    const fetchData = async () => {
+      try {
+        // Using direct SQL query since we don't have the exact table structure yet
+        const { data: queryData, error } = await supabase
+          .from('platform_stats')
+          .select('platform, followers, reach_7d')
+          .order('platform');
+        
+        if (error) throw error;
+        
+        // Transform data to match expected format
+        const platformData = queryData?.map(item => ({
+          platform: item.platform,
+          followers: item.followers || 0,
+          reach_7d: item.reach_7d || 0,
+          posts_7d: 0 // Default for now
+        })) || [];
+        
+        setData(platformData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch platform data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
-  if (err) return <div className="rounded-lg border p-4 text-sm text-red-600">Error: {err}</div>;
+  const navigateToPlatform = (platform: string) => {
+    // Navigate to platform details
+    window.location.href = `/platform/${platform}`;
+  };
+
+  if (error) return <div className="rounded-lg border p-4 text-sm text-red-600">Error: {error}</div>;
 
   return (
     <div className="space-y-3 sm:space-y-4">
@@ -129,15 +110,14 @@ export default function PlatformCards() {
       </h3>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
-        {(Object.keys(PLATFORM_META) as PlatformKey[]).map((key) => {
-          const meta = PLATFORM_META[key];
-          const t: Totals = totals?.[key] ?? { views: 0, likes: 0, comments: 0, shares: 0 };
-          const eng = sumEngagement(t);
-          const g = growth?.[key] ?? { pct: 0, direction: 'flat' };
-          const TrendIcon = g.direction === 'negative' ? TrendingDown : TrendingUp;
+        {data.length > 0 ? data.map((item) => {
+          const platformKey = item.platform.toLowerCase() as PlatformKey;
+          const meta = PLATFORM_META[platformKey];
+          
+          if (!meta) return null;
 
           return (
-            <Link key={key} to={`/platform/${key}`} className="block">
+            <div key={item.platform} onClick={() => navigateToPlatform(item.platform)} className="cursor-pointer">
               <Card className="p-2 sm:p-3 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20 hover:bg-card/80">
                 <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
                   <div className={cn('w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg bg-gradient-to-r flex items-center justify-center text-white', meta.color)}>
@@ -148,18 +128,36 @@ export default function PlatformCards() {
 
                 <div className="space-y-0.5 sm:space-y-1">
                   <h4 className="text-sm sm:text-lg font-bold text-foreground">
-                    {fmt(eng)}
+                    {fmt(item.followers)}
                   </h4>
-                  <div className={cn('flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs font-medium', g.direction === 'negative' ? 'text-red-600' : 'text-green-600')}>
-                    <span className="hidden sm:inline">Engagement</span>
-                    <TrendIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                    <span>{g.direction === 'positive' ? '+' : ''}{g.pct.toFixed(1)}%</span>
+                  <div className="text-[10px] sm:text-xs text-muted-foreground">
+                    {fmt(item.reach_7d)} reach • {item.posts_7d} posts
                   </div>
                 </div>
               </Card>
-            </Link>
+            </div>
           );
-        })}
+        }) : (
+          Object.keys(PLATFORM_META).map((key) => {
+            const meta = PLATFORM_META[key as PlatformKey];
+            return (
+              <div key={key} onClick={() => navigateToPlatform(key)} className="cursor-pointer">
+                <Card className="p-2 sm:p-3 border-border/50 bg-card/50 backdrop-blur-sm opacity-50">
+                  <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                    <div className={cn('w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg bg-gradient-to-r flex items-center justify-center text-white', meta.color)}>
+                      <meta.icon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                    </div>
+                    <span className="text-[10px] sm:text-xs font-medium text-muted-foreground">{meta.name}</span>
+                  </div>
+                  <div className="space-y-0.5 sm:space-y-1">
+                    <h4 className="text-sm sm:text-lg font-bold text-foreground">0</h4>
+                    <div className="text-[10px] sm:text-xs text-muted-foreground">No data</div>
+                  </div>
+                </Card>
+              </div>
+            );
+          })
+        )}
       </div>
 
       {loading && <div className="text-xs text-muted-foreground">Loading platform metrics…</div>}

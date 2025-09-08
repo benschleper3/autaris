@@ -5,6 +5,8 @@ import RevenueTracker from './RevenueTracker';
 import AIGrowthInsights from './AIGrowthInsights';
 import CampaignDashboard from './CampaignDashboard';
 import MetricCard from '../MetricCard';
+import MetricCardFollowers from '../MetricCardFollowers';
+import MetricCardReach from '../MetricCardReach';
 import ActivityChart from '../ActivityChart';
 import TopPosts from '../TopPosts';
 import InsightsPreview from '../InsightsPreview';
@@ -29,20 +31,8 @@ export default function UGCDashboard() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
-        <MetricCard
-          title="Total Followers"
-          value="26.4K"
-          change="+8.2%"
-          changeType="positive"
-          icon={<Users className="w-4 h-4 sm:w-5 sm:h-5" />}
-        />
-        <MetricCard
-          title="Weekly Reach"
-          value="89.2K"
-          change="+12.5%"
-          changeType="positive"
-          icon={<Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
-        />
+        <MetricCardFollowers />
+        <MetricCardReach />
         <MetricCard
           title="Engagement Rate"
           value="7.8%"
