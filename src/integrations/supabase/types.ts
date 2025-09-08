@@ -172,9 +172,11 @@ export type Database = {
           full_name: string | null
           last_login_at: string | null
           metadata: Json | null
+          onboarded: boolean | null
           onboarded_at: string | null
           phone: string | null
           plan: string | null
+          role: Database["public"]["Enums"]["user_role"] | null
           timezone: string | null
           updated_at: string | null
           user_id: string | null
@@ -186,9 +188,11 @@ export type Database = {
           full_name?: string | null
           last_login_at?: string | null
           metadata?: Json | null
+          onboarded?: boolean | null
           onboarded_at?: string | null
           phone?: string | null
           plan?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
           timezone?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -200,9 +204,11 @@ export type Database = {
           full_name?: string | null
           last_login_at?: string | null
           metadata?: Json | null
+          onboarded?: boolean | null
           onboarded_at?: string | null
           phone?: string | null
           plan?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
           timezone?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -331,7 +337,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_role: "coach" | "ugc_creator"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -458,6 +464,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["coach", "ugc_creator"],
+    },
   },
 } as const
