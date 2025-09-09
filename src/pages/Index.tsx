@@ -11,7 +11,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  useEffect(() => {
+  useEffect(() => { console.log('[Index] mount');
     const initializeAuth = async () => {
       try {
         // Get initial session
