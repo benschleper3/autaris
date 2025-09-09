@@ -2,16 +2,30 @@ import { cn } from '@/lib/utils';
 import { 
   TrendingUp,
   Users,
-  Palette
+  Video,
+  Settings
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface NavigationProps {
-  dashboardView?: string;
-  onViewChange?: (view: string) => void;
+  // Remove old props since we'll detect current route
 }
 
-export default function Navigation({ dashboardView, onViewChange }: NavigationProps) {
+export default function Navigation({}: NavigationProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  const isCreatorDashboard = location.pathname === '/dashboard-creator';
+  const isUGCDashboard = location.pathname === '/dashboard-ugc';
+  
+  const handleDashboardSwitch = (type: 'creator' | 'ugc') => {
+    if (type === 'creator') {
+      navigate('/dashboard-creator');
+    } else {
+      navigate('/dashboard-ugc');
+    }
+  };
   return (
     <nav className="flex items-center justify-between w-full px-6 py-4 border-b border-border/50">
       <div className="flex items-center gap-8">
@@ -25,29 +39,36 @@ export default function Navigation({ dashboardView, onViewChange }: NavigationPr
           </span>
         </div>
 
-        {/* Dashboard Toggle */}
-        {dashboardView && onViewChange && (
+        {/* Dashboard Toggle - Show only on dashboard pages */}
+        {(isCreatorDashboard || isUGCDashboard) && (
           <div className="flex items-center gap-1 p-1 bg-muted rounded-lg">
             <Button
-              variant={dashboardView === 'creator' ? 'default' : 'ghost'}
+              variant={isCreatorDashboard ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => onViewChange('creator')}
-              className="flex items-center gap-2"
-            >
-              <Palette className="w-4 h-4" />
-              Creator
-            </Button>
-            <Button
-              variant={dashboardView === 'coach' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => onViewChange('coach')}
+              onClick={() => handleDashboardSwitch('creator')}
               className="flex items-center gap-2"
             >
               <Users className="w-4 h-4" />
-              Coach
+              Creator
+            </Button>
+            <Button
+              variant={isUGCDashboard ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => handleDashboardSwitch('ugc')}
+              className="flex items-center gap-2"
+            >
+              <Video className="w-4 h-4" />
+              UGC Creator
             </Button>
           </div>
         )}
+      </div>
+      
+      {/* Settings/Profile section */}
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" size="sm">
+          <Settings className="w-4 h-4" />
+        </Button>
       </div>
     </nav>
   );
