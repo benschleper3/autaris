@@ -1,59 +1,61 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, Users, Phone, DollarSign, Calendar, BarChart3 } from 'lucide-react';
-import CreatorKPICards from './CreatorKPICards';
-import ContentAttributionTable from './ContentAttributionTable';
-import PipelineKanban from './PipelineKanban';
-import BookingsCalendar from './BookingsCalendar';
-import BestTimeHeatmap from './BestTimeHeatmap';
-import AIInsightsCreator from './AIInsightsCreator';
-import LinkHubPerformance from './LinkHubPerformance';
+import { BarChart3, FileText } from 'lucide-react';
+import CreatorAnalyticsKPIs from './CreatorAnalyticsKPIs';
+import BestTimeAnalytics from './BestTimeAnalytics';
+import PerformanceTrends from './PerformanceTrends';
+import BestPostsTable from './BestPostsTable';
+import AIInsightsPanel from './AIInsightsPanel';
+import PlatformBreakdown from './PlatformBreakdown';
 
 export default function CreatorDashboard() {
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 min-h-screen bg-gradient-to-br from-background to-background/80">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-growth-primary to-growth-secondary bg-clip-text text-transparent">
-            Creator Dashboard
+            Creator Analytics
           </h1>
           <p className="text-muted-foreground mt-1">
-            Turn content into leads → calls → clients → revenue
+            Understand what's working and optimize your content strategy
           </p>
         </div>
-        <Button className="bg-gradient-to-r from-growth-primary to-growth-secondary text-white">
-          <BarChart3 className="w-4 h-4 mr-2" />
-          Generate Report
+        <Button className="gradient-primary text-white shadow-lg">
+          <FileText className="w-4 h-4 mr-2" />
+          Export Report
         </Button>
       </div>
 
       {/* KPI Row */}
-      <CreatorKPICards />
+      <CreatorAnalyticsKPIs />
 
-      {/* Main Dashboard Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Content Attribution */}
-        <div className="lg:col-span-2">
-          <ContentAttributionTable />
+      {/* Main Analytics Grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        {/* Performance Trends - Full Width */}
+        <div className="xl:col-span-3">
+          <PerformanceTrends />
         </div>
-
-        {/* Pipeline Kanban */}
-        <div className="lg:col-span-2">
-          <PipelineKanban />
-        </div>
-
-        {/* Bookings Calendar */}
-        <BookingsCalendar />
 
         {/* Best Time to Post */}
-        <BestTimeHeatmap />
+        <div className="xl:col-span-2">
+          <BestTimeAnalytics />
+        </div>
 
-        {/* AI Insights */}
-        <AIInsightsCreator />
+        {/* Platform Breakdown */}
+        <div className="xl:col-span-1">
+          <PlatformBreakdown />
+        </div>
 
-        {/* Link Hub Performance */}
-        <LinkHubPerformance />
+        {/* Best Posts Table - Full Width */}
+        <div className="xl:col-span-3">
+          <BestPostsTable />
+        </div>
+
+        {/* AI Insights - Full Width */}
+        <div className="xl:col-span-3">
+          <AIInsightsPanel />
+        </div>
       </div>
     </div>
   );
