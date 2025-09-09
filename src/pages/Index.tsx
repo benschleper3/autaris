@@ -13,45 +13,49 @@ const Index = () => {
 
   useEffect(() => {
     const initializeAuth = async () => {
-      // Get initial session
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser(session.user);
-        
-        // Check if user has completed onboarding
-        const { data: userMetaData } = await supabase
-          .from('user_meta')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .single();
-          
-        if (userMetaData) {
-          setUserMeta(userMetaData);
-        } else {
-          setShowOnboarding(true);
+      try {
+        // Get initial session
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          setUser(session.user);
+          // Check if user has completed onboarding
+          const { data: userMetaData } = await supabase
+            .from('user_meta')
+            .select('role')
+            .eq('user_id', session.user.id)
+            .maybeSingle();
+
+          if (userMetaData) {
+            setUserMeta(userMetaData);
+          } else {
+            setShowOnboarding(true);
+          }
         }
+      } catch (e) {
+        console.error('Init auth error', e);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         setUser(session.user);
-        
-        // Check user meta when auth state changes
-        const { data: userMetaData } = await supabase
-          .from('user_meta')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .single();
-          
-        if (userMetaData) {
-          setUserMeta(userMetaData);
-          setShowOnboarding(false);
-        } else {
-          setShowOnboarding(true);
-        }
+        // Defer fetching meta to avoid deadlocks
+        setTimeout(async () => {
+          const { data: userMetaData } = await supabase
+            .from('user_meta')
+            .select('role')
+            .eq('user_id', session.user.id)
+            .maybeSingle();
+          if (userMetaData) {
+            setUserMeta(userMetaData);
+            setShowOnboarding(false);
+          } else {
+            setShowOnboarding(true);
+          }
+        }, 0);
       } else {
         setUser(null);
         setUserMeta(null);
@@ -71,7 +75,7 @@ const Index = () => {
         .from('user_meta')
         .select('role')
         .eq('user_id', user.id)
-        .single()
+        .maybeSingle()
         .then(({ data }) => {
           if (data) {
             setUserMeta(data);
