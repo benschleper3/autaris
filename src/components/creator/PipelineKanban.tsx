@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 interface Opportunity {
   id: string;
@@ -57,37 +56,6 @@ export default function PipelineKanban() {
     fetchOpportunities();
   }, []);
 
-  const handleDragEnd = async (result: any) => {
-    if (!result.destination) return;
-
-    const { source, destination, draggableId } = result;
-    
-    if (source.droppableId === destination.droppableId) return;
-
-    try {
-      const { error } = await supabase
-        .from('crm_opportunities')
-        .update({ stage: destination.droppableId })
-        .eq('id', draggableId);
-
-      if (error) throw error;
-
-      // Update local state
-      const newOpportunities = { ...opportunities };
-      const [moved] = newOpportunities[source.droppableId].splice(source.index, 1);
-      moved.stage = destination.droppableId;
-      
-      if (!newOpportunities[destination.droppableId]) {
-        newOpportunities[destination.droppableId] = [];
-      }
-      newOpportunities[destination.droppableId].splice(destination.index, 0, moved);
-      
-      setOpportunities(newOpportunities);
-    } catch (error) {
-      console.error('Error updating opportunity stage:', error);
-    }
-  };
-
   if (loading) {
     return (
       <Card>
@@ -107,6 +75,7 @@ export default function PipelineKanban() {
         <CardTitle>Sales Pipeline</CardTitle>
       </CardHeader>
       <CardContent>
+        {/* Remove the complex drag and drop for now and just display the data */}
         <div className="overflow-x-auto">
           <div className="flex gap-4 min-w-max pb-4">
             {stages.map((stage) => (
@@ -122,7 +91,7 @@ export default function PipelineKanban() {
                   {(opportunities[stage.id] || []).map((opp) => (
                     <div
                       key={opp.id}
-                      className="bg-background rounded-lg p-3 shadow-sm border"
+                      className="bg-background rounded-lg p-3 shadow-sm border cursor-pointer hover:shadow-md transition-shadow"
                     >
                       <h4 className="font-medium text-sm mb-2">{opp.title}</h4>
                       <div className="flex justify-between items-center">

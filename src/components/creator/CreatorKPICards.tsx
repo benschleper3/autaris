@@ -15,12 +15,22 @@ export default function CreatorKPICards() {
   useEffect(() => {
     const fetchKPIs = async () => {
       try {
-        const { data, error } = await supabase.rpc('get_creator_kpis');
-        if (error) throw error;
+        // Query each KPI separately since the RPC might not be available yet
+        const [leadsResult, callsResult, clientsResult, revenueResult] = await Promise.all([
+          supabase.from('crm_leads').select('id', { count: 'exact' }).gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+          supabase.from('crm_bookings').select('id', { count: 'exact' }).gte('starts_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+          supabase.from('crm_opportunities').select('id', { count: 'exact' }).eq('won', true).gte('close_date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]),
+          supabase.from('crm_opportunities').select('value_cents').eq('won', true).gte('close_date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
+        ]);
         
-        if (data && data.length > 0) {
-          setKpis(data[0]);
-        }
+        const revenue = (revenueResult.data || []).reduce((sum, item) => sum + (item.value_cents || 0), 0) / 100;
+        
+        setKpis({
+          leads_7d: leadsResult.count || 0,
+          calls_7d: callsResult.count || 0,
+          clients_30d: clientsResult.count || 0,
+          revenue_30d: revenue
+        });
       } catch (error) {
         console.error('Error fetching creator KPIs:', error);
       } finally {

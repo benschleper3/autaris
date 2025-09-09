@@ -634,6 +634,30 @@ export type Database = {
         }
         Relationships: []
       }
+      v_posts_with_latest: {
+        Row: {
+          comments: number | null
+          created_at: string | null
+          engagement_rate: number | null
+          likes: number | null
+          platform:
+            | "tiktok"
+            | "instagram"
+            | "facebook"
+            | "twitter"
+            | "linkedin"
+            | "youtube"
+            | null
+          post_id: string | null
+          published_at: string | null
+          shares: number | null
+          title: string | null
+          url: string | null
+          user_id: string | null
+          views: number | null
+        }
+        Relationships: []
+      }
       v_pricing_suggestions: {
         Row: {
           avg_views_30d: number | null
@@ -705,7 +729,15 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      get_creator_kpis: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          calls_7d: number
+          clients_30d: number
+          leads_7d: number
+          revenue_30d: number
+        }[]
+      }
     }
     Enums: {
       user_role: "coach" | "ugc_creator"

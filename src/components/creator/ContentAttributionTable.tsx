@@ -23,23 +23,34 @@ export default function ContentAttributionTable() {
     const fetchAttributionData = async () => {
       try {
         const { data: attributionData, error } = await supabase
-          .from('v_posts_with_latest')
+          .from('post_metrics')
           .select(`
             title,
-            platform,
-            published_at,
-            created_at,
             views,
             engagement_rate,
             post_id,
-            v_post_attribution!inner(leads_count, revenue_usd)
+            published_at,
+            created_at,
+            social_accounts!inner(platform)
           `)
           .gte('coalesce(published_at, created_at)', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
-          .order('v_post_attribution.revenue_usd', { ascending: false })
+          .order('views', { ascending: false })
           .limit(10);
 
         if (error) throw error;
-        setData(attributionData || []);
+        
+        // Transform the data to match expected interface
+        const transformedData = (attributionData || []).map(item => ({
+          title: item.title || 'Untitled',
+          platform: item.social_accounts?.platform || 'Unknown',
+          published_at: item.published_at || item.created_at,
+          leads_count: 0, // TODO: Calculate from attribution
+          revenue_usd: 0, // TODO: Calculate from attribution  
+          views: item.views || 0,
+          engagement_rate: item.engagement_rate || 0
+        }));
+        
+        setData(transformedData);
       } catch (error) {
         console.error('Error fetching content attribution:', error);
       } finally {

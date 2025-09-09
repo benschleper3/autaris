@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
-import { supabase } from '@/lib/config';
-import UGCDashboard from '@/components/ugc/UGCDashboard';
+import { supabase } from '@/integrations/supabase/client';
+import UGCCreatorDashboard from '@/components/ugc/UGCCreatorDashboard';
 import Navigation from '@/components/Navigation';
 
 export default function DashboardUGC() {
@@ -20,13 +20,13 @@ export default function DashboardUGC() {
       setUser(session.user);
       
       // Check user role
-      const { data: profileData } = await supabase
-        .from('profiles')
+      const { data: userMetaData } = await supabase
+        .from('user_meta')
         .select('role')
-        .eq('id', session.user.id)
+        .eq('user_id', session.user.id)
         .single();
         
-      setProfile(profileData);
+      setProfile(userMetaData);
       setLoading(false);
     };
 
@@ -45,14 +45,14 @@ export default function DashboardUGC() {
     return <Navigate to="/" replace />;
   }
 
-  if (profile?.role !== 'ugc') {
+  if (profile?.role !== 'ugc_creator') {
     return <Navigate to="/" replace />;
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-background/80">
       <Navigation />
-      <UGCDashboard />
+      <UGCCreatorDashboard />
     </div>
   );
 }
