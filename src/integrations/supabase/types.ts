@@ -29,6 +29,159 @@ export type Database = {
         }
         Relationships: []
       }
+      campaigns: {
+        Row: {
+          brand_name: string | null
+          budget_cents: number | null
+          created_at: string | null
+          end_date: string | null
+          id: string
+          start_date: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          brand_name?: string | null
+          budget_cents?: number | null
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          start_date?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          brand_name?: string | null
+          budget_cents?: number | null
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          start_date?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      creator_revenue: {
+        Row: {
+          amount_cents: number
+          brand_name: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          paid_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          brand_name?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          brand_name?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      crm_bookings: {
+        Row: {
+          created_at: string | null
+          ends_at: string
+          id: string
+          location: string | null
+          starts_at: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          ends_at: string
+          id?: string
+          location?: string | null
+          starts_at: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          ends_at?: string
+          id?: string
+          location?: string | null
+          starts_at?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      crm_leads: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string
+          name: string | null
+          source: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          name?: string | null
+          source?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          name?: string | null
+          source?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      crm_opportunities: {
+        Row: {
+          close_date: string | null
+          created_at: string | null
+          id: string
+          stage: string | null
+          title: string
+          user_id: string
+          value_cents: number | null
+          won: boolean | null
+        }
+        Insert: {
+          close_date?: string | null
+          created_at?: string | null
+          id?: string
+          stage?: string | null
+          title: string
+          user_id: string
+          value_cents?: number | null
+          won?: boolean | null
+        }
+        Update: {
+          close_date?: string | null
+          created_at?: string | null
+          id?: string
+          stage?: string | null
+          title?: string
+          user_id?: string
+          value_cents?: number | null
+          won?: boolean | null
+        }
+        Relationships: []
+      }
       dashboard_items: {
         Row: {
           created_at: string
@@ -85,6 +238,54 @@ export type Database = {
         }
         Relationships: []
       }
+      deliverables: {
+        Row: {
+          approved: boolean | null
+          campaign_id: string | null
+          created_at: string | null
+          due_date: string | null
+          id: string
+          stage: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          approved?: boolean | null
+          campaign_id?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          stage?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          approved?: boolean | null
+          campaign_id?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          stage?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deliverables_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deliverables_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "v_campaign_rollup"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       healthchecks: {
         Row: {
           created_at: string
@@ -100,6 +301,146 @@ export type Database = {
           created_at?: string
           id?: never
           note?: string
+        }
+        Relationships: []
+      }
+      link_clicks: {
+        Row: {
+          clicked_at: string | null
+          id: string
+          link_id: string | null
+          user_id: string
+        }
+        Insert: {
+          clicked_at?: string | null
+          id?: string
+          link_id?: string | null
+          user_id: string
+        }
+        Update: {
+          clicked_at?: string | null
+          id?: string
+          link_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "link_clicks_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "link_hub_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      link_hub_links: {
+        Row: {
+          created_at: string | null
+          id: string
+          slug: string
+          title: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          slug: string
+          title: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          slug?: string
+          title?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      portfolio_items: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          featured: boolean | null
+          id: string
+          image_url: string | null
+          post_id: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          featured?: boolean | null
+          id?: string
+          image_url?: string | null
+          post_id?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          featured?: boolean | null
+          id?: string
+          image_url?: string | null
+          post_id?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      report_links: {
+        Row: {
+          created_at: string | null
+          id: string
+          report_type: string | null
+          title: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          report_type?: string | null
+          title: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          report_type?: string | null
+          title?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_meta: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: string
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -260,6 +601,69 @@ export type Database = {
           status?: "active" | "paused" | "disconnected" | "error" | null
           updated_at?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      v_campaign_rollup: {
+        Row: {
+          approved_count: number | null
+          avg_engagement_rate: number | null
+          brand_name: string | null
+          deliverables_count: number | null
+          id: string | null
+          title: string | null
+          total_views: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
+      v_daily_perf: {
+        Row: {
+          avg_er_percent: number | null
+          day: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
+      v_post_attribution: {
+        Row: {
+          leads_count: number | null
+          post_id: string | null
+          revenue_usd: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
+      v_pricing_suggestions: {
+        Row: {
+          avg_views_30d: number | null
+          platform:
+            | "tiktok"
+            | "instagram"
+            | "facebook"
+            | "twitter"
+            | "linkedin"
+            | "youtube"
+            | null
+          suggested_cpm_usd: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
+      v_time_heatmap: {
+        Row: {
+          avg_engagement_percent: number | null
+          dow: number | null
+          hour: number | null
+          platform:
+            | "tiktok"
+            | "instagram"
+            | "facebook"
+            | "twitter"
+            | "linkedin"
+            | "youtube"
+            | null
+          user_id: string | null
         }
         Relationships: []
       }

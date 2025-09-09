@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supabase } from '@/lib/config';
+import { supabase } from '@/integrations/supabase/client';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
@@ -19,7 +19,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     if (!selectedRole) {
       toast({
         title: "Please select a role",
-        description: "Choose whether you're a Coach/Consultant or UGC Creator",
+        description: "Choose whether you're a Creator or UGC Creator",
         variant: "destructive"
       });
       return;
@@ -30,19 +30,19 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No user found');
 
+      // Upsert into user_meta table
       const { error } = await supabase
-        .from('profiles')
-        .update({ 
-          role: selectedRole as 'coach' | 'ugc_creator',
-          onboarded: true 
-        })
-        .eq('user_id', user.id);
+        .from('user_meta')
+        .upsert({ 
+          user_id: user.id,
+          role: selectedRole as 'creator' | 'ugc_creator'
+        });
 
       if (error) throw error;
 
       toast({
         title: "Welcome aboard!",
-        description: `You're all set up as a ${selectedRole === 'coach' ? 'Coach/Consultant' : 'UGC Creator'}`,
+        description: `You're all set up as a ${selectedRole === 'creator' ? 'Creator' : 'UGC Creator'}`,
       });
 
       onComplete();
@@ -76,16 +76,16 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
         <RadioGroup value={selectedRole} onValueChange={setSelectedRole}>
           <div className="space-y-4">
             <div className="flex items-center space-x-3 p-4 rounded-lg border border-border/50 hover:bg-card/50 cursor-pointer">
-              <RadioGroupItem value="coach" id="coach" />
-              <Label htmlFor="coach" className="flex-1 cursor-pointer">
+              <RadioGroupItem value="creator" id="creator" />
+              <Label htmlFor="creator" className="flex-1 cursor-pointer">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-growth-primary/10 flex items-center justify-center">
                     <Users className="w-4 h-4 text-growth-primary" />
                   </div>
                   <div>
-                    <div className="font-medium">Coach / Consultant</div>
+                    <div className="font-medium">Creator</div>
                     <div className="text-sm text-muted-foreground">
-                      Help others grow their social media presence
+                      Turn content into leads, calls, and clients
                     </div>
                   </div>
                 </div>
@@ -102,7 +102,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                   <div>
                     <div className="font-medium">UGC Creator</div>
                     <div className="text-sm text-muted-foreground">
-                      Create content and track brand partnerships
+                      Manage brand campaigns and track revenue
                     </div>
                   </div>
                 </div>
