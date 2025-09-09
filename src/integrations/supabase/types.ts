@@ -168,15 +168,12 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string | null
-          email: string | null
           full_name: string | null
           last_login_at: string | null
           metadata: Json | null
-          onboarded: boolean | null
           onboarded_at: string | null
           phone: string | null
           plan: string | null
-          role: Database["public"]["Enums"]["user_role"] | null
           timezone: string | null
           updated_at: string | null
           user_id: string | null
@@ -184,15 +181,12 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string | null
-          email?: string | null
           full_name?: string | null
           last_login_at?: string | null
           metadata?: Json | null
-          onboarded?: boolean | null
           onboarded_at?: string | null
           phone?: string | null
           plan?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
           timezone?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -200,15 +194,12 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string | null
-          email?: string | null
           full_name?: string | null
           last_login_at?: string | null
           metadata?: Json | null
-          onboarded?: boolean | null
           onboarded_at?: string | null
           phone?: string | null
           plan?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
           timezone?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -278,14 +269,6 @@ export type Database = {
           created_at: string | null
           id: number | null
           narrative: string | null
-          platform:
-            | "tiktok"
-            | "instagram"
-            | "facebook"
-            | "twitter"
-            | "linkedin"
-            | "youtube"
-            | null
           recommendations: string | null
           top_posts: Json | null
           updated_at: string | null
@@ -297,14 +280,6 @@ export type Database = {
           created_at?: string | null
           id?: number | null
           narrative?: string | null
-          platform?:
-            | "tiktok"
-            | "instagram"
-            | "facebook"
-            | "twitter"
-            | "linkedin"
-            | "youtube"
-            | null
           recommendations?: string | null
           top_posts?: Json | null
           updated_at?: string | null
@@ -316,14 +291,6 @@ export type Database = {
           created_at?: string | null
           id?: number | null
           narrative?: string | null
-          platform?:
-            | "tiktok"
-            | "instagram"
-            | "facebook"
-            | "twitter"
-            | "linkedin"
-            | "youtube"
-            | null
           recommendations?: string | null
           top_posts?: Json | null
           updated_at?: string | null
