@@ -11,23 +11,26 @@ export default function DashboardUGC() {
 
   useEffect(() => {
     const checkAccess = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) {
+          return;
+        }
+        setUser(session.user);
+
+        // Check user role
+        const { data: userMetaData } = await supabase
+          .from('user_meta')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+
+        setProfile(userMetaData || null);
+      } catch (e) {
+        console.error('[DashboardUGC] access check failed', e);
+      } finally {
         setLoading(false);
-        return;
       }
-      
-      setUser(session.user);
-      
-      // Check user role
-      const { data: userMetaData } = await supabase
-        .from('user_meta')
-        .select('role')
-        .eq('user_id', session.user.id)
-        .single();
-        
-      setProfile(userMetaData);
-      setLoading(false);
     };
 
     checkAccess();

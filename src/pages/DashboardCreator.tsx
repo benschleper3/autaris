@@ -11,23 +11,26 @@ export default function DashboardCreator() {
 
   useEffect(() => {
     const checkAccess = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) {
+          return;
+        }
+        setUser(session.user);
+
+        // Check user role
+        const { data: userMetaData } = await supabase
+          .from('user_meta')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+
+        setUserMeta(userMetaData || null);
+      } catch (e) {
+        console.error('[DashboardCreator] access check failed', e);
+      } finally {
         setLoading(false);
-        return;
       }
-      
-      setUser(session.user);
-      
-      // Check user role
-      const { data: userMetaData } = await supabase
-        .from('user_meta')
-        .select('role')
-        .eq('user_id', session.user.id)
-        .single();
-        
-      setUserMeta(userMetaData);
-      setLoading(false);
     };
 
     checkAccess();
