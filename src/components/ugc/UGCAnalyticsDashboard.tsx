@@ -89,20 +89,23 @@ export default function UGCAnalyticsDashboard() {
               </Popover>
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">Platform:</span>
-              <Select value={filters.platform || ""} onValueChange={(value) => updateFilter('platform', value || null)}>
-                <SelectTrigger className="w-32">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">All</SelectItem>
-                  <SelectItem value="tiktok">TikTok</SelectItem>
-                  <SelectItem value="instagram">Instagram</SelectItem>
-                  <SelectItem value="youtube">YouTube</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium">Platform:</span>
+            <Select
+              value={filters.platform ?? "all"}
+              onValueChange={(value) => updateFilter('platform', value === 'all' ? null : value)}
+            >
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="All" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="tiktok">TikTok</SelectItem>
+                <SelectItem value="instagram">Instagram</SelectItem>
+                <SelectItem value="youtube">YouTube</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           </div>
 
           <div className="flex items-center gap-2">
