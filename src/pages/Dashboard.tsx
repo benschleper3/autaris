@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import Layout from '@/components/Layout';
 import UGCAnalyticsDashboard from '@/components/ugc/UGCAnalyticsDashboard';
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,7 +16,7 @@ export default function Dashboard() {
         }
         setUser(session.user);
 
-        // Check user role and set to ugc_creator if not exists
+        // Set user role if not exists
         const { data: userMetaData } = await supabase
           .from('user_meta')
           .select('role')
@@ -26,10 +24,8 @@ export default function Dashboard() {
           .maybeSingle();
 
         if (!userMetaData) {
-          await supabase.rpc('set_user_role', { p_role: 'ugc_creator' } as any);
+          await supabase.rpc('set_user_role', { p_role: 'ugc_creator' });
         }
-
-        setProfile(userMetaData || { role: 'ugc_creator' });
       } catch (e) {
         console.error('[Dashboard] access check failed', e);
       } finally {
@@ -52,9 +48,5 @@ export default function Dashboard() {
     return <Navigate to="/" replace />;
   }
 
-  return (
-    <Layout>
-      <UGCAnalyticsDashboard />
-    </Layout>
-  );
+  return <UGCAnalyticsDashboard />;
 }

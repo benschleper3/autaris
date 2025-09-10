@@ -43,75 +43,77 @@ export default function UGCAnalyticsDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-background/80">
-      {/* Sticky Filter Bar */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b p-4">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">From:</span>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="justify-start text-left font-normal">
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {filters.from ? format(filters.from, "MMM dd, yyyy") : "Select date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={filters.from || undefined}
-                  onSelect={(date) => updateFilter('from', date)}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
+      {/* Sticky Global Filter Bar */}
+      <div id="filterbar-global" className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b p-4">
+        <div className="flex flex-wrap items-center gap-4 justify-between">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">From:</span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="justify-start text-left font-normal">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {filters.from ? format(filters.from, "MMM dd, yyyy") : "Select date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={filters.from || undefined}
+                    onSelect={(date) => updateFilter('from', date)}
+                    initialFocus
+                    className={cn("p-3")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">To:</span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="justify-start text-left font-normal">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {filters.to ? format(filters.to, "MMM dd, yyyy") : "Select date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={filters.to || undefined}
+                    onSelect={(date) => updateFilter('to', date)}
+                    initialFocus
+                    className={cn("p-3")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">Platform:</span>
+              <Select value={filters.platform || ""} onValueChange={(value) => updateFilter('platform', value || null)}>
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All</SelectItem>
+                  <SelectItem value="tiktok">TikTok</SelectItem>
+                  <SelectItem value="instagram">Instagram</SelectItem>
+                  <SelectItem value="youtube">YouTube</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">To:</span>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="justify-start text-left font-normal">
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {filters.to ? format(filters.to, "MMM dd, yyyy") : "Select date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={filters.to || undefined}
-                  onSelect={(date) => updateFilter('to', date)}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">Platform:</span>
-            <Select value={filters.platform || ""} onValueChange={(value) => updateFilter('platform', value || null)}>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="All" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">All</SelectItem>
-                <SelectItem value="tiktok">TikTok</SelectItem>
-                <SelectItem value="instagram">Instagram</SelectItem>
-                <SelectItem value="youtube">YouTube</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex items-center gap-2 ml-auto">
             <Dialog open={showReportModal} onOpenChange={setShowReportModal}>
               <DialogTrigger asChild>
-                <Button variant="outline">
+                <Button id="btn-report" variant="outline">
                   <FileText className="w-4 h-4 mr-2" />
                   Report Generator
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md">
+              <DialogContent id="modal-report" className="max-w-md">
                 <ReportGeneratorModal 
                   filters={filters}
                   onClose={() => setShowReportModal(false)}
@@ -121,12 +123,12 @@ export default function UGCAnalyticsDashboard() {
 
             <Dialog open={showPortfolioModal} onOpenChange={setShowPortfolioModal}>
               <DialogTrigger asChild>
-                <Button variant="outline">
+                <Button id="btn-portfolio" variant="outline">
                   <FolderOpen className="w-4 h-4 mr-2" />
                   Portfolio Manager
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+              <DialogContent id="modal-portfolio" className="max-w-4xl max-h-[80vh] overflow-y-auto">
                 <PortfolioManagerModal onClose={() => setShowPortfolioModal(false)} />
               </DialogContent>
             </Dialog>
@@ -146,24 +148,36 @@ export default function UGCAnalyticsDashboard() {
         </div>
 
         {/* KPI Strip */}
-        <UGCKPICards filters={filters} />
+        <div id="kpi-strip">
+          <UGCKPICards filters={filters} />
+        </div>
 
-        {/* Performance Trend */}
-        <UGCPerformanceTrend filters={filters} />
+        {/* Performance Trend Chart */}
+        <div id="chart-trend">
+          <UGCPerformanceTrend filters={filters} />
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Platform Breakdown */}
-          <UGCPlatformBreakdown filters={filters} />
+          <div id="platform-breakdown">
+            <UGCPlatformBreakdown filters={filters} />
+          </div>
 
           {/* Best Time Heatmap */}
-          <UGCBestTimeHeatmap filters={filters} />
+          <div id="heatmap-posting">
+            <UGCBestTimeHeatmap filters={filters} />
+          </div>
         </div>
 
         {/* Top Posts */}
-        <UGCTopPosts filters={filters} />
+        <div id="table-top-posts">
+          <UGCTopPosts filters={filters} />
+        </div>
 
         {/* AI Insights */}
-        <UGCInsights filters={filters} />
+        <div id="list-insights">
+          <UGCInsights filters={filters} />
+        </div>
       </div>
     </div>
   );
