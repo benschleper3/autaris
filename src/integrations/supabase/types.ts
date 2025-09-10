@@ -33,6 +33,7 @@ export type Database = {
         Row: {
           brand_name: string | null
           budget_cents: number | null
+          campaign_name: string | null
           created_at: string | null
           end_date: string | null
           id: string
@@ -43,6 +44,7 @@ export type Database = {
         Insert: {
           brand_name?: string | null
           budget_cents?: number | null
+          campaign_name?: string | null
           created_at?: string | null
           end_date?: string | null
           id?: string
@@ -53,6 +55,7 @@ export type Database = {
         Update: {
           brand_name?: string | null
           budget_cents?: number | null
+          campaign_name?: string | null
           created_at?: string | null
           end_date?: string | null
           id?: string
@@ -395,30 +398,54 @@ export type Database = {
       }
       report_links: {
         Row: {
+          campaign_id: string | null
           created_at: string | null
+          from_date: string | null
           id: string
           report_type: string | null
           title: string
+          to_date: string | null
           url: string
           user_id: string
         }
         Insert: {
+          campaign_id?: string | null
           created_at?: string | null
+          from_date?: string | null
           id?: string
           report_type?: string | null
           title: string
+          to_date?: string | null
           url: string
           user_id: string
         }
         Update: {
+          campaign_id?: string | null
           created_at?: string | null
+          from_date?: string | null
           id?: string
           report_type?: string | null
           title?: string
+          to_date?: string | null
           url?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "report_links_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_links_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "v_campaign_rollup"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_meta: {
         Row: {

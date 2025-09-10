@@ -13,10 +13,7 @@ import {
 const navigation = [
   { name: 'Dashboard', href: '/dashboard-ugc', icon: BarChart3 },
   { name: 'Content', href: '/content', icon: FileText },
-  { name: 'Performance', href: '/performance', icon: TrendingUp },
-  { name: 'Portfolio', href: '/portfolio', icon: Briefcase },
-  { name: 'Reports', href: '/reports', icon: FileBarChart },
-  { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'Reports & Portfolio', href: '/reports', icon: FileBarChart },
 ];
 
 export default function Sidebar() {
