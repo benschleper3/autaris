@@ -118,14 +118,8 @@ const Index = () => {
     return <Onboarding onComplete={handleOnboardingComplete} />;
   }
 
-  // Redirect to appropriate dashboard based on role
-  if (userMeta?.role === 'creator') {
-    return <Navigate to="/dashboard-creator" replace />;
-  }
-  
-  if (userMeta?.role === 'ugc_creator') {
-    return <Navigate to="/dashboard-ugc" replace />;
-  }
+  // Redirect to single dashboard
+  return <Navigate to="/dashboard" replace />;
 
   // Fallback - show onboarding if no role is set
   return <Onboarding onComplete={handleOnboardingComplete} />;
