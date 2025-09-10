@@ -56,7 +56,7 @@ export default function UGCDashboard() {
           .maybeSingle();
 
         if (!userMeta) {
-          await supabase.rpc('set_user_role', { p_role: 'ugc_creator' });
+          await supabase.rpc('set_user_role', { p_role: 'ugc_creator' } as any);
         }
       } catch (error) {
         console.error('Error initializing user role:', error);

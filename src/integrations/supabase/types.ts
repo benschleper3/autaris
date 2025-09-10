@@ -774,6 +774,10 @@ export type Database = {
           views_30d: number
         }[]
       }
+      set_user_role: {
+        Args: { p_role: string }
+        Returns: undefined
+      }
     }
     Enums: {
       user_role: "coach" | "ugc_creator"
