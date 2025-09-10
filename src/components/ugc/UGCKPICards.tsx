@@ -1,37 +1,58 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import MetricCard from '@/components/MetricCard';
-import { Eye, TrendingUp, Briefcase, DollarSign } from 'lucide-react';
+import { Eye, TrendingUp, FileText, Target } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+
+interface KPIData {
+  views_30d: number;
+  avg_er_30d: number;
+  posts_30d: number;
+  active_campaigns: number;
+}
 
 export default function UGCKPICards() {
-  const [kpis, setKpis] = useState({
+  const [kpis, setKpis] = useState<KPIData>({
     views_30d: 0,
     avg_er_30d: 0,
-    active_campaigns: 0,
-    revenue_mtd: 0
+    posts_30d: 0,
+    active_campaigns: 0
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchKPIs = async () => {
       try {
-        // Query each KPI separately
-        const [viewsResult, erResult, campaignsResult, revenueResult] = await Promise.all([
-          supabase.from('post_metrics').select('views').gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
-          supabase.from('post_metrics').select('engagement_rate').gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
-          supabase.from('campaigns').select('id', { count: 'exact' }).lte('start_date', new Date().toISOString().split('T')[0]).gte('end_date', new Date().toISOString().split('T')[0]),
-          supabase.from('creator_revenue').select('amount_cents').gte('paid_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString())
-        ]);
+        // Fetch 30d data from posts
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
         
-        const totalViews = (viewsResult.data || []).reduce((sum, item) => sum + (item.views || 0), 0);
-        const avgER = (erResult.data || []).reduce((sum, item, _, arr) => sum + (item.engagement_rate || 0) / arr.length, 0);
-        const revenueThisMonth = (revenueResult.data || []).reduce((sum, item) => sum + (item.amount_cents || 0), 0) / 100;
+        const { data: postsData, error: postsError } = await supabase
+          .from('v_posts_with_latest')
+          .select('views, engagement_rate')
+          .gte('published_at', thirtyDaysAgo);
+
+        if (postsError) throw postsError;
+
+        // Fetch active campaigns
+        const today = new Date().toISOString().split('T')[0];
+        const { data: campaignsData, error: campaignsError } = await supabase
+          .from('campaigns')
+          .select('id', { count: 'exact' })
+          .lte('start_date', today)
+          .gte('end_date', today);
+
+        if (campaignsError) throw campaignsError;
+
+        const totalViews = (postsData || []).reduce((sum, item) => sum + (item.views || 0), 0);
+        const avgER = postsData?.length 
+          ? (postsData.reduce((sum, item) => sum + (item.engagement_rate || 0), 0) / postsData.length)
+          : 0;
         
         setKpis({
           views_30d: totalViews,
           avg_er_30d: Math.round(avgER * 100) / 100,
-          active_campaigns: campaignsResult.count || 0,
-          revenue_mtd: revenueThisMonth
+          posts_30d: postsData?.length || 0,
+          active_campaigns: campaignsData?.length || 0
         });
       } catch (error) {
         console.error('Error fetching UGC KPIs:', error);
@@ -47,7 +68,7 @@ export default function UGCKPICards() {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="h-24 bg-card/50 rounded-lg animate-pulse" />
+          <Skeleton key={i} className="h-24 rounded-2xl" />
         ))}
       </div>
     );
@@ -58,7 +79,7 @@ export default function UGCKPICards() {
       <MetricCard
         title="Views (30d)"
         value={kpis.views_30d.toLocaleString()}
-        change="+18%"
+        change="+12%"
         changeType="positive"
         icon={<Eye className="w-4 h-4" />}
       />
@@ -70,18 +91,18 @@ export default function UGCKPICards() {
         icon={<TrendingUp className="w-4 h-4" />}
       />
       <MetricCard
+        title="Posts (30d)"
+        value={kpis.posts_30d.toString()}
+        change="+3"
+        changeType="positive"
+        icon={<FileText className="w-4 h-4" />}
+      />
+      <MetricCard
         title="Active Campaigns"
         value={kpis.active_campaigns.toString()}
         change="+1"
         changeType="positive"
-        icon={<Briefcase className="w-4 h-4" />}
-      />
-      <MetricCard
-        title="Revenue (MTD)"
-        value={`$${kpis.revenue_mtd.toLocaleString()}`}
-        change="+25%"
-        changeType="positive"
-        icon={<DollarSign className="w-4 h-4" />}
+        icon={<Target className="w-4 h-4" />}
       />
     </div>
   );

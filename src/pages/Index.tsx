@@ -3,7 +3,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Navigate } from 'react-router-dom';
 import AuthForm from '@/components/AuthForm';
 import Onboarding from '@/components/Onboarding';
-import Navigation from '@/components/Navigation';
 
 const Index = () => {
   const [user, setUser] = useState(null);
@@ -28,6 +27,10 @@ const Index = () => {
           if (userMetaData) {
             setUserMeta(userMetaData);
           } else {
+            // Set default role as ugc_creator for new users
+            await supabase
+              .from('user_meta')
+              .insert({ user_id: session.user.id, role: 'ugc_creator' });
             setShowOnboarding(true);
           }
         }

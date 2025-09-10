@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import UGCCreatorDashboard from '@/components/ugc/UGCCreatorDashboard';
-import Navigation from '@/components/Navigation';
+import Layout from '@/components/Layout';
+import UGCDashboard from '@/components/ugc/UGCDashboard';
 
 export default function DashboardUGC() {
   const [user, setUser] = useState(null);
@@ -48,14 +48,9 @@ export default function DashboardUGC() {
     return <Navigate to="/" replace />;
   }
 
-  if (profile?.role !== 'ugc_creator') {
-    return <Navigate to="/" replace />;
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-background/80">
-      <Navigation />
-      <UGCCreatorDashboard />
-    </div>
+    <Layout>
+      <UGCDashboard />
+    </Layout>
   );
 }
