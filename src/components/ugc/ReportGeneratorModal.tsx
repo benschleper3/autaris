@@ -31,7 +31,7 @@ interface Props {
 export default function ReportGeneratorModal({ filters, onClose }: Props) {
   const [from, setFrom] = useState<Date | null>(filters.from);
   const [to, setTo] = useState<Date | null>(filters.to);
-  const [campaignId, setCampaignId] = useState<string>('');
+  const [campaignId, setCampaignId] = useState<string>('all');
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [generating, setGenerating] = useState(false);
   const { toast } = useToast();
@@ -78,7 +78,7 @@ export default function ReportGeneratorModal({ filters, onClose }: Props) {
         role: "ugc_creator",
         from: from.toISOString(),
         to: to.toISOString(),
-        campaign_id: campaignId || null
+        campaign_id: campaignId === 'all' ? null : campaignId
       };
 
       // Mock report generation
@@ -96,7 +96,7 @@ export default function ReportGeneratorModal({ filters, onClose }: Props) {
           .from('report_links')
           .insert({
             user_id: user.user.id,
-            campaign_id: campaignId || null,
+            campaign_id: campaignId === 'all' ? null : campaignId,
             from_date: from.toISOString().split('T')[0],
             to_date: to.toISOString().split('T')[0],
             url: mockReportUrl,
@@ -184,7 +184,7 @@ export default function ReportGeneratorModal({ filters, onClose }: Props) {
               <SelectValue placeholder="Select a campaign" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Campaigns</SelectItem>
+              <SelectItem value="all">All Campaigns</SelectItem>
               {campaigns.map((campaign) => (
                 <SelectItem key={campaign.id} value={campaign.id}>
                   {campaign.campaign_name}
