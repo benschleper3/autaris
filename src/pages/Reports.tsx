@@ -70,21 +70,22 @@ export default function Reports() {
       // Fetch campaigns
       const { data: campaignsData } = await supabase
         .from('campaigns')
-        .select('id, title as campaign_name')
+        .select('id, title')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      setCampaigns(campaignsData || []);
+      setCampaigns(campaignsData?.map(c => ({ id: c.id, campaign_name: c.title || 'Untitled Campaign' })) || []);
 
       // Fetch report links
       const { data: reportsData } = await supabase
         .from('report_links')
-        .select('id, created_at, title as campaign_name, url')
+        .select('id, created_at, title, url')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       setReportLinks(reportsData?.map(item => ({
         ...item,
+        campaign_name: item.title || 'Untitled Report',
         from_date: '',
         to_date: ''
       })) || []);

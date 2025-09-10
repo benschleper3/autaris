@@ -765,6 +765,15 @@ export type Database = {
           revenue_30d: number
         }[]
       }
+      get_ugc_kpis: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          active_campaigns: number
+          avg_er_30d: number
+          posts_30d: number
+          views_30d: number
+        }[]
+      }
     }
     Enums: {
       user_role: "coach" | "ugc_creator"

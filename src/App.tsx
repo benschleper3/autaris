@@ -25,10 +25,7 @@ function App() {
             <Route path="/" element={<Index />} />
             <Route path="/dashboard-ugc" element={<DashboardUGC />} />
             <Route path="/content" element={<Content />} />
-            <Route path="/performance" element={<Performance />} />
-            <Route path="/portfolio" element={<Portfolio />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/settings" element={<Settings />} />
+        <Route path="/reports" element={<Reports />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
