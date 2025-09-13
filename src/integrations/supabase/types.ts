@@ -765,8 +765,18 @@ export type Database = {
           revenue_30d: number
         }[]
       }
+      get_daily_perf: {
+        Args: { p_from?: string; p_platform?: string; p_to?: string }
+        Returns: {
+          avg_er_percent: number
+          day: string
+          day_views: number
+        }[]
+      }
       get_ugc_kpis: {
-        Args: Record<PropertyKey, never>
+        Args:
+          | Record<PropertyKey, never>
+          | { p_from?: string; p_platform?: string; p_to?: string }
         Returns: {
           active_campaigns: number
           avg_er_30d: number

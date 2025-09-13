@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import UGCAnalyticsDashboard from '@/components/ugc/UGCAnalyticsDashboard';
+import UnifiedAnalyticsDashboard from '@/components/unified/UnifiedAnalyticsDashboard';
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -48,5 +48,5 @@ export default function Dashboard() {
     return <Navigate to="/" replace />;
   }
 
-  return <UGCAnalyticsDashboard />;
+  return <UnifiedAnalyticsDashboard />;
 }
