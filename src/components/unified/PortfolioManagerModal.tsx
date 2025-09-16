@@ -53,6 +53,20 @@ export default function PortfolioManagerModal({ open, onOpenChange }: PortfolioM
 
   const toggleFeatured = async (id: string, featured: boolean) => {
     try {
+      const response = await fetch('https://your-n8n-domain.com/webhook/update-portfolio', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: id,
+          featured: featured
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to update portfolio item');
+
+      // Also update local database
       const { error } = await supabase
         .from('portfolio_items')
         .update({ featured })
@@ -82,6 +96,19 @@ export default function PortfolioManagerModal({ open, onOpenChange }: PortfolioM
 
   const deleteItem = async (id: string) => {
     try {
+      const response = await fetch('https://your-n8n-domain.com/webhook/delete-portfolio', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: id
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to delete portfolio item');
+
+      // Also delete from local database
       const { error } = await supabase
         .from('portfolio_items')
         .delete()

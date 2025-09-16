@@ -87,17 +87,76 @@ export default function TopPostsTable({ filters }: TopPostsTableProps) {
     }
   };
 
+  const handleAddToPortfolio = async (post: PostData) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const response = await fetch('https://your-n8n-domain.com/webhook/add-portfolio', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          post_id: post.post_id,
+          user_id: user.id
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to add to portfolio');
+
+      // Also add to local database
+      const { error } = await supabase
+        .from('portfolio_items')
+        .insert({
+          user_id: user.id,
+          post_id: post.post_id,
+          title: post.title || 'Untitled',
+          image_url: null,
+          featured: false
+        });
+
+      if (error && !error.message.includes('duplicate')) {
+        throw error;
+      }
+
+      toast({
+        title: "Added to Portfolio",
+        description: "Post has been added to your portfolio successfully."
+      });
+    } catch (error) {
+      console.error('Error adding to portfolio:', error);
+      toast({
+        title: "Addition Failed",
+        description: "Could not add post to portfolio. It may already exist.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleAIExplain = async (post: PostData) => {
     try {
       setSelectedPost(post);
       setInsightsLoading(true);
       setDrawerOpen(true);
 
-      const { data, error } = await supabase.functions.invoke('ai-ugc-post-insights', {
-        body: { post_id: post.post_id }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const response = await fetch('https://your-n8n-domain.com/webhook/post-insights', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          post_id: post.post_id,
+          user_id: user.id
+        })
       });
 
-      if (error) throw error;
+      if (!response.ok) throw new Error('Failed to get insights');
+      
+      const data = await response.json();
 
       setInsights({
         angle: data.angle || 'No specific angle identified',
@@ -217,6 +276,14 @@ export default function TopPostsTable({ filters }: TopPostsTableProps) {
                       >
                         <Brain className="w-3 h-3" />
                         AI Explain
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleAddToPortfolio(post)}
+                        className="flex items-center gap-1"
+                      >
+                        Add to Portfolio
                       </Button>
                       {post.url && (
                         <Button size="sm" variant="ghost" asChild>

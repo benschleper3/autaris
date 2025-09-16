@@ -68,16 +68,43 @@ export default function ReportGeneratorModal({ open, onOpenChange }: ReportGener
     try {
       setGenerating(true);
 
-      const { data, error } = await supabase.functions.invoke('reports-generate', {
-        body: {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const response = await fetch('https://your-n8n-domain.com/webhook/generate-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           role: 'ugc_creator',
           from: fromDate?.toISOString().split('T')[0],
           to: toDate?.toISOString().split('T')[0],
-          campaign_id: selectedCampaign || null
-        }
+          campaign_id: selectedCampaign || null,
+          user_id: user.id
+        })
       });
 
-      if (error) throw error;
+      if (!response.ok) throw new Error('Failed to generate report');
+      
+      const data = await response.json();
+
+      // Insert the report link into the database
+      const { error: insertError } = await supabase
+        .from('report_links')
+        .insert({
+          user_id: user.id,
+          report_type: 'ugc_creator',
+          title: `UGC Report - ${format(fromDate || new Date(), "MMM dd")} to ${format(toDate || new Date(), "MMM dd")}`,
+          url: data.report_url,
+          from_date: fromDate?.toISOString().split('T')[0],
+          to_date: toDate?.toISOString().split('T')[0],
+          campaign_id: selectedCampaign || null
+        });
+
+      if (insertError) {
+        console.error('Error saving report link:', insertError);
+      }
 
       toast({
         title: "Report Generated",

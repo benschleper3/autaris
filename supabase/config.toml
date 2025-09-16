@@ -29,7 +29,6 @@ ip_version = "ipv4"
 enabled = true
 port = 54324
 api_url = "http://127.0.0.1:54321"
-openai_api_key = "env(OPENAI_API_KEY)"
 
 [inbucket]
 enabled = true
@@ -40,15 +39,6 @@ pop3_port = 54327
 [functions]
 enabled = true
 region = "us-east-1"
-
-[functions.ai-ugc-insights]
-verify_jwt = true
-
-[functions.ai-ugc-post-insights]
-verify_jwt = true
-
-[functions.reports-generate]
-verify_jwt = true
 
 [auth]
 enabled = true

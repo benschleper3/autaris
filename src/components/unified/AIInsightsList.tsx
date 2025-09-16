@@ -54,15 +54,23 @@ export default function AIInsightsList({ filters }: AIInsightsListProps) {
     try {
       setGenerating(true);
       
-      const { data, error } = await supabase.functions.invoke('ai-ugc-insights', {
-        body: {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const response = await fetch('https://your-n8n-domain.com/webhook/ai-insights', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           from: filters.from?.toISOString().split('T')[0] || null,
           to: filters.to?.toISOString().split('T')[0] || null,
-          platform: filters.platform
-        }
+          platform: filters.platform,
+          user_id: user.id
+        })
       });
 
-      if (error) throw error;
+      if (!response.ok) throw new Error('Failed to generate insights');
 
       toast({
         title: "Insights Generated",
