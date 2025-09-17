@@ -594,7 +594,13 @@ export default function WiringExport() {
         {/* JSON Export Viewer */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">JSON Export</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">JSON Export</CardTitle>
+              <Button onClick={handleCopyJson} variant="outline" size="sm" className="gap-2">
+                <Copy className="w-4 h-4" />
+                Copy JSON
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <pre className="bg-muted p-4 rounded-lg text-xs overflow-auto max-h-96 whitespace-pre-wrap">
