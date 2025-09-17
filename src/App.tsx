@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
+import WiringExport from "./pages/WiringExport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,6 +21,7 @@ function App() {
             <Route path="/" element={<Index />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard-ugc" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dev/wiring-export" element={<WiringExport />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
