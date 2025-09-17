@@ -153,12 +153,13 @@ export default function WiringExport() {
   }, [selectedPages, searchQuery, selectedTypes, selectedRoles]);
 
   const exportJson = useMemo(() => {
+    // Component wiring data
     const pageGroups = selectedPages.reduce((acc, path) => {
       acc[path] = filteredData.filter(item => item.page_path === path);
       return acc;
     }, {} as Record<string, typeof filteredData>);
 
-    return {
+    const componentWiring = {
       export_version: "v1",
       generated_at_iso: new Date().toISOString(),
       pages: Object.entries(pageGroups).map(([path, components]) => ({
@@ -185,6 +186,197 @@ export default function WiringExport() {
           notes: comp.notes
         }))
       }))
+    };
+
+    // Complete project export
+    return {
+      project: {
+        name: "Social Media Analytics Platform",
+        version: "1.0.0",
+        type: "react-typescript-vite",
+        framework: {
+          name: "React",
+          version: "18.3.1",
+          buildTool: "Vite",
+          styling: "Tailwind CSS",
+          uiLibrary: "shadcn/ui"
+        },
+        backend: {
+          provider: "Supabase",
+          database: "PostgreSQL",
+          authentication: "Supabase Auth",
+          storage: "Supabase Storage"
+        }
+      },
+      
+      routes: [
+        { path: "/", component: "Index", description: "Landing page with authentication" },
+        { path: "/dashboard", component: "Dashboard", description: "Main dashboard (redirected from /dashboard-ugc)" },
+        { path: "/dashboard-ugc", redirect: "/dashboard", description: "UGC creator dashboard" },
+        { path: "/dev/wiring-export", component: "WiringExport", description: "Developer tool for component analysis" },
+        { path: "*", component: "NotFound", description: "404 page" }
+      ],
+
+      components: {
+        pages: [
+          "src/pages/Index.tsx",
+          "src/pages/Dashboard.tsx", 
+          "src/pages/WiringExport.tsx",
+          "src/pages/NotFound.tsx"
+        ],
+        ui: [
+          "src/components/ui/button.tsx",
+          "src/components/ui/card.tsx",
+          "src/components/ui/input.tsx",
+          "src/components/ui/badge.tsx",
+          "src/components/ui/checkbox.tsx",
+          "src/components/ui/label.tsx",
+          "src/components/ui/separator.tsx",
+          "src/components/ui/toast.tsx",
+          "src/components/ui/toaster.tsx"
+        ],
+        business: [
+          "src/components/unified/UnifiedAnalyticsDashboard.tsx",
+          "src/components/unified/ExportAppJsonModal.tsx",
+          "src/components/unified/GlobalFilters.tsx",
+          "src/components/unified/KPIStrip.tsx",
+          "src/components/unified/PlatformBreakdown.tsx",
+          "src/components/unified/PostingHeatmap.tsx",
+          "src/components/unified/ReportGeneratorModal.tsx",
+          "src/components/unified/TopPostsTable.tsx",
+          "src/components/unified/TrendChart.tsx",
+          "src/components/ugc/UGCDashboard.tsx",
+          "src/components/ugc/UGCKPICards.tsx",
+          "src/components/ugc/PerformanceTrends.tsx",
+          "src/components/creator/CreatorDashboard.tsx"
+        ]
+      },
+
+      database: {
+        provider: "Supabase",
+        url: "https://gjfbxqsjxasubvnpeeie.supabase.co",
+        tables: [
+          {
+            name: "user_meta",
+            columns: ["id", "user_id", "role", "created_at", "updated_at"],
+            rls: true,
+            policies: ["Users can manage their own meta"]
+          },
+          {
+            name: "posts", 
+            columns: ["id", "user_id", "title", "caption", "asset_url", "published_at", "social_account_id", "campaign_id"],
+            rls: true,
+            policies: ["all_posts", "sel_posts"]
+          },
+          {
+            name: "post_metrics",
+            columns: ["id", "post_id", "views", "likes", "comments", "shares", "saves", "captured_at"],
+            rls: true,
+            policies: ["sel_post_metrics", "post_metrics_owner_crud"]
+          },
+          {
+            name: "social_accounts",
+            columns: ["id", "user_id", "platform", "handle", "external_id", "status", "last_synced_at"],
+            rls: true,
+            policies: ["all_social", "sel_social", "social_accounts_owner_crud"]
+          },
+          {
+            name: "campaigns",
+            columns: ["id", "user_id", "title", "campaign_name", "brand_name", "start_date", "end_date", "budget_cents"],
+            rls: true,
+            policies: ["Users can manage their own campaigns", "all_campaigns", "sel_campaigns"]
+          },
+          {
+            name: "creator_revenue",
+            columns: ["id", "user_id", "amount_cents", "brand_name", "notes", "paid_at"],
+            rls: true,
+            policies: ["Users can manage their own revenue"]
+          }
+        ],
+        functions: [
+          "get_ugc_kpis()",
+          "get_ugc_kpis(p_from date, p_to date, p_platform text)",
+          "get_daily_perf(p_from date, p_to date, p_platform text)",
+          "get_creator_kpis()",
+          "set_user_role(p_role text)"
+        ],
+        views: [
+          "v_posts_with_latest",
+          "v_post_latest", 
+          "v_daily_perf",
+          "v_time_heatmap"
+        ]
+      },
+
+      dependencies: {
+        runtime: {
+          "react": "^18.3.1",
+          "react-dom": "^18.3.1",
+          "react-router-dom": "^6.30.1",
+          "@supabase/supabase-js": "^2.56.0",
+          "@tanstack/react-query": "^5.83.0",
+          "tailwindcss": "latest",
+          "lucide-react": "^0.462.0",
+          "recharts": "^2.15.4",
+          "react-hook-form": "^7.61.1",
+          "@radix-ui/react-dialog": "^1.1.14",
+          "@radix-ui/react-select": "^2.2.5",
+          "clsx": "^2.1.1",
+          "tailwind-merge": "^2.6.0"
+        },
+        dev: {
+          "@types/react": "^18.3.12",
+          "@types/react-dom": "^18.3.1",
+          "typescript": "^5.6.3",
+          "vite": "^5.4.10",
+          "@vitejs/plugin-react": "^4.3.3"
+        }
+      },
+
+      configuration: {
+        "tailwind.config.ts": "Tailwind configuration with custom design tokens",
+        "vite.config.ts": "Vite build configuration",
+        "tsconfig.json": "TypeScript configuration",
+        "package.json": "Project dependencies and scripts",
+        "src/index.css": "Global styles and design system tokens",
+        "src/main.tsx": "Application entry point",
+        "src/App.tsx": "Root component with routing"
+      },
+
+      features: [
+        {
+          name: "User Authentication",
+          description: "Supabase auth with role-based access control",
+          files: ["src/hooks/useUserRole.ts", "src/components/AuthForm.tsx"],
+          database: ["user_meta table", "profiles table"]
+        },
+        {
+          name: "Analytics Dashboard", 
+          description: "Unified analytics with KPIs, charts, and insights",
+          files: ["src/components/unified/UnifiedAnalyticsDashboard.tsx"],
+          database: ["posts", "post_metrics", "v_posts_with_latest"]
+        },
+        {
+          name: "UGC Creator Tools",
+          description: "Tools for UGC creators to track performance",
+          files: ["src/components/ugc/UGCDashboard.tsx", "src/components/ugc/UGCKPICards.tsx"],
+          database: ["get_ugc_kpis function", "campaigns table"]
+        },
+        {
+          name: "Social Media Integration",
+          description: "Connect and sync social media accounts",
+          files: ["src/components/PlatformCards.tsx"],
+          database: ["social_accounts table"]
+        },
+        {
+          name: "Performance Tracking",
+          description: "Track post metrics and engagement",
+          files: ["src/components/unified/TrendChart.tsx"],
+          database: ["post_metrics table", "get_daily_perf function"]
+        }
+      ],
+
+      componentWiring
     };
   }, [selectedPages, filteredData]);
 
