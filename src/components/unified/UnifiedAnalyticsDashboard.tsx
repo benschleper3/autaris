@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { FileText, FolderOpen } from 'lucide-react';
+import { FileText, FolderOpen, Code } from 'lucide-react';
+import { useUserRole } from '@/hooks/useUserRole';
 import GlobalFilters from './GlobalFilters';
 import KPIStrip from './KPIStrip';
 import TrendChart from './TrendChart';
@@ -10,8 +11,11 @@ import TopPostsTable from './TopPostsTable';
 import AIInsightsList from './AIInsightsList';
 import ReportGeneratorModal from './ReportGeneratorModal';
 import PortfolioManagerModal from './PortfolioManagerModal';
+import ExportAppJsonModal from './ExportAppJsonModal';
 
 export default function UnifiedAnalyticsDashboard() {
+  const { isOwnerOrAdmin } = useUserRole();
+  
   const [filters, setFilters] = useState({
     from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
     to: new Date(), // today
@@ -20,6 +24,7 @@ export default function UnifiedAnalyticsDashboard() {
   
   const [showReportModal, setShowReportModal] = useState(false);
   const [showPortfolioModal, setShowPortfolioModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-background/80">
@@ -45,6 +50,12 @@ export default function UnifiedAnalyticsDashboard() {
               <FolderOpen className="w-4 h-4" />
               Portfolio Manager
             </Button>
+            {isOwnerOrAdmin && (
+              <Button onClick={() => setShowExportModal(true)} variant="outline" size="sm" className="flex items-center gap-2">
+                <Code className="w-4 h-4" />
+                Export App JSON
+              </Button>
+            )}
           </div>
         </div>
 
@@ -82,6 +93,7 @@ export default function UnifiedAnalyticsDashboard() {
 
       <ReportGeneratorModal open={showReportModal} onOpenChange={setShowReportModal} />
       <PortfolioManagerModal open={showPortfolioModal} onOpenChange={setShowPortfolioModal} />
+      <ExportAppJsonModal open={showExportModal} onOpenChange={setShowExportModal} />
     </div>
   );
 }
