@@ -22,7 +22,7 @@ interface Campaign {
 
 export default function ReportGeneratorModal({ open, onOpenChange }: ReportGeneratorModalProps) {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [selectedCampaign, setSelectedCampaign] = useState<string>('');
+  const [selectedCampaign, setSelectedCampaign] = useState<string>('all');
   const [fromDate, setFromDate] = useState<Date | undefined>();
   const [toDate, setToDate] = useState<Date | undefined>();
   const [generating, setGenerating] = useState(false);
@@ -80,7 +80,7 @@ export default function ReportGeneratorModal({ open, onOpenChange }: ReportGener
           role: 'ugc_creator',
           from: fromDate?.toISOString().split('T')[0],
           to: toDate?.toISOString().split('T')[0],
-          campaign_id: selectedCampaign || null,
+          campaign_id: selectedCampaign === 'all' ? null : selectedCampaign,
           user_id: user.id
         })
       });
@@ -99,7 +99,7 @@ export default function ReportGeneratorModal({ open, onOpenChange }: ReportGener
           url: data.report_url,
           from_date: fromDate?.toISOString().split('T')[0],
           to_date: toDate?.toISOString().split('T')[0],
-          campaign_id: selectedCampaign || null
+          campaign_id: selectedCampaign === 'all' ? null : selectedCampaign
         });
 
       if (insertError) {
@@ -144,7 +144,7 @@ export default function ReportGeneratorModal({ open, onOpenChange }: ReportGener
                 <SelectValue placeholder="Select a campaign" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Campaigns</SelectItem>
+                <SelectItem value="all">All Campaigns</SelectItem>
                 {campaigns.map((campaign) => (
                   <SelectItem key={campaign.campaign_id} value={campaign.campaign_id}>
                     {campaign.campaign_name}
