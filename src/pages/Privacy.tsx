@@ -174,8 +174,8 @@ export default function Privacy() {
               <h2 className="text-2xl font-semibold mb-4">10. Contact Us</h2>
               <p className="text-foreground/80">
                 If you have any questions or requests regarding this Privacy Policy, please contact us at:{' '}
-                <a href="mailto:hello@growthos.ai" className="text-primary hover:underline">
-                  📧 hello@growthos.ai
+                <a href="mailto:BenSchleper8@gmail.com" className="text-primary hover:underline">
+                  BenSchleper8@gmail.com
                 </a>
               </p>
             </section>
