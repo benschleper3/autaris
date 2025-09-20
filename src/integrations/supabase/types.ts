@@ -713,15 +713,6 @@ export type Database = {
         }
         Relationships: []
       }
-      v_daily_perf: {
-        Row: {
-          avg_er_percent: number | null
-          day: string | null
-          day_views: number | null
-          user_id: string | null
-        }
-        Relationships: []
-      }
       v_post_latest: {
         Row: {
           captured_at: string | null
@@ -768,17 +759,6 @@ export type Database = {
           url: string | null
           user_id: string | null
           views: number | null
-        }
-        Relationships: []
-      }
-      v_time_heatmap: {
-        Row: {
-          avg_engagement_percent: number | null
-          dow: number | null
-          hour: number | null
-          platform: string | null
-          posts_count: number | null
-          user_id: string | null
         }
         Relationships: []
       }
