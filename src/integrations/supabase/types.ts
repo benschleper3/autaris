@@ -280,13 +280,6 @@ export type Database = {
             referencedRelation: "campaigns"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "deliverables_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "v_campaign_rollup"
-            referencedColumns: ["id"]
-          },
         ]
       }
       healthchecks: {
@@ -396,6 +389,152 @@ export type Database = {
         }
         Relationships: []
       }
+      post_ai_insights: {
+        Row: {
+          angle: string | null
+          created_at: string | null
+          id: string
+          next_test: string | null
+          post_id: string
+          user_id: string
+          what_to_replicate: string | null
+        }
+        Insert: {
+          angle?: string | null
+          created_at?: string | null
+          id?: string
+          next_test?: string | null
+          post_id: string
+          user_id: string
+          what_to_replicate?: string | null
+        }
+        Update: {
+          angle?: string | null
+          created_at?: string | null
+          id?: string
+          next_test?: string | null
+          post_id?: string
+          user_id?: string
+          what_to_replicate?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_ai_insights_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_ai_insights_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "v_posts_with_latest"
+            referencedColumns: ["post_id"]
+          },
+        ]
+      }
+      post_metrics: {
+        Row: {
+          captured_at: string | null
+          comments: number | null
+          id: string
+          likes: number | null
+          post_id: string
+          saves: number | null
+          shares: number | null
+          views: number | null
+        }
+        Insert: {
+          captured_at?: string | null
+          comments?: number | null
+          id?: string
+          likes?: number | null
+          post_id: string
+          saves?: number | null
+          shares?: number | null
+          views?: number | null
+        }
+        Update: {
+          captured_at?: string | null
+          comments?: number | null
+          id?: string
+          likes?: number | null
+          post_id?: string
+          saves?: number | null
+          shares?: number | null
+          views?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_metrics_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_metrics_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "v_posts_with_latest"
+            referencedColumns: ["post_id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          asset_url: string | null
+          campaign_id: string | null
+          caption: string | null
+          created_at: string | null
+          external_id: string | null
+          id: string
+          published_at: string | null
+          scheduled_at: string | null
+          social_account_id: string | null
+          status: string | null
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          asset_url?: string | null
+          campaign_id?: string | null
+          caption?: string | null
+          created_at?: string | null
+          external_id?: string | null
+          id?: string
+          published_at?: string | null
+          scheduled_at?: string | null
+          social_account_id?: string | null
+          status?: string | null
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          asset_url?: string | null
+          campaign_id?: string | null
+          caption?: string | null
+          created_at?: string | null
+          external_id?: string | null
+          id?: string
+          published_at?: string | null
+          scheduled_at?: string | null
+          social_account_id?: string | null
+          status?: string | null
+          title?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_social_account_id_fkey"
+            columns: ["social_account_id"]
+            isOneToOne: false
+            referencedRelation: "social_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       report_links: {
         Row: {
           campaign_id: string | null
@@ -438,14 +577,40 @@ export type Database = {
             referencedRelation: "campaigns"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "report_links_campaign_id_fkey"
-            columns: ["campaign_id"]
-            isOneToOne: false
-            referencedRelation: "v_campaign_rollup"
-            referencedColumns: ["id"]
-          },
         ]
+      }
+      social_accounts: {
+        Row: {
+          created_at: string | null
+          external_id: string | null
+          handle: string | null
+          id: string
+          last_synced_at: string | null
+          platform: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          external_id?: string | null
+          handle?: string | null
+          id?: string
+          last_synced_at?: string | null
+          platform: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          external_id?: string | null
+          handle?: string | null
+          id?: string
+          last_synced_at?: string | null
+          platform?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       user_meta: {
         Row: {
@@ -471,67 +636,41 @@ export type Database = {
         }
         Relationships: []
       }
-    }
-    Views: {
-      post_metrics: {
+      weekly_insights: {
         Row: {
-          comments: number | null
+          confidence: number | null
           created_at: string | null
-          engagement_rate: number | null
-          id: number | null
-          likes: number | null
-          post_id: string | null
-          published_at: string | null
-          shares: number | null
-          social_account_id: number | null
-          title: string | null
-          updated_at: string | null
-          url: string | null
-          user_id: string | null
-          views: number | null
+          id: string
+          insight: string | null
+          narrative: string | null
+          recommendations: string | null
+          user_id: string
+          week_start: string
         }
         Insert: {
-          comments?: number | null
+          confidence?: number | null
           created_at?: string | null
-          engagement_rate?: number | null
-          id?: number | null
-          likes?: number | null
-          post_id?: string | null
-          published_at?: string | null
-          shares?: number | null
-          social_account_id?: number | null
-          title?: string | null
-          updated_at?: string | null
-          url?: string | null
-          user_id?: string | null
-          views?: number | null
+          id?: string
+          insight?: string | null
+          narrative?: string | null
+          recommendations?: string | null
+          user_id: string
+          week_start: string
         }
         Update: {
-          comments?: number | null
+          confidence?: number | null
           created_at?: string | null
-          engagement_rate?: number | null
-          id?: number | null
-          likes?: number | null
-          post_id?: string | null
-          published_at?: string | null
-          shares?: number | null
-          social_account_id?: number | null
-          title?: string | null
-          updated_at?: string | null
-          url?: string | null
-          user_id?: string | null
-          views?: number | null
+          id?: string
+          insight?: string | null
+          narrative?: string | null
+          recommendations?: string | null
+          user_id?: string
+          week_start?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "post_metrics_social_account_id_fkey"
-            columns: ["social_account_id"]
-            isOneToOne: false
-            referencedRelation: "social_accounts"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
+    }
+    Views: {
       profiles: {
         Row: {
           avatar_url: string | null
@@ -574,130 +713,61 @@ export type Database = {
         }
         Relationships: []
       }
-      social_accounts: {
-        Row: {
-          created_at: string | null
-          external_id: string | null
-          handle: string | null
-          id: number | null
-          last_synced_at: string | null
-          platform:
-            | "tiktok"
-            | "instagram"
-            | "facebook"
-            | "twitter"
-            | "linkedin"
-            | "youtube"
-            | null
-          status: "active" | "paused" | "disconnected" | "error" | null
-          updated_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          external_id?: string | null
-          handle?: string | null
-          id?: number | null
-          last_synced_at?: string | null
-          platform?:
-            | "tiktok"
-            | "instagram"
-            | "facebook"
-            | "twitter"
-            | "linkedin"
-            | "youtube"
-            | null
-          status?: "active" | "paused" | "disconnected" | "error" | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          external_id?: string | null
-          handle?: string | null
-          id?: number | null
-          last_synced_at?: string | null
-          platform?:
-            | "tiktok"
-            | "instagram"
-            | "facebook"
-            | "twitter"
-            | "linkedin"
-            | "youtube"
-            | null
-          status?: "active" | "paused" | "disconnected" | "error" | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      v_campaign_rollup: {
-        Row: {
-          approved_count: number | null
-          avg_engagement_rate: number | null
-          brand_name: string | null
-          deliverables_count: number | null
-          id: string | null
-          title: string | null
-          total_views: number | null
-          user_id: string | null
-        }
-        Relationships: []
-      }
       v_daily_perf: {
         Row: {
           avg_er_percent: number | null
           day: string | null
+          day_views: number | null
           user_id: string | null
         }
         Relationships: []
       }
-      v_post_attribution: {
+      v_post_latest: {
         Row: {
-          leads_count: number | null
+          captured_at: string | null
+          comments: number | null
+          likes: number | null
           post_id: string | null
-          revenue_usd: number | null
-          user_id: string | null
+          saves: number | null
+          shares: number | null
+          views: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "post_metrics_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_metrics_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "v_posts_with_latest"
+            referencedColumns: ["post_id"]
+          },
+        ]
       }
       v_posts_with_latest: {
         Row: {
+          asset_url: string | null
+          caption: string | null
           comments: number | null
           created_at: string | null
           engagement_rate: number | null
           likes: number | null
-          platform:
-            | "tiktok"
-            | "instagram"
-            | "facebook"
-            | "twitter"
-            | "linkedin"
-            | "youtube"
-            | null
+          platform: string | null
           post_id: string | null
           published_at: string | null
+          saves: number | null
+          scheduled_at: string | null
           shares: number | null
+          status: string | null
           title: string | null
           url: string | null
           user_id: string | null
           views: number | null
-        }
-        Relationships: []
-      }
-      v_pricing_suggestions: {
-        Row: {
-          avg_views_30d: number | null
-          platform:
-            | "tiktok"
-            | "instagram"
-            | "facebook"
-            | "twitter"
-            | "linkedin"
-            | "youtube"
-            | null
-          suggested_cpm_usd: number | null
-          user_id: string | null
         }
         Relationships: []
       }
@@ -706,51 +776,9 @@ export type Database = {
           avg_engagement_percent: number | null
           dow: number | null
           hour: number | null
-          platform:
-            | "tiktok"
-            | "instagram"
-            | "facebook"
-            | "twitter"
-            | "linkedin"
-            | "youtube"
-            | null
+          platform: string | null
+          posts_count: number | null
           user_id: string | null
-        }
-        Relationships: []
-      }
-      weekly_insights: {
-        Row: {
-          best_times: Json | null
-          created_at: string | null
-          id: number | null
-          narrative: string | null
-          recommendations: string | null
-          top_posts: Json | null
-          updated_at: string | null
-          user_id: string | null
-          week_start: string | null
-        }
-        Insert: {
-          best_times?: Json | null
-          created_at?: string | null
-          id?: number | null
-          narrative?: string | null
-          recommendations?: string | null
-          top_posts?: Json | null
-          updated_at?: string | null
-          user_id?: string | null
-          week_start?: string | null
-        }
-        Update: {
-          best_times?: Json | null
-          created_at?: string | null
-          id?: number | null
-          narrative?: string | null
-          recommendations?: string | null
-          top_posts?: Json | null
-          updated_at?: string | null
-          user_id?: string | null
-          week_start?: string | null
         }
         Relationships: []
       }
@@ -766,7 +794,7 @@ export type Database = {
         }[]
       }
       get_daily_perf: {
-        Args: { p_from?: string; p_platform?: string; p_to?: string }
+        Args: { p_from: string; p_platform: string; p_to: string }
         Returns: {
           avg_er_percent: number
           day: string
@@ -776,7 +804,8 @@ export type Database = {
       get_ugc_kpis: {
         Args:
           | Record<PropertyKey, never>
-          | { p_from?: string; p_platform?: string; p_to?: string }
+          | { p_from: string; p_platform: string; p_to: string }
+          | { p_from: string; p_platform: string; p_to: string }
         Returns: {
           active_campaigns: number
           avg_er_30d: number
@@ -784,9 +813,24 @@ export type Database = {
           views_30d: number
         }[]
       }
+      run_user_kpis: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
       set_user_role: {
         Args: { p_role: string }
         Returns: undefined
+      }
+      upsert_metrics: {
+        Args: {
+          p_captured_at: string
+          p_handle: string
+          p_metrics: Json
+          p_platform: string
+          p_post: Json
+          p_user_id: string
+        }
+        Returns: Json
       }
     }
     Enums: {
