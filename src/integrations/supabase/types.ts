@@ -762,6 +762,17 @@ export type Database = {
         }
         Relationships: []
       }
+      v_time_heatmap: {
+        Row: {
+          avg_engagement_percent: number | null
+          dow: number | null
+          hour: number | null
+          platform: string | null
+          posts_count: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_creator_kpis: {
