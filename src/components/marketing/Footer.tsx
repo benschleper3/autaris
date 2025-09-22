@@ -41,10 +41,10 @@ export function Footer() {
               <h3 className="text-sm font-semibold">Contact</h3>
               <nav className="flex flex-col space-y-1 text-sm">
                 <a 
-                  href="mailto:hello@growthos.ai"
+                  href="mailto:BenSchleper8@gmail.com"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  hello@growthos.ai
+                  BenSchleper8@gmail.com
                 </a>
               </nav>
             </div>
