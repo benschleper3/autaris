@@ -18,19 +18,37 @@ export default function PricingSuggestions() {
   useEffect(() => {
     const fetchPricingSuggestions = async () => {
       try {
+        // Get user's posts to calculate pricing suggestions
         const { data, error } = await supabase
-          .from('v_pricing_suggestions')
-          .select('*');
+          .from('v_posts_with_latest')
+          .select('platform, views')
+          .not('views', 'is', null);
 
         if (error) throw error;
+
+        // Group by platform and calculate averages
+        const platformData: { [key: string]: number[] } = {};
+        (data || []).forEach(post => {
+          if (!platformData[post.platform]) {
+            platformData[post.platform] = [];
+          }
+          platformData[post.platform].push(post.views || 0);
+        });
+
+        // Create pricing suggestions
+        const suggestions: PricingSuggestion[] = Object.entries(platformData).map(([platform, views]) => {
+          const avgViews = Math.round(views.reduce((a, b) => a + b, 0) / views.length);
+          const baseCPM = platform === 'tiktok' ? 15 : platform === 'instagram' ? 12 : 10;
+          
+          return {
+            platform,
+            avg_views_30d: avgViews,
+            suggested_cpm_usd: baseCPM,
+            suggested_rate_usd: Math.round((avgViews / 1000) * baseCPM)
+          };
+        });
         
-        // Calculate suggested rate
-        const withRates = (data || []).map(item => ({
-          ...item,
-          suggested_rate_usd: Math.round((item.avg_views_30d / 1000) * item.suggested_cpm_usd)
-        }));
-        
-        setSuggestions(withRates);
+        setSuggestions(suggestions);
       } catch (error) {
         console.error('Error fetching pricing suggestions:', error);
       } finally {

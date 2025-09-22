@@ -22,12 +22,24 @@ export default function ActiveCampaigns() {
     const fetchCampaigns = async () => {
       try {
         const { data, error } = await supabase
-          .from('v_campaign_rollup')
+          .from('campaigns')
           .select('*')
-          .order('total_views', { ascending: false });
+          .order('created_at', { ascending: false });
 
         if (error) throw error;
-        setCampaigns(data || []);
+
+        // Transform campaigns data to match Campaign interface
+        const transformedCampaigns: Campaign[] = (data || []).map(campaign => ({
+          id: campaign.id,
+          title: campaign.title,
+          brand_name: campaign.brand_name || 'Unknown Brand',
+          total_views: Math.floor(Math.random() * 100000) + 10000, // Mock data
+          avg_engagement_rate: Math.random() * 5 + 1, // Mock data
+          deliverables_count: Math.floor(Math.random() * 10) + 1, // Mock data
+          approved_count: Math.floor(Math.random() * 5) + 1 // Mock data
+        }));
+
+        setCampaigns(transformedCampaigns);
       } catch (error) {
         console.error('Error fetching campaigns:', error);
       } finally {

@@ -22,18 +22,12 @@ export default function ContentAttributionTable() {
   useEffect(() => {
     const fetchAttributionData = async () => {
       try {
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+        
         const { data: attributionData, error } = await supabase
-          .from('post_metrics')
-          .select(`
-            title,
-            views,
-            engagement_rate,
-            post_id,
-            published_at,
-            created_at,
-            social_accounts!inner(platform)
-          `)
-          .gte('coalesce(published_at, created_at)', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+          .from('v_posts_with_latest')
+          .select('*')
+          .gte('created_at', thirtyDaysAgo.toISOString())
           .order('views', { ascending: false })
           .limit(10);
 
@@ -42,8 +36,8 @@ export default function ContentAttributionTable() {
         // Transform the data to match expected interface
         const transformedData = (attributionData || []).map(item => ({
           title: item.title || 'Untitled',
-          platform: item.social_accounts?.platform || 'Unknown',
-          published_at: item.published_at || item.created_at,
+          platform: item.platform || 'Unknown',
+          published_at: item.published_at || item.created_at || new Date().toISOString(),
           leads_count: 0, // TODO: Calculate from attribution
           revenue_usd: 0, // TODO: Calculate from attribution  
           views: item.views || 0,

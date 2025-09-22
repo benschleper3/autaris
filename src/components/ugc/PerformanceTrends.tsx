@@ -17,11 +17,14 @@ export default function PerformanceTrends() {
   useEffect(() => {
     const fetchTrends = async () => {
       try {
-        const { data, error } = await supabase
-          .from('v_daily_perf')
-          .select('day, avg_er_percent')
-          .gte('day', new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
-          .order('day');
+        const fromDate = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        const toDate = new Date().toISOString().split('T')[0];
+
+        const { data, error } = await supabase.rpc('get_daily_perf', {
+          p_from: fromDate,
+          p_to: toDate,
+          p_platform: 'all'
+        });
 
         if (error) throw error;
 

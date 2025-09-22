@@ -21,19 +21,21 @@ export default function PerformanceTrends() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        const { data: performanceData, error } = await supabase
-          .from('v_daily_perf')
-          .select('day, avg_er_percent')
-          .eq('user_id', user.id)
-          .gte('day', new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
-          .order('day');
+        const fromDate = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        const toDate = new Date().toISOString().split('T')[0];
+
+        const { data: performanceData, error } = await supabase.rpc('get_daily_perf', {
+          p_from: fromDate,
+          p_to: toDate,
+          p_platform: 'all'
+        });
 
         if (error) throw error;
         
         const formattedData = (performanceData || []).map(item => ({
           date: new Date(item.day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-          day_views: Math.floor(Math.random() * 10000), // Mock data since day_views doesn't exist
-          avg_er_percent: item.avg_er_percent || 0
+          day_views: Math.round(item.day_views || 0),
+          avg_er_percent: Math.round((item.avg_er_percent || 0) * 100) / 100
         }));
         
         setData(formattedData);

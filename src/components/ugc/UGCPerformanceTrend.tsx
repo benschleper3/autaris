@@ -32,19 +32,14 @@ export default function UGCPerformanceTrend({ filters }: Props) {
         const { data: user } = await supabase.auth.getUser();
         if (!user.user) return;
 
-        let query = supabase
-          .from('v_daily_perf')
-          .select('day, avg_er_percent')
-          .eq('user_id', user.user.id)
-          .order('day');
+        let fromDate = filters.from?.toISOString().split('T')[0] || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        let toDate = filters.to?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0];
 
-        if (filters.from && filters.to) {
-          query = query
-            .gte('day', filters.from.toISOString().split('T')[0])
-            .lte('day', filters.to.toISOString().split('T')[0]);
-        }
-
-        const { data: trendData, error } = await query;
+        const { data: trendData, error } = await supabase.rpc('get_daily_perf', {
+          p_from: fromDate,
+          p_to: toDate,
+          p_platform: filters.platform || 'all'
+        });
 
         if (error) {
           console.error('Error fetching trend data:', error);
@@ -52,8 +47,8 @@ export default function UGCPerformanceTrend({ filters }: Props) {
         } else {
           const formatted = (trendData || []).map((item, index) => ({
             date: new Date(item.day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-            day_views: Math.floor(Math.random() * 10000) + index * 100, // Mock data
-            avg_er_percent: item.avg_er_percent || 0
+            day_views: Math.round(item.day_views || 0),
+            avg_er_percent: Math.round((item.avg_er_percent || 0) * 100) / 100
           }));
           setData(formatted);
         }
