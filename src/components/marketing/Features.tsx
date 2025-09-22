@@ -1,12 +1,12 @@
-import { BarChart, FileChartColumn, Clock } from 'lucide-react';
+import { BarChart, FileChartColumn, Brain } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function Features() {
   const features = [
     {
-      icon: BarChart,
-      title: "Real metrics, zero spreadsheets",
-      description: "Auto-sync your posts and metrics directly from TikTok. No more manual data entry or confusing spreadsheets."
+      icon: Brain,
+      title: "AI-powered insights",
+      description: "Get personalized recommendations based on your unique content style, audience behavior, and performance patterns. AI analyzes what works for you specifically."
     },
     {
       icon: FileChartColumn,
@@ -14,9 +14,9 @@ export function Features() {
       description: "Generate professional, shareable reports that highlight your ROI and make it easy for brands to say yes."
     },
     {
-      icon: Clock,
-      title: "Post at the right time",
-      description: "Discover your audience's peak activity with personalized heatmaps based on your actual performance data."
+      icon: BarChart,
+      title: "Personalized optimization",
+      description: "Custom growth strategies tailored to your content and audience. No generic advice – just insights that work for your specific niche."
     }
   ];
 
