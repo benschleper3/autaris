@@ -1,4 +1,4 @@
-import { BarChart, FileChartColumn, Brain } from 'lucide-react';
+import { BarChart, FileChartColumn, Brain, Folder } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function Features() {
@@ -14,9 +14,9 @@ export function Features() {
       description: "Generate professional, shareable reports that highlight your ROI and make it easy for brands to say yes."
     },
     {
-      icon: BarChart,
-      title: "Personalized optimization",
-      description: "Custom growth strategies tailored to your content and audience. No generic advice – just insights that work for your specific niche."
+      icon: Folder,
+      title: "Portfolio builder",
+      description: "Create stunning portfolios that showcase your best work. Easily share your content performance and case studies with potential brand partners."
     }
   ];
 
