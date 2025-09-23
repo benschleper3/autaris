@@ -38,7 +38,6 @@ export function Navbar() {
 
   const navLinks = [
     { name: 'Features', href: '#features' },
-    { name: 'How it works', href: '#how' },
     { name: 'FAQ', href: '#faq' },
   ];
 
