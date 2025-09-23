@@ -37,9 +37,11 @@ export function Navbar() {
   };
 
   const navLinks = [
-    { name: 'Landing Page', href: '/landing', isRoute: true },
-    { name: 'Features', href: '#features' },
-    { name: 'FAQ', href: '#faq' },
+    { name: 'Home', href: '/landing', isRoute: true },
+    { name: 'Features', href: '/features', isRoute: true },
+    { name: 'FAQ', href: '/faq', isRoute: true },
+    { name: 'Terms', href: '/terms', isRoute: true },
+    { name: 'Privacy', href: '/privacy', isRoute: true },
   ];
 
   return (
