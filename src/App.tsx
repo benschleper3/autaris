@@ -9,7 +9,9 @@ import FAQPage from "./pages/FAQPage";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Dashboard from "./pages/Dashboard";
-
+import Auth from "./pages/Auth";
+import AuthDebug from "./pages/AuthDebug";
+import RequireAuth from "./components/auth/RequireAuth";
 import WiringExport from "./pages/WiringExport";
 import NotFound from "./pages/NotFound";
 
@@ -29,7 +31,9 @@ function App() {
             <Route path="/faq" element={<FAQPage />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/auth/debug" element={<AuthDebug />} />
+            <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
             <Route path="/dashboard-ugc" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dev/wiring-export" element={<WiringExport />} />
             <Route path="*" element={<NotFound />} />

@@ -1,7 +1,8 @@
-// src/lib/supabase.ts
 import { createClient } from '@supabase/supabase-js';
 
-export const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL || 'https://gjfbxqsjxasubvnpeeie.supabase.co',
-  import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdqZmJ4cXNqeGFzdWJ2bnBlZWllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxNTU4MzIsImV4cCI6MjA3MTczMTgzMn0.HPRrUtWLV-aruEFGIdL1wis-ffsvSx_a5vr64RSYDIc'
-);
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL!;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY!;
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+});

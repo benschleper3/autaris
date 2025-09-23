@@ -3,37 +3,21 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
+import { useSession } from '@/hooks/useSession';
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const session = useSession();
 
-  const handleSignUp = async () => {
-    // This will trigger the AuthForm which handles signup
-    const { error } = await supabase.auth.signInWithPassword({
-      email: 'signup_trigger',
-      password: 'signup_trigger'
-    });
-    // If user is already logged in somehow, redirect to dashboard
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      navigate('/dashboard');
-    } else {
-      // Redirect to a signup page or modal - for now, let's scroll to hero
-      document.getElementById('hero')?.scrollIntoView({ behavior: 'smooth' });
-    }
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/auth');
   };
 
-  const handleLogin = async () => {
-    // Similar approach - this could open a login modal or redirect
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      navigate('/dashboard');
-    } else {
-      // For now, let's scroll to hero where they can access auth
-      document.getElementById('hero')?.scrollIntoView({ behavior: 'smooth' });
-    }
+  const handleSignIn = () => {
+    navigate('/auth');
   };
 
   const navLinks = [
@@ -85,12 +69,20 @@ export function Navbar() {
         <div className="flex flex-1 items-center justify-end space-x-4">
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex md:items-center md:space-x-3">
-            <Button variant="ghost" size="sm" onClick={handleLogin}>
-              Log in
-            </Button>
-            <Button size="sm" onClick={handleSignUp}>
-              Get started
-            </Button>
+            {session ? (
+              <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                Sign out
+              </Button>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" onClick={handleSignIn}>
+                  Sign in
+                </Button>
+                <Button size="sm" onClick={handleSignIn}>
+                  Get started
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu */}
@@ -125,27 +117,43 @@ export function Navbar() {
                 )}
                 
                 <div className="border-t pt-6 space-y-3">
-                  <Button 
-                    variant="ghost" 
-                    size="lg" 
-                    className="w-full justify-start"
-                    onClick={() => {
-                      handleLogin();
-                      setIsOpen(false);
-                    }}
-                  >
-                    Log in
-                  </Button>
-                  <Button 
-                    size="lg" 
-                    className="w-full"
-                    onClick={() => {
-                      handleSignUp();
-                      setIsOpen(false);
-                    }}
-                  >
-                    Get started
-                  </Button>
+                  {session ? (
+                    <Button 
+                      variant="ghost" 
+                      size="lg" 
+                      className="w-full justify-start"
+                      onClick={() => {
+                        handleSignOut();
+                        setIsOpen(false);
+                      }}
+                    >
+                      Sign out
+                    </Button>
+                  ) : (
+                    <>
+                      <Button 
+                        variant="ghost" 
+                        size="lg" 
+                        className="w-full justify-start"
+                        onClick={() => {
+                          handleSignIn();
+                          setIsOpen(false);
+                        }}
+                      >
+                        Sign in
+                      </Button>
+                      <Button 
+                        size="lg" 
+                        className="w-full"
+                        onClick={() => {
+                          handleSignIn();
+                          setIsOpen(false);
+                        }}
+                      >
+                        Get started
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </SheetContent>
