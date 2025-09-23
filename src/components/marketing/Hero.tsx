@@ -1,14 +1,11 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, Users, Clock, BarChart3 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import AuthForm from '@/components/AuthForm';
+import { supabase } from '@/lib/supabase';
 
 export function Hero() {
-  const [showAuth, setShowAuth] = useState(false);
   const navigate = useNavigate();
 
   const handleGetStarted = async () => {
@@ -16,13 +13,8 @@ export function Hero() {
     if (session?.user) {
       navigate('/dashboard');
     } else {
-      setShowAuth(true);
+      navigate('/auth');
     }
-  };
-
-  const handleAuthSuccess = () => {
-    setShowAuth(false);
-    navigate('/dashboard');
   };
 
   return (
@@ -56,11 +48,6 @@ export function Hero() {
             </Button>
           </div>
 
-          {showAuth && (
-            <div className="mt-8 p-6 bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl">
-              <AuthForm />
-            </div>
-          )}
         </div>
 
         <div className="flex items-center justify-center lg:justify-end">
