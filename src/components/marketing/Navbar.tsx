@@ -37,6 +37,7 @@ export function Navbar() {
   };
 
   const navLinks = [
+    { name: 'Landing page', href: '/' },
     { name: 'Features', href: '#features' },
     { name: 'How it works', href: '#how' },
     { name: 'Pricing', href: '#pricing' },
