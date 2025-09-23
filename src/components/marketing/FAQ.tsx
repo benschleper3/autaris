@@ -74,7 +74,7 @@ export function FAQ() {
               value={`item-${index}`}
               className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg px-6"
             >
-              <AccordionTrigger className="text-left hover:no-underline py-4">
+              <AccordionTrigger className="text-left hover:no-underline py-4 [&[data-state=open]>svg]:rotate-180">
                 <span className="font-medium">{faq.question}</span>
               </AccordionTrigger>
               <AccordionContent className="pb-4 text-muted-foreground">
