@@ -5,11 +5,13 @@ import { supabase } from "@/lib/config"
 
 type View = "sign-in" | "sign-up"
 
-function buildMeta(fullName?: string, phone?: string) {
-  const name = (fullName ?? "").trim()
+function buildMeta(firstName?: string, lastName?: string, phone?: string) {
+  const first = (firstName ?? "").trim()
+  const last = (lastName ?? "").trim()
+  const fullName = [first, last].filter(Boolean).join(" ")
   const phoneNumber = (phone ?? "").trim()
   return {
-    full_name: name.length ? name : null,
+    full_name: fullName.length ? fullName : null,
     phone: phoneNumber.length ? phoneNumber : null,
     plan: "Starter",
     timezone:
@@ -23,7 +25,8 @@ export default function AuthForm() {
   const [view, setView] = useState<View>("sign-in")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [fullName, setFullName] = useState("")
+  const [firstName, setFirstName] = useState("")
+  const [lastName, setLastName] = useState("")
   const [phone, setPhone] = useState("")
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
@@ -35,7 +38,7 @@ export default function AuthForm() {
     setMessage(null)
     try {
       // 1) Sign up with metadata
-      const meta = buildMeta(fullName, phone)
+      const meta = buildMeta(firstName, lastName, phone)
       console.log("SIGN UP → metadata", meta)
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
@@ -73,7 +76,7 @@ export default function AuthForm() {
       if (signInError) throw signInError
 
       // Force a metadata sync right after first sign in to cover older accounts
-      const meta = buildMeta(fullName, phone)
+      const meta = buildMeta(firstName, lastName, phone)
       console.log("SIGN IN → metadata sync", meta)
       await supabase.auth.updateUser({ data: meta })
 
@@ -133,12 +136,21 @@ export default function AuthForm() {
       {view === "sign-up" && (
         <>
           <div className="space-y-1">
-            <label className="text-sm">Full name (optional)</label>
+            <label className="text-sm">First name (optional)</label>
             <input
               className="w-full rounded-lg border px-3 py-2"
-              placeholder="Ben Schleper"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              placeholder="First name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm">Last name (optional)</label>
+            <input
+              className="w-full rounded-lg border px-3 py-2"
+              placeholder="Last name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
             />
           </div>
           <div className="space-y-1">
