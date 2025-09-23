@@ -37,7 +37,6 @@ export function Navbar() {
   };
 
   const navLinks = [
-    { name: 'Home', href: '/landing', isRoute: true },
     { name: 'Features', href: '/features', isRoute: true },
     { name: 'FAQ', href: '/faq', isRoute: true },
     { name: 'Terms', href: '/terms', isRoute: true },
