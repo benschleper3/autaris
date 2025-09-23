@@ -27,12 +27,36 @@ export function FAQ() {
       answer: "Your TikTok data syncs automatically every 24 hours to ensure you always have the latest metrics. You can also manually refresh your data at any time from your dashboard."
     },
     {
+      question: "What pricing plans do you offer?",
+      answer: "We offer flexible pricing starting with a free trial, then Starter ($19/month), Pro ($49/month), and Agency ($99/month) plans. Each tier includes different features like multiple accounts, advanced analytics, and team collaboration tools."
+    },
+    {
+      question: "How accurate is the data?",
+      answer: "Our data comes directly from TikTok's official API, ensuring 100% accuracy. We sync your latest metrics every 24 hours and cross-reference multiple data points to provide the most reliable analytics available."
+    },
+    {
+      question: "Can my team collaborate on Growth OS?",
+      answer: "Yes! Pro and Agency plans include team features where you can invite team members, assign roles, and collaborate on reports. Perfect for agencies managing multiple creator accounts."
+    },
+    {
       question: "What if I'm just starting out as a creator?",
       answer: "Growth OS works for creators at any stage! Whether you have 100 or 100K followers, our analytics help you understand your audience, track growth, and create professional reports to attract brand partnerships."
     },
     {
       question: "Is there a free trial?",
       answer: "Yes! Get started with a 7-day free trial to explore all features. No credit card required. Experience the full power of Growth OS before committing to a subscription."
+    },
+    {
+      question: "Do you offer API access?",
+      answer: "Enterprise customers can access our API to integrate Growth OS data into their own systems. Contact our sales team to discuss custom API solutions and enterprise pricing."
+    },
+    {
+      question: "What kind of customer support do you provide?",
+      answer: "We offer email support for all users, priority support for Pro users, and dedicated account management for Agency customers. Our average response time is under 4 hours during business days."
+    },
+    {
+      question: "How long does onboarding take?",
+      answer: "Getting started is quick! Once you connect your TikTok account, we'll sync your data within minutes. Our guided onboarding tour helps you explore key features and create your first report in under 10 minutes."
     },
     {
       question: "How is my data secured?",
@@ -45,6 +69,14 @@ export function FAQ() {
     {
       question: "What makes Growth OS different from other analytics tools?",
       answer: "Growth OS is built specifically for TikTok creators seeking brand partnerships. We focus on the metrics that matter to brands and present them in professional, shareable reports that help you win more deals."
+    },
+    {
+      question: "Can I white-label reports for my clients?",
+      answer: "Agency plan users can customize reports with their own branding, logos, and color schemes. Perfect for agencies presenting analytics to their clients under their own brand."
+    },
+    {
+      question: "What happens if TikTok changes their API?",
+      answer: "We continuously monitor TikTok's API changes and update our integration accordingly. Our engineering team ensures seamless data continuity even when TikTok updates their platform."
     },
     {
       question: "Can I cancel anytime?",
