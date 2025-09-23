@@ -37,7 +37,7 @@ export function Navbar() {
   };
 
   const navLinks = [
-    { name: 'Landing Page', href: '/', isRoute: true },
+    { name: 'Landing Page', href: '/landing', isRoute: true },
     { name: 'Features', href: '#features' },
     { name: 'FAQ', href: '#faq' },
   ];
@@ -46,7 +46,7 @@ export function Navbar() {
     <nav id="nav" className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
         <Link 
-          to="/" 
+          to="/landing" 
           className="flex items-center space-x-2"
           onClick={() => {
             // Scroll to top when clicking logo
