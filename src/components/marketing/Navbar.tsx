@@ -37,6 +37,7 @@ export function Navbar() {
   };
 
   const navLinks = [
+    { name: 'Landing Page', href: '/', isRoute: true },
     { name: 'Features', href: '#features' },
     { name: 'FAQ', href: '#faq' },
   ];
@@ -59,15 +60,25 @@ export function Navbar() {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex md:items-center md:space-x-6 ml-8">
-          {navLinks.map((link) => (
-            <a
-              key={link.name}
-              href={link.href}
-              className="text-sm font-medium text-foreground/70 transition-colors hover:text-foreground"
-            >
-              {link.name}
-            </a>
-          ))}
+          {navLinks.map((link) => 
+            link.isRoute ? (
+              <Link
+                key={link.name}
+                to={link.href}
+                className="text-sm font-medium text-foreground/70 transition-colors hover:text-foreground"
+              >
+                {link.name}
+              </Link>
+            ) : (
+              <a
+                key={link.name}
+                href={link.href}
+                className="text-sm font-medium text-foreground/70 transition-colors hover:text-foreground"
+              >
+                {link.name}
+              </a>
+            )
+          )}
         </div>
 
         <div className="flex flex-1 items-center justify-end space-x-4">
@@ -90,16 +101,27 @@ export function Navbar() {
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
               <div className="flex flex-col space-y-6 mt-8">
-                {navLinks.map((link) => (
-                  <a
-                    key={link.name}
-                    href={link.href}
-                    onClick={() => setIsOpen(false)}
-                    className="text-lg font-medium text-foreground/70 transition-colors hover:text-foreground"
-                  >
-                    {link.name}
-                  </a>
-                ))}
+                {navLinks.map((link) => 
+                  link.isRoute ? (
+                    <Link
+                      key={link.name}
+                      to={link.href}
+                      onClick={() => setIsOpen(false)}
+                      className="text-lg font-medium text-foreground/70 transition-colors hover:text-foreground"
+                    >
+                      {link.name}
+                    </Link>
+                  ) : (
+                    <a
+                      key={link.name}
+                      href={link.href}
+                      onClick={() => setIsOpen(false)}
+                      className="text-lg font-medium text-foreground/70 transition-colors hover:text-foreground"
+                    >
+                      {link.name}
+                    </a>
+                  )
+                )}
                 
                 <div className="border-t pt-6 space-y-3">
                   <Button 

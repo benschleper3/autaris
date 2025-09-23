@@ -11,16 +11,7 @@ import { Footer } from '@/components/marketing/Footer';
 export default function Landing() {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        navigate('/dashboard');
-      }
-    };
-    
-    checkAuth();
-  }, [navigate]);
+  // No auto-redirect - allow authenticated users to view landing page
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-background/80">
