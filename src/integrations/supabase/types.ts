@@ -535,6 +535,54 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          last_login_at: string | null
+          metadata: Json | null
+          onboarded_at: string | null
+          phone: string | null
+          plan: string | null
+          timezone: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          last_login_at?: string | null
+          metadata?: Json | null
+          onboarded_at?: string | null
+          phone?: string | null
+          plan?: string | null
+          timezone?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          last_login_at?: string | null
+          metadata?: Json | null
+          onboarded_at?: string | null
+          phone?: string | null
+          plan?: string | null
+          timezone?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       report_links: {
         Row: {
           campaign_id: string | null
@@ -671,48 +719,6 @@ export type Database = {
       }
     }
     Views: {
-      profiles: {
-        Row: {
-          avatar_url: string | null
-          created_at: string | null
-          full_name: string | null
-          last_login_at: string | null
-          metadata: Json | null
-          onboarded_at: string | null
-          phone: string | null
-          plan: string | null
-          timezone: string | null
-          updated_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          last_login_at?: string | null
-          metadata?: Json | null
-          onboarded_at?: string | null
-          phone?: string | null
-          plan?: string | null
-          timezone?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          last_login_at?: string | null
-          metadata?: Json | null
-          onboarded_at?: string | null
-          phone?: string | null
-          plan?: string | null
-          timezone?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       v_post_latest: {
         Row: {
           captured_at: string | null
