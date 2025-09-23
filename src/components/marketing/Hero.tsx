@@ -39,7 +39,7 @@ export function Hero() {
             </h1>
             
             <p className="text-xl text-muted-foreground lg:text-2xl max-w-lg">
-              Growth OS is the complete analytics platform for content creators and UGC professionals. Track performance across all platforms, optimize posting times with AI that adapts to your unique content style, manage campaigns, build portfolios, and generate professional reports that secure bigger brand deals.
+              Growth OS is the complete analytics platform for content creators and UGC professionals. Track performance across all platforms, optimize posting times, manage campaigns, build portfolios, and generate professional reports that secure bigger brand deals.
             </p>
           </div>
 

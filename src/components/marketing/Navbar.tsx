@@ -37,9 +37,8 @@ export function Navbar() {
   };
 
   const navLinks = [
-    { name: 'Home', href: '/landing', isRoute: true },
     { name: 'Features', href: '#features' },
-    { name: 'How it works', href: '/how-it-works', isRoute: true },
+    { name: 'How it works', href: '#how' },
     { name: 'Pricing', href: '#pricing' },
     { name: 'FAQ', href: '#faq' },
   ];
@@ -56,23 +55,13 @@ export function Navbar() {
         {/* Desktop Navigation */}
         <div className="hidden md:flex md:items-center md:space-x-6 ml-8">
           {navLinks.map((link) => (
-            link.isRoute ? (
-              <Link
-                key={link.name}
-                to={link.href}
-                className="text-sm font-medium text-foreground/70 transition-colors hover:text-foreground"
-              >
-                {link.name}
-              </Link>
-            ) : (
-              <a
-                key={link.name}
-                href={link.href}
-                className="text-sm font-medium text-foreground/70 transition-colors hover:text-foreground"
-              >
-                {link.name}
-              </a>
-            )
+            <a
+              key={link.name}
+              href={link.href}
+              className="text-sm font-medium text-foreground/70 transition-colors hover:text-foreground"
+            >
+              {link.name}
+            </a>
           ))}
         </div>
 
@@ -97,25 +86,14 @@ export function Navbar() {
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
               <div className="flex flex-col space-y-6 mt-8">
                 {navLinks.map((link) => (
-                  link.isRoute ? (
-                    <Link
-                      key={link.name}
-                      to={link.href}
-                      onClick={() => setIsOpen(false)}
-                      className="text-lg font-medium text-foreground/70 transition-colors hover:text-foreground"
-                    >
-                      {link.name}
-                    </Link>
-                  ) : (
-                    <a
-                      key={link.name}
-                      href={link.href}
-                      onClick={() => setIsOpen(false)}
-                      className="text-lg font-medium text-foreground/70 transition-colors hover:text-foreground"
-                    >
-                      {link.name}
-                    </a>
-                  )
+                  <a
+                    key={link.name}
+                    href={link.href}
+                    onClick={() => setIsOpen(false)}
+                    className="text-lg font-medium text-foreground/70 transition-colors hover:text-foreground"
+                  >
+                    {link.name}
+                  </a>
                 ))}
                 
                 <div className="border-t pt-6 space-y-3">
