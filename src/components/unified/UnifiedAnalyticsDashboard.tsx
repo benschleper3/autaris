@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { FileText, FolderOpen, Code } from 'lucide-react';
+import { FileText, FolderOpen, Code, Home } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
 import GlobalFilters from './GlobalFilters';
 import KPIStrip from './KPIStrip';
