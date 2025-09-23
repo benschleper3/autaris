@@ -7,16 +7,44 @@ export function FAQ() {
       answer: "Simply click the 'Connect TikTok' button in your dashboard and authorize Growth OS to access your account data. We only access publicly available metrics and never post on your behalf."
     },
     {
+      question: "What analytics do I get?",
+      answer: "Growth OS provides comprehensive TikTok analytics including follower growth, engagement rates, reach metrics, best posting times, top-performing content, audience demographics, and performance trends over time."
+    },
+    {
       question: "Can I export a PDF report?",
       answer: "Yes! Growth OS generates shareable report links that brands can view in their browser. You can also export reports as PDFs for presentations or email attachments."
+    },
+    {
+      question: "How do I share my analytics with brands?",
+      answer: "Create a professional report link in seconds that showcases your key metrics, top posts, and growth trends. Brands can view your performance data in a clean, branded format without needing to log in."
     },
     {
       question: "Do you support Instagram/YouTube?",
       answer: "Currently, Growth OS focuses exclusively on TikTok to provide the most accurate and detailed analytics. Instagram and YouTube support are on our roadmap for 2024."
     },
     {
+      question: "How often is my data updated?",
+      answer: "Your TikTok data syncs automatically every 24 hours to ensure you always have the latest metrics. You can also manually refresh your data at any time from your dashboard."
+    },
+    {
+      question: "What if I'm just starting out as a creator?",
+      answer: "Growth OS works for creators at any stage! Whether you have 100 or 100K followers, our analytics help you understand your audience, track growth, and create professional reports to attract brand partnerships."
+    },
+    {
+      question: "Is there a free trial?",
+      answer: "Yes! Get started with a 7-day free trial to explore all features. No credit card required. Experience the full power of Growth OS before committing to a subscription."
+    },
+    {
       question: "How is my data secured?",
       answer: "We use enterprise-grade security including encrypted data storage, secure API connections, and never store your TikTok login credentials. Your data is protected and never shared with third parties."
+    },
+    {
+      question: "Can I track multiple TikTok accounts?",
+      answer: "Our Pro plan allows you to connect and track multiple TikTok accounts from one dashboard. Perfect for agencies or creators managing multiple brands."
+    },
+    {
+      question: "What makes Growth OS different from other analytics tools?",
+      answer: "Growth OS is built specifically for TikTok creators seeking brand partnerships. We focus on the metrics that matter to brands and present them in professional, shareable reports that help you win more deals."
     },
     {
       question: "Can I cancel anytime?",
@@ -46,7 +74,7 @@ export function FAQ() {
               value={`item-${index}`}
               className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg px-6"
             >
-              <AccordionTrigger className="text-left hover:no-underline py-4">
+              <AccordionTrigger className="text-left hover:no-underline py-4 [&[data-state=open]>svg]:rotate-180">
                 <span className="font-medium">{faq.question}</span>
               </AccordionTrigger>
               <AccordionContent className="pb-4 text-muted-foreground">
