@@ -58,8 +58,8 @@ export default function AuthPage() {
 
         {mode === 'signup' ? (
           <form className="space-y-3" onSubmit={handleSignUp}>
-            <div><label className="text-sm">Full name (optional)</label><Input name="full_name" placeholder="Your name" /></div>
-            <div><label className="text-sm">Phone (optional)</label><Input name="phone" placeholder="Your phone" /></div>
+            <div><label className="text-sm">Full name</label><Input name="full_name" required placeholder="Your name" /></div>
+            <div><label className="text-sm">Phone</label><Input name="phone" required placeholder="Your phone" /></div>
             <div><label className="text-sm">Email</label><Input name="email" type="email" required placeholder="you@example.com" /></div>
             <div><label className="text-sm">Password</label><Input name="password" type="password" required placeholder="********" /></div>
             {err && <p className="text-xs text-red-500">{err}</p>}
