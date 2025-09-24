@@ -90,7 +90,7 @@ export default function ReportGeneratorModal({ open, onOpenChange }: ReportGener
           url: data.report_url,
           from_date: fromDate?.toISOString().split('T')[0],
           to_date: toDate?.toISOString().split('T')[0],
-          campaign_id: selectedCampaign || null
+          campaign_id: selectedCampaign === 'all' ? null : selectedCampaign || null
         });
 
       if (insertError) {
@@ -135,7 +135,7 @@ export default function ReportGeneratorModal({ open, onOpenChange }: ReportGener
                 <SelectValue placeholder="Select a campaign" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Campaigns</SelectItem>
+                <SelectItem value="all">All Campaigns</SelectItem>
                 {campaigns.map((campaign) => (
                   <SelectItem key={campaign.campaign_id} value={campaign.campaign_id}>
                     {campaign.campaign_name}
