@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { TrendingUp, Video, BarChart3, Camera } from 'lucide-react';
@@ -7,8 +8,10 @@ import DeliverablesKanban from './DeliverablesKanban';
 import RevenueTracker from './RevenueTracker';
 import PricingSuggestions from './PricingSuggestions';
 import BestTimeHeatmap from './BestTimeHeatmap';
+import ReportGeneratorModal from '../unified/ReportGeneratorModal';
 
 export default function UGCCreatorDashboard() {
+  const [showReportModal, setShowReportModal] = useState(false);
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -21,7 +24,10 @@ export default function UGCCreatorDashboard() {
             Manage brand campaigns → create content → get paid
           </p>
         </div>
-        <Button className="bg-gradient-to-r from-growth-primary to-growth-secondary text-white">
+        <Button 
+          className="bg-gradient-to-r from-growth-primary to-growth-secondary text-white"
+          onClick={() => setShowReportModal(true)}
+        >
           <BarChart3 className="w-4 h-4 mr-2" />
           Generate Brand Report
         </Button>
@@ -53,6 +59,11 @@ export default function UGCCreatorDashboard() {
           <BestTimeHeatmap />
         </div>
       </div>
+
+      <ReportGeneratorModal 
+        open={showReportModal} 
+        onOpenChange={setShowReportModal} 
+      />
     </div>
   );
 }
