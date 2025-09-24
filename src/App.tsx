@@ -12,7 +12,6 @@ import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
 import AuthDebug from "./pages/AuthDebug";
 import RequireAuth from "./components/auth/RequireAuth";
-import UGCCreatorDashboard from "./components/ugc/UGCCreatorDashboard";
 import WiringExport from "./pages/WiringExport";
 import NotFound from "./pages/NotFound";
 
@@ -35,7 +34,6 @@ function App() {
             <Route path="/auth" element={<Auth />} />
             <Route path="/auth/debug" element={<AuthDebug />} />
             <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
-            <Route path="/dashboard-ugc" element={<RequireAuth><UGCCreatorDashboard /></RequireAuth>} />
             <Route path="/dev/wiring-export" element={<WiringExport />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
