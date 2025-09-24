@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/config"
+import { supabase } from "@/integrations/supabase/client"
 
 export default function TestSupabase() {
   const [message, setMessage] = useState("Testing Supabase...")

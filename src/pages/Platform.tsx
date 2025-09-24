@@ -1,7 +1,7 @@
 // src/pages/Platform.tsx
 import { useParams, Link } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 type Row = { title: string|null; url: string|null; published_at: string|null; views: number|null; likes: number|null; comments: number|null; shares: number|null; engagement_rate: number|null; };
 type Insight = { week_start: string; narrative: string|null; recommendations: string|null; };
@@ -30,16 +30,48 @@ export default function Platform() {
         const ids = (accounts ?? []).map(a => a.id);
         if (ids.length === 0) { setRows([]); return; }
 
-        // 2) Pull last 7d posts for those accounts
-        const { data, error: pmErr } = await supabase
-          .from('post_metrics')
-          .select('title,url,published_at,views,likes,comments,shares,engagement_rate,social_account_id')
+        // 2) Pull last 7d posts for those accounts from posts table
+        const { data: postsData, error: postsErr } = await supabase
+          .from('posts')
+          .select('id,title,asset_url,published_at')
           .in('social_account_id', ids)
           .gte('published_at', sinceISO)
-          .order('engagement_rate', { ascending: false })
+          .order('published_at', { ascending: false })
           .limit(25);
-        if (pmErr) { setErr(pmErr.message); return; }
-        setRows(data ?? []);
+        if (postsErr) { setErr(postsErr.message); return; }
+        
+        // Get metrics for these posts
+        if (postsData && postsData.length > 0) {
+          const postIds = postsData.map(p => p.id);
+          const { data: metricsData, error: metricsErr } = await supabase
+            .from('post_metrics')
+            .select('post_id,views,likes,comments,shares')
+            .in('post_id', postIds);
+          
+          if (!metricsErr) {
+            // Join posts with their latest metrics
+            const joinedData = postsData.map(post => {
+              const metrics = metricsData?.find(m => m.post_id === post.id);
+              const totalEngagement = (metrics?.likes || 0) + (metrics?.comments || 0) + (metrics?.shares || 0);
+              const engagementRate = metrics?.views ? totalEngagement / metrics.views : 0;
+              
+              return {
+                title: post.title,
+                url: post.asset_url,
+                published_at: post.published_at,
+                views: metrics?.views || 0,
+                likes: metrics?.likes || 0,
+                comments: metrics?.comments || 0,
+                shares: metrics?.shares || 0,
+                engagement_rate: engagementRate
+              };
+            });
+            
+            setRows(joinedData);
+          }
+        } else {
+          setRows([]);
+        }
       });
 
     // 3) This week's general insight (until we store per-platform)

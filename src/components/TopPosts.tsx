@@ -1,6 +1,6 @@
 // src/components/TopPosts.tsx
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 type PostRow = {
   title: string | null;
@@ -20,14 +20,26 @@ export default function TopPosts() {
   useEffect(() => {
     const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     supabase
-      .from('post_metrics')
-      .select('title,url,published_at,views,likes,comments,shares,engagement_rate')
+      .from('v_posts_with_latest')
+      .select('title,post_id,published_at,views,likes,comments,shares,engagement_rate')
       .gte('published_at', since)
       .order('engagement_rate', { ascending: false })
       .limit(5)
       .then(({ data, error }) => {
         if (error) setErr(error.message);
-        else setRows(data ?? []);
+        else {
+          const mappedRows = (data ?? []).map(item => ({
+            title: item.title,
+            url: null, // Not available in current schema
+            published_at: item.published_at,
+            views: item.views,
+            likes: item.likes,
+            comments: item.comments,
+            shares: item.shares,
+            engagement_rate: item.engagement_rate
+          }));
+          setRows(mappedRows);
+        }
       });
   }, []);
 

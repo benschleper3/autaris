@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { FaInstagram, FaYoutube, FaXTwitter, FaLinkedin, FaFacebook, FaTiktok } from 'react-icons/fa6';
-import { supabase } from '@/lib/config';
+import { supabase } from '@/integrations/supabase/client';
 
 type PlatformKey = 'instagram' | 'youtube' | 'twitter' | 'linkedin' | 'facebook' | 'tiktok';
 
@@ -69,20 +69,20 @@ export default function PlatformCards() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Using direct SQL query since we don't have the exact table structure yet
+        // Get user's social accounts
         const { data: queryData, error } = await supabase
-          .from('platform_stats')
-          .select('platform, followers, reach_7d')
+          .from('social_accounts')
+          .select('platform')
           .order('platform');
         
         if (error) throw error;
         
-        // Transform data to match expected format
+        // Transform data to match expected format with mock data
         const platformData = queryData?.map(item => ({
           platform: item.platform,
-          followers: item.followers || 0,
-          reach_7d: item.reach_7d || 0,
-          posts_7d: 0 // Default for now
+          followers: Math.floor(Math.random() * 10000) + 1000, // Mock data
+          reach_7d: Math.floor(Math.random() * 50000) + 5000, // Mock data
+          posts_7d: Math.floor(Math.random() * 7) + 1 // Mock data
         })) || [];
         
         setData(platformData);

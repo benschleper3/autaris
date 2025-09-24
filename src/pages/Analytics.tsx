@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
-import { supabase } from '@/lib/config';
+import { supabase } from '@/integrations/supabase/client';
 import Navigation from '@/components/Navigation';
 import { Card } from '@/components/ui/card';
 
@@ -11,23 +11,24 @@ function AnalyticsOverview() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data: queryData, error } = await supabase.rpc('exec_sql', {
-        query: `
-          with base as (
-            select * from public.v_posts_with_latest
-            where user_id = auth.uid()
-              and coalesce(published_at, now()) >= now() - interval '30 days'
-          )
-          select
-            count(*)                       as posts_published_30d,
-            sum(views)                     as total_views_30d,
-            round(avg(engagement_rate),2)  as avg_er_30d
-          from base;
-        `
-      });
+      // Use existing tables to calculate similar metrics
+      const { data: postsData, error } = await supabase
+        .from('v_posts_with_latest')
+        .select('*')
+        .gte('published_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
       
-      if (!error && queryData?.[0]) {
-        setData(queryData[0]);
+      if (!error && postsData) {
+        const posts = postsData.length;
+        const totalViews = postsData.reduce((sum, post) => sum + (post.views || 0), 0);
+        const avgEngagement = postsData.length > 0 
+          ? postsData.reduce((sum, post) => sum + (post.engagement_rate || 0), 0) / postsData.length
+          : 0;
+          
+        setData({
+          posts_published_30d: posts,
+          total_views_30d: totalViews,
+          avg_er_30d: avgEngagement
+        });
       }
       setLoading(false);
     };

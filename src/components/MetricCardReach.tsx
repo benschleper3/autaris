@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { TrendingUp, Eye } from 'lucide-react';
-import { supabase } from '@/lib/config';
+import { supabase } from '@/integrations/supabase/client';
 
 const fmt = (n: number) => {
   if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
@@ -27,15 +27,15 @@ export default function MetricCardReach() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fallback query for now
+        // Use posts view to get weekly reach
         const { data: queryData, error } = await supabase
-          .from('platform_stats')
-          .select('reach_7d')
-          .eq('user_id', (await supabase.auth.getUser()).data.user?.id);
+          .from('v_posts_with_latest')
+          .select('views')
+          .gte('published_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
         
         if (error) throw error;
         
-        const weeklyReach = queryData?.reduce((sum, item) => sum + (item.reach_7d || 0), 0) || 0;
+        const weeklyReach = queryData?.reduce((sum, item) => sum + (item.views || 0), 0) || 0;
         setData({ weekly_reach: weeklyReach });
       } catch (err) {
         console.error('Error fetching reach:', err);

@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { supabase } from "@/lib/config"
+import { supabase } from "@/integrations/supabase/client"
 
 type View = "sign-in" | "sign-up"
 

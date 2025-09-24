@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
-import { supabase } from '@/lib/config';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ActivityData {
   day_name: string;
