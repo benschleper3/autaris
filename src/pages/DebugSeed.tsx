@@ -17,7 +17,7 @@ export default function DebugSeed() {
       // Upsert profile (use id as primary key for existing schema)
       const { error: pErr } = await supabase
         .from('profiles')
-        .upsert({ id: userId, full_name: 'Ben Schleper', timezone: 'America/Chicago' });
+        .upsert({ user_id: userId, full_name: 'Ben Schleper', timezone: 'America/Chicago' });
       if (pErr) { setMsg('Profile error: ' + pErr.message); return; }
 
       setMsg('Basic profile seeded! Run SQL migration first, then full seed will work.');

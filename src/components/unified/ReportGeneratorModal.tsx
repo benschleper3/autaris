@@ -71,23 +71,14 @@ export default function ReportGeneratorModal({ open, onOpenChange }: ReportGener
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      const response = await fetch('https://your-n8n-domain.com/webhook/generate-report', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          role: 'ugc_creator',
-          from: fromDate?.toISOString().split('T')[0],
-          to: toDate?.toISOString().split('T')[0],
-          campaign_id: selectedCampaign || null,
-          user_id: user.id
-        })
-      });
-
-      if (!response.ok) throw new Error('Failed to generate report');
+      // Generate a mock report URL for demo purposes
+      const reportTitle = `UGC Report - ${format(fromDate || new Date(), "MMM dd")} to ${format(toDate || new Date(), "MMM dd")}`;
+      const mockReportUrl = `https://example.com/reports/${user.id}-${Date.now()}.pdf`;
       
-      const data = await response.json();
+      const data = { 
+        report_url: mockReportUrl,
+        title: reportTitle
+      };
 
       // Insert the report link into the database
       const { error: insertError } = await supabase
