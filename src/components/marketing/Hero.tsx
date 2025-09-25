@@ -1,25 +1,14 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { TrendingUp, Users, Clock, BarChart3 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { WaitlistForm } from './WaitlistForm';
 
 export function Hero() {
-  const navigate = useNavigate();
   const [showWaitlist, setShowWaitlist] = useState(false);
 
-  const handleViewSampleReport = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      navigate('/dashboard');
-    } else {
-      navigate('/auth');
-    }
-  };
 
   return (
     <section id="hero" className="container py-24 lg:py-32">
@@ -50,13 +39,6 @@ export function Hero() {
                 <WaitlistForm onSuccess={() => setShowWaitlist(false)} />
               </DialogContent>
             </Dialog>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              onClick={handleViewSampleReport}
-            >
-              View a sample report
-            </Button>
           </div>
 
         </div>

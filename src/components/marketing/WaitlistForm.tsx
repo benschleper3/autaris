@@ -59,7 +59,7 @@ export function WaitlistForm({ onSuccess }: WaitlistFormProps) {
       if (error instanceof z.ZodError) {
         toast({
           title: "Invalid email",
-          description: error.errors[0].message,
+          description: error.issues[0].message,
           variant: "destructive"
         });
       } else {
