@@ -1,14 +1,18 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { TrendingUp, Users, Clock, BarChart3 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { WaitlistForm } from './WaitlistForm';
 
 export function Hero() {
   const navigate = useNavigate();
+  const [showWaitlist, setShowWaitlist] = useState(false);
 
-  const handleGetStarted = async () => {
+  const handleViewSampleReport = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
       navigate('/dashboard');
@@ -36,13 +40,20 @@ export function Hero() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
-            <Button size="lg" onClick={handleGetStarted} className="bg-primary hover:bg-primary/90">
-              Get started
-            </Button>
+            <Dialog open={showWaitlist} onOpenChange={setShowWaitlist}>
+              <DialogTrigger asChild>
+                <Button size="lg" className="bg-primary hover:bg-primary/90">
+                  Join Waitlist
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <WaitlistForm onSuccess={() => setShowWaitlist(false)} />
+              </DialogContent>
+            </Dialog>
             <Button 
               size="lg" 
               variant="outline" 
-              onClick={() => document.getElementById('screenshots')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={handleViewSampleReport}
             >
               View a sample report
             </Button>

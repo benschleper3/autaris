@@ -684,6 +684,30 @@ export type Database = {
         }
         Relationships: []
       }
+      waitlist: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          notes: string | null
+          referral_source: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          notes?: string | null
+          referral_source?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          notes?: string | null
+          referral_source?: string | null
+        }
+        Relationships: []
+      }
       weekly_insights: {
         Row: {
           confidence: number | null
