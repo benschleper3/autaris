@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@/hooks/useSession';
+import logo from '@/assets/logo.png';
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,6 +39,7 @@ export function Navbar() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         >
+          <img src={logo} alt="Growth OS Logo" className="w-8 h-8" />
           <span className="text-xl font-bold bg-gradient-to-r from-primary to-growth-accent bg-clip-text text-transparent">
             Growth OS
           </span>

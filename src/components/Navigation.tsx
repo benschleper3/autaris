@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, useLocation } from 'react-router-dom';
+import logo from '@/assets/logo.png';
 
 interface NavigationProps {
   // Remove old props since we'll detect current route
@@ -31,9 +32,7 @@ export default function Navigation({}: NavigationProps) {
       <div className="flex items-center gap-8">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
-            <TrendingUp className="w-4 h-4 text-white" />
-          </div>
+          <img src={logo} alt="Growth OS Logo" className="w-8 h-8" />
           <span className="text-xl font-bold bg-gradient-to-r from-growth-primary to-growth-secondary bg-clip-text text-transparent">
             Growth OS
           </span>

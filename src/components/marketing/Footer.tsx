@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import logo from '@/assets/logo.png';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -9,6 +10,7 @@ export function Footer() {
         <div className="grid gap-8 lg:grid-cols-2">
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
+              <img src={logo} alt="Growth OS Logo" className="w-8 h-8" />
               <span className="text-xl font-bold bg-gradient-to-r from-primary to-growth-accent bg-clip-text text-transparent">
                 Growth OS
               </span>
