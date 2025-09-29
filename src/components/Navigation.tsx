@@ -3,9 +3,17 @@ import {
   TrendingUp,
   Users,
   Video,
-  Settings
+  User
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '@/assets/logo.png';
 
@@ -63,11 +71,22 @@ export default function Navigation({}: NavigationProps) {
         )}
       </div>
       
-      {/* Settings/Profile section */}
+      {/* Profile section */}
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm">
-          <Settings className="w-4 h-4" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="rounded-full">
+              <User className="w-5 h-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              Connect TikTok Account
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </nav>
   );
