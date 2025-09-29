@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 import { CalendarIcon, Home } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -94,21 +94,6 @@ export default function GlobalFilters({ filters, onFiltersChange }: GlobalFilter
                   />
                 </PopoverContent>
               </Popover>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">Platform:</span>
-              <Select value={filters.platform} onValueChange={(value) => updateFilter('platform', value)}>
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Platforms</SelectItem>
-                  <SelectItem value="tiktok">TikTok</SelectItem>
-                  <SelectItem value="instagram">Instagram</SelectItem>
-                  <SelectItem value="youtube">YouTube</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
         </div>
