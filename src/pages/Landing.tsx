@@ -19,8 +19,8 @@ export default function Landing() {
       <main>
         <Hero />
         <Features />
-        <FoundationLaunch />
         <SocialImpact />
+        <FoundationLaunch />
       </main>
       <Footer />
     </div>
