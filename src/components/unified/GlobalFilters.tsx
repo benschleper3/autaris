@@ -28,7 +28,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { CalendarIcon, User, LogOut, Trash2, CreditCard, MessageSquare } from 'lucide-react';
+import { CalendarIcon, User, LogOut, Trash2, CreditCard, MessageSquare, Sun, Moon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -36,6 +36,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useTheme } from 'next-themes';
 
 interface GlobalFiltersProps {
   filters: {
@@ -56,6 +57,7 @@ export default function GlobalFilters({ filters, onFiltersChange }: GlobalFilter
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
 
   const updateFilter = (key: string, value: any) => {
     onFiltersChange({ ...filters, [key]: value });
@@ -212,6 +214,20 @@ export default function GlobalFilters({ filters, onFiltersChange }: GlobalFilter
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+              {theme === 'dark' ? (
+                <>
+                  <Sun className="mr-2 h-4 w-4" />
+                  Light Mode
+                </>
+              ) : (
+                <>
+                  <Moon className="mr-2 h-4 w-4" />
+                  Dark Mode
+                </>
+              )}
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleManageSubscription}>
               <CreditCard className="mr-2 h-4 w-4" />
