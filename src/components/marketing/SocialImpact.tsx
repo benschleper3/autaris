@@ -1,6 +1,71 @@
+import { useEffect, useState } from 'react';
 import { Heart } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Progress } from '@/components/ui/progress';
+import { Loader2 } from 'lucide-react';
+
+interface FoundationData {
+  total_raised_cents: number;
+  goal_cents: number;
+  contributors: number;
+}
 
 export function SocialImpact() {
+  const [data, setData] = useState<FoundationData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const formatCurrency = (cents: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(cents / 100);
+  };
+
+  const fetchData = async () => {
+    const { data: fundData, error } = await supabase
+      .from('foundation_fund')
+      .select('*')
+      .single();
+
+    if (error) {
+      console.error('Error fetching foundation data:', error);
+      return;
+    }
+
+    if (fundData) {
+      setData(fundData);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+
+    // Subscribe to realtime updates
+    const channel = supabase
+      .channel('foundation-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'foundation_fund'
+        },
+        () => {
+          fetchData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const progressPercent = data ? Math.round((data.total_raised_cents / data.goal_cents) * 100) : 0;
+
   return (
     <section id="social-impact" className="container py-24 lg:py-32">
       <div className="max-w-4xl mx-auto">
@@ -27,6 +92,24 @@ export function SocialImpact() {
               <p className="text-lg text-muted-foreground leading-relaxed">
                 We're on a mission to launch the Autaris Foundation with an initial fund of <strong>$20,000</strong>. Every subscription brings us closer to this milestone. Once we reach it, we'll officially begin funding projects that provide food, shelter, and medical care for dogs in need. Join us in building a future where every dog gets a second chance.
               </p>
+
+              {loading ? (
+                <div className="flex justify-center lg:justify-start pt-4">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                </div>
+              ) : data && (
+                <div className="pt-4 space-y-3">
+                  <p className="text-xl font-semibold">
+                    {formatCurrency(data.total_raised_cents)} raised of $20,000 ({progressPercent}%)
+                  </p>
+                  
+                  <Progress value={progressPercent} className="h-3" />
+                  
+                  <p className="text-sm text-muted-foreground">
+                    {data.contributors} {data.contributors === 1 ? 'contributor' : 'contributors'}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

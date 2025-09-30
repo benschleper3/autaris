@@ -5,7 +5,6 @@ import { Navbar } from '@/components/marketing/Navbar';
 import { Hero } from '@/components/marketing/Hero';
 import { Features } from '@/components/marketing/Features';
 import { SocialImpact } from '@/components/marketing/SocialImpact';
-import { FoundationLaunch } from '@/components/marketing/FoundationLaunch';
 import { Footer } from '@/components/marketing/Footer';
 
 export default function Landing() {
@@ -20,7 +19,6 @@ export default function Landing() {
         <Hero />
         <Features />
         <SocialImpact />
-        <FoundationLaunch />
       </main>
       <Footer />
     </div>
