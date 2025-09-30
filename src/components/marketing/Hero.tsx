@@ -17,7 +17,7 @@ export function Hero() {
         <div className="flex flex-col justify-center space-y-8">
           <div className="space-y-6">
             <h1 className="text-4xl font-bold tracking-tight lg:text-6xl">
-              <span className="bg-gradient-to-r from-primary to-growth-accent bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-primary to-autaris-accent bg-clip-text text-transparent">
                 Prove your value.
               </span>
               <br />
@@ -25,7 +25,7 @@ export function Hero() {
             </h1>
             
             <p className="text-xl text-muted-foreground lg:text-2xl max-w-lg">
-              Growth OS is the complete analytics platform for content creators and UGC professionals. Track performance across all platforms, optimize posting times with AI that adapts to your unique content style, manage campaigns, build portfolios, and generate professional reports that secure bigger brand deals.
+              Autaris is the complete analytics platform for content creators and UGC professionals. Track performance across all platforms, optimize posting times with AI that adapts to your unique content style, manage campaigns, build portfolios, and generate professional reports that secure bigger brand deals.
             </p>
           </div>
 
@@ -55,7 +55,7 @@ export function Hero() {
                 </div>
                 <img 
                   src={dashboardPreview} 
-                  alt="Growth OS Analytics Dashboard Preview - showing KPI metrics, performance trends, platform breakdown, and posting analytics"
+                  alt="Autaris Analytics Dashboard Preview - showing KPI metrics, performance trends, platform breakdown, and posting analytics"
                   className="w-full rounded-lg shadow-lg border border-border/50"
                 />
                 <p className="text-xs text-muted-foreground text-center">

@@ -4,7 +4,7 @@ import { Star } from 'lucide-react';
 export function Testimonials() {
   const testimonials = [
     {
-      quote: "Growth OS helped me land my biggest brand deal yet. The reports show exactly why brands should work with me.",
+      quote: "Autaris helped me land my biggest brand deal yet. The reports show exactly why brands should work with me.",
       author: "Sarah M.",
       role: "Fashion Creator",
       followers: "250K followers"
@@ -29,12 +29,12 @@ export function Testimonials() {
         <div className="space-y-4">
           <h2 className="text-3xl font-bold lg:text-5xl">
             Creators are already
-            <span className="bg-gradient-to-r from-primary to-growth-accent bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-primary to-autaris-accent bg-clip-text text-transparent">
               {" "}winning bigger deals
             </span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Don't just take our word for it. See what creators are saying about Growth OS.
+            Don't just take our word for it. See what creators are saying about Autaris.
           </p>
         </div>
 

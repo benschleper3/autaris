@@ -26,12 +26,12 @@ export function Features() {
         <div className="space-y-4">
           <h2 className="text-3xl font-bold lg:text-5xl">
             Everything you need to
-            <span className="bg-gradient-to-r from-primary to-growth-accent bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-primary to-autaris-accent bg-clip-text text-transparent">
               {" "}win more deals
             </span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Stop losing brand opportunities because you can't show your value. Growth OS makes your impact impossible to ignore.
+            Stop losing brand opportunities because you can't show your value. Autaris makes your impact impossible to ignore.
           </p>
         </div>
 

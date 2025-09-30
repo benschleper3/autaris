@@ -22,7 +22,7 @@ export default function MetricCard({
   const TrendIcon = changeType === 'positive' ? TrendingUp : TrendingDown;
   
   return (
-    <Card className={cn("p-3 sm:p-4 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-growth-primary/20 hover:bg-card/80 cursor-pointer", className)}>
+    <Card className={cn("p-3 sm:p-4 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-autaris-primary/20 hover:bg-card/80 cursor-pointer", className)}>
       <div className="flex items-center justify-between mb-1 sm:mb-2">
         <p className="text-xs sm:text-sm font-medium text-muted-foreground">{title}</p>
         {icon && (
@@ -36,7 +36,7 @@ export default function MetricCard({
         <h3 className="text-lg sm:text-2xl font-bold text-foreground">{value}</h3>
         <div className={cn(
           "flex items-center gap-1 text-xs sm:text-sm font-medium",
-          changeType === 'positive' ? "text-growth-success" : "text-growth-danger"
+          changeType === 'positive' ? "text-autaris-success" : "text-autaris-danger"
         )}>
           <TrendIcon className="w-3 h-3" />
           {change}

@@ -50,7 +50,7 @@ export function WaitlistForm({ onSuccess }: WaitlistFormProps) {
         setSubmitted(true);
         toast({
           title: "Welcome to the waitlist!",
-          description: "We'll notify you when Growth OS is ready.",
+          description: "We'll notify you when Autaris is ready.",
           variant: "default"
         });
         onSuccess?.();
@@ -85,7 +85,7 @@ export function WaitlistForm({ onSuccess }: WaitlistFormProps) {
               </svg>
             </div>
             <h3 className="text-lg font-semibold">You're on the list!</h3>
-            <p className="text-muted-foreground">We'll notify you when Growth OS launches.</p>
+            <p className="text-muted-foreground">We'll notify you when Autaris launches.</p>
           </div>
         </CardContent>
       </Card>
@@ -97,7 +97,7 @@ export function WaitlistForm({ onSuccess }: WaitlistFormProps) {
       <CardHeader className="text-center">
         <CardTitle>Join the Waitlist</CardTitle>
         <CardDescription>
-          Be the first to know when Growth OS launches
+          Be the first to know when Autaris launches
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -65,8 +65,8 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
           <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mx-auto mb-4">
             <TrendingUp className="w-6 h-6 text-white" />
           </div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-growth-primary to-growth-secondary bg-clip-text text-transparent">
-            Welcome to Growth OS
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-autaris-primary to-autaris-secondary bg-clip-text text-transparent">
+            Welcome to Autaris
           </h1>
           <p className="text-muted-foreground">
             Choose your role to customize your dashboard
@@ -79,8 +79,8 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
               <RadioGroupItem value="creator" id="creator" />
               <Label htmlFor="creator" className="flex-1 cursor-pointer">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-growth-primary/10 flex items-center justify-center">
-                    <Users className="w-4 h-4 text-growth-primary" />
+                  <div className="w-8 h-8 rounded-lg bg-autaris-primary/10 flex items-center justify-center">
+                    <Users className="w-4 h-4 text-autaris-primary" />
                   </div>
                   <div>
                     <div className="font-medium">Creator</div>
@@ -96,8 +96,8 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
               <RadioGroupItem value="ugc_creator" id="ugc_creator" />
               <Label htmlFor="ugc_creator" className="flex-1 cursor-pointer">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-growth-secondary/10 flex items-center justify-center">
-                    <Video className="w-4 h-4 text-growth-secondary" />
+                  <div className="w-8 h-8 rounded-lg bg-autaris-secondary/10 flex items-center justify-center">
+                    <Video className="w-4 h-4 text-autaris-secondary" />
                   </div>
                   <div>
                     <div className="font-medium">UGC Creator</div>

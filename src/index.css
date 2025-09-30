@@ -38,14 +38,14 @@ All colors MUST be HSL.
 
     --radius: 0.75rem;
 
-    /* Growth OS Design System */
-    --growth-primary: 263 70% 50%;
-    --growth-primary-light: 263 70% 60%;
-    --growth-secondary: 220 70% 50%;
-    --growth-accent: 280 70% 50%;
-    --growth-success: 142 76% 36%;
-    --growth-warning: 38 92% 50%;
-    --growth-danger: 0 84% 60%;
+    /* Autaris Design System */
+    --autaris-primary: 263 70% 50%;
+    --autaris-primary-light: 263 70% 60%;
+    --autaris-secondary: 220 70% 50%;
+    --autaris-accent: 280 70% 50%;
+    --autaris-success: 142 76% 36%;
+    --autaris-warning: 38 92% 50%;
+    --autaris-danger: 0 84% 60%;
     
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(263 70% 50%), hsl(220 70% 50%));
@@ -133,7 +133,7 @@ All colors MUST be HSL.
     @apply text-muted-foreground;
   }
 
-  /* Growth OS Custom Styles */
+  /* Autaris Custom Styles */
   .gradient-primary {
     background: var(--gradient-primary);
   }

@@ -23,13 +23,13 @@ export function FinalCTA() {
         <div className="space-y-6">
           <h2 className="text-4xl font-bold lg:text-6xl max-w-4xl mx-auto">
             Ready to win more
-            <span className="bg-gradient-to-r from-primary to-growth-accent bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-primary to-autaris-accent bg-clip-text text-transparent">
               {" "}brand deals?
             </span>
           </h2>
           
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Join creators who are already using Growth OS to prove their value and secure bigger brand partnerships.
+            Join creators who are already using Autaris to prove their value and secure bigger brand partnerships.
           </p>
         </div>
 

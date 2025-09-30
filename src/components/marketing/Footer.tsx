@@ -10,9 +10,9 @@ export function Footer() {
         <div className="grid gap-8 lg:grid-cols-2">
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <img src={logo} alt="Growth OS Logo" className="w-8 h-8" />
-              <span className="text-xl font-bold bg-gradient-to-r from-primary to-growth-accent bg-clip-text text-transparent">
-                Growth OS
+              <img src={logo} alt="Autaris Logo" className="w-8 h-8" />
+              <span className="text-xl font-bold bg-gradient-to-r from-primary to-autaris-accent bg-clip-text text-transparent">
+                Autaris
               </span>
             </div>
             <p className="text-sm text-muted-foreground max-w-md">
@@ -55,7 +55,7 @@ export function Footer() {
 
         <div className="mt-12 pt-8 border-t border-border/40">
           <p className="text-sm text-muted-foreground text-center">
-            © {currentYear} Growth OS. All rights reserved.
+            © {currentYear} Autaris. All rights reserved.
           </p>
         </div>
       </div>

@@ -47,9 +47,9 @@ export function Navbar() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         >
-          <img src={logo} alt="Growth OS Logo" className="w-8 h-8" />
-          <span className="text-xl font-bold bg-gradient-to-r from-primary to-growth-accent bg-clip-text text-transparent">
-            Growth OS
+          <img src={logo} alt="Autaris Logo" className="w-8 h-8" />
+          <span className="text-xl font-bold bg-gradient-to-r from-primary to-autaris-accent bg-clip-text text-transparent">
+            Autaris
           </span>
         </Link>
 

@@ -55,7 +55,7 @@ export default function ActivityChart() {
   }, []);
 
   return (
-    <Card className="p-3 sm:p-4 lg:p-6 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-growth-primary/20 hover:bg-card/80 cursor-pointer">
+    <Card className="p-3 sm:p-4 lg:p-6 border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-autaris-primary/20 hover:bg-card/80 cursor-pointer">
       <div className="mb-3 sm:mb-4">
         <h3 className="text-base sm:text-lg font-semibold text-foreground">Weekly Activity</h3>
         <p className="text-xs sm:text-sm text-muted-foreground">Views and engagement over time</p>
@@ -71,12 +71,12 @@ export default function ActivityChart() {
             <AreaChart data={data}>
               <defs>
                 <linearGradient id="colorFollowers" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--growth-primary))" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(var(--growth-primary))" stopOpacity={0} />
+                  <stop offset="5%" stopColor="hsl(var(--autaris-primary))" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(var(--autaris-primary))" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="colorEngagement" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--growth-secondary))" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(var(--growth-secondary))" stopOpacity={0} />
+                  <stop offset="5%" stopColor="hsl(var(--autaris-secondary))" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(var(--autaris-secondary))" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <XAxis 
@@ -102,7 +102,7 @@ export default function ActivityChart() {
               <Area
                 type="monotone"
                 dataKey="followers"
-                stroke="hsl(var(--growth-primary))"
+                stroke="hsl(var(--autaris-primary))"
                 fillOpacity={1}
                 fill="url(#colorFollowers)"
                 strokeWidth={2}
@@ -111,7 +111,7 @@ export default function ActivityChart() {
               <Area
                 type="monotone"
                 dataKey="engagement"
-                stroke="hsl(var(--growth-secondary))"
+                stroke="hsl(var(--autaris-secondary))"
                 fillOpacity={1}
                 fill="url(#colorEngagement)"
                 strokeWidth={2}

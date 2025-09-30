@@ -55,14 +55,14 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				growth: {
-					primary: 'hsl(var(--growth-primary))',
-					'primary-light': 'hsl(var(--growth-primary-light))',
-					secondary: 'hsl(var(--growth-secondary))',
-					accent: 'hsl(var(--growth-accent))',
-					success: 'hsl(var(--growth-success))',
-					warning: 'hsl(var(--growth-warning))',
-					danger: 'hsl(var(--growth-danger))'
+				autaris: {
+					primary: 'hsl(var(--autaris-primary))',
+					'primary-light': 'hsl(var(--autaris-primary-light))',
+					secondary: 'hsl(var(--autaris-secondary))',
+					accent: 'hsl(var(--autaris-accent))',
+					success: 'hsl(var(--autaris-success))',
+					warning: 'hsl(var(--autaris-warning))',
+					danger: 'hsl(var(--autaris-danger))'
 				},
 				chart: {
 					'1': 'hsl(var(--chart-1))',
