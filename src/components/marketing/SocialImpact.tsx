@@ -23,6 +23,10 @@ export function SocialImpact() {
               <p className="text-lg text-muted-foreground leading-relaxed">
                 🌍 With every subscription to Autaris, a percentage of your plan goes directly toward building the <strong>Autaris Foundation</strong> — dedicated to helping dogs in need. By joining us, you're not only empowering creators, you're also making an impact on the lives of countless dogs waiting for care, shelter, and a second chance.
               </p>
+              
+              <p className="text-lg text-muted-foreground leading-relaxed">
+                We're on a mission to launch the Autaris Foundation with an initial fund of <strong>$20,000</strong>. Every subscription brings us closer to this milestone. Once we reach it, we'll officially begin funding projects that provide food, shelter, and medical care for dogs in need. Join us in building a future where every dog gets a second chance.
+              </p>
             </div>
           </div>
         </div>
