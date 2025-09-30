@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { TrendingUp, Users, Clock, BarChart3 } from 'lucide-react';
 import { WaitlistForm } from './WaitlistForm';
-import dashboardPreview from '@/assets/dashboard-screenshot.png';
+import dashboardPreview from '@/assets/dashboard-preview-mockup.png';
 
 export function Hero() {
   const [showWaitlist, setShowWaitlist] = useState(false);
@@ -55,7 +55,7 @@ export function Hero() {
                 </div>
                 <img 
                   src={dashboardPreview} 
-                  alt="Autaris Analytics Dashboard Preview - showing KPI metrics, performance trends, platform breakdown, and posting analytics"
+                  alt="Autaris Analytics Dashboard with real-time data showing 2.4M total views, 6.8% engagement rate, performance trends, platform breakdown across TikTok, Instagram, and YouTube, and best posting times heatmap"
                   className="w-full rounded-lg shadow-lg border border-border/50"
                 />
                 <p className="text-xs text-muted-foreground text-center">
