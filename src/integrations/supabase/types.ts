@@ -282,6 +282,33 @@ export type Database = {
           },
         ]
       }
+      foundation_fund: {
+        Row: {
+          contributors: number
+          created_at: string
+          goal_cents: number
+          id: string
+          total_raised_cents: number
+          updated_at: string
+        }
+        Insert: {
+          contributors?: number
+          created_at?: string
+          goal_cents?: number
+          id?: string
+          total_raised_cents?: number
+          updated_at?: string
+        }
+        Update: {
+          contributors?: number
+          created_at?: string
+          goal_cents?: number
+          id?: string
+          total_raised_cents?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       healthchecks: {
         Row: {
           created_at: string
