@@ -11,10 +11,31 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { CalendarIcon, User } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { CalendarIcon, User, LogOut, Trash2, CreditCard, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface GlobalFiltersProps {
   filters: {
@@ -28,7 +49,13 @@ interface GlobalFiltersProps {
 export default function GlobalFilters({ filters, onFiltersChange }: GlobalFiltersProps) {
   const [fromOpen, setFromOpen] = useState(false);
   const [toOpen, setToOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [supportDialogOpen, setSupportDialogOpen] = useState(false);
+  const [supportMessage, setSupportMessage] = useState('');
+  const [supportEmail, setSupportEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const updateFilter = (key: string, value: any) => {
     onFiltersChange({ ...filters, [key]: value });
@@ -37,6 +64,71 @@ export default function GlobalFilters({ filters, onFiltersChange }: GlobalFilter
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate('/auth');
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Delete user data
+      await supabase.auth.admin.deleteUser(user.id);
+      
+      toast({
+        title: "Account deleted",
+        description: "Your account has been permanently deleted.",
+      });
+      
+      navigate('/auth');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete account. Please contact support.",
+        variant: "destructive",
+      });
+    }
+    setDeleteDialogOpen(false);
+  };
+
+  const handleContactSupport = async () => {
+    if (!supportMessage.trim() || !supportEmail.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please provide both your email and message.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Here you would integrate with your support system
+      // For now, we'll just show a success message
+      toast({
+        title: "Message sent",
+        description: "Our support team will get back to you soon.",
+      });
+      
+      setSupportMessage('');
+      setSupportEmail('');
+      setSupportDialogOpen(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleManageSubscription = () => {
+    // Redirect to subscription management (implement based on your payment provider)
+    toast({
+      title: "Coming soon",
+      description: "Subscription management will be available soon.",
+    });
   };
 
   return (
@@ -121,16 +213,99 @@ export default function GlobalFilters({ filters, onFiltersChange }: GlobalFilter
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              Connect TikTok Account
+            <DropdownMenuItem onClick={handleManageSubscription}>
+              <CreditCard className="mr-2 h-4 w-4" />
+              Manage Subscription
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSupportDialogOpen(true)}>
+              <MessageSquare className="mr-2 h-4 w-4" />
+              Contact Support
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut}>
-              Sign out
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => setDeleteDialogOpen(true)}
+              className="text-destructive focus:text-destructive"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Account
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {/* Delete Account Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your account
+              and remove all your data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteAccount}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete Account
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Contact Support Dialog */}
+      <Dialog open={supportDialogOpen} onOpenChange={setSupportDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Contact Support</DialogTitle>
+            <DialogDescription>
+              Send us a message and we'll get back to you as soon as possible.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="support-email">Your Email</Label>
+              <Input
+                id="support-email"
+                type="email"
+                placeholder="your@email.com"
+                value={supportEmail}
+                onChange={(e) => setSupportEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="support-message">Message</Label>
+              <Textarea
+                id="support-message"
+                placeholder="How can we help you?"
+                value={supportMessage}
+                onChange={(e) => setSupportMessage(e.target.value)}
+                rows={5}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setSupportDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleContactSupport}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Sending...' : 'Send Message'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
