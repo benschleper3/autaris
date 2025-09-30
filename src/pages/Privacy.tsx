@@ -10,7 +10,7 @@ export default function Privacy() {
       <main className="container mx-auto px-4 py-16 max-w-4xl">
         <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-8">
           <header className="text-center mb-12">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-growth-accent bg-clip-text text-transparent mb-4">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-autaris-accent bg-clip-text text-transparent mb-4">
               Privacy Policy
             </h1>
             <p className="text-muted-foreground">
@@ -20,10 +20,10 @@ export default function Privacy() {
 
           <div className="prose prose-invert max-w-none space-y-8">
             <p className="text-foreground/80 mb-8">
-              This Privacy Policy describes how Growth OS ("we," "us," or "our") collects, uses, and shares your information when you access or use our website, application, and related services (collectively, the "Service").
+              This Privacy Policy describes how Autaris ("we," "us," or "our") collects, uses, and shares your information when you access or use our website, application, and related services (collectively, the "Service").
             </p>
             <p className="text-foreground/80 mb-8">
-              By using Growth OS, you agree to the collection and use of information as described in this policy. If you do not agree, please discontinue use of the Service.
+              By using Autaris, you agree to the collection and use of information as described in this policy. If you do not agree, please discontinue use of the Service.
             </p>
 
             <section>
@@ -66,7 +66,7 @@ export default function Privacy() {
               <h2 className="text-2xl font-semibold mb-4">2. How We Use Information</h2>
               <p className="text-foreground/80 mb-4">We use the information we collect to:</p>
               <ul className="list-disc pl-6 text-foreground/80 space-y-2">
-                <li>Provide, maintain, and improve Growth OS services.</li>
+                <li>Provide, maintain, and improve Autaris services.</li>
                 <li>Generate analytics, insights, and performance reports.</li>
                 <li>Develop new features and personalize your experience.</li>
                 <li>Communicate with you about your account, subscriptions, or updates.</li>
@@ -152,7 +152,7 @@ export default function Privacy() {
             <section>
               <h2 className="text-2xl font-semibold mb-4">7. Children's Privacy</h2>
               <p className="text-foreground/80">
-                Growth OS is not directed to children under 13 (or the minimum age required by local law). We do not knowingly collect personal information from children. If we learn that we have collected such information, we will delete it promptly.
+                Autaris is not directed to children under 13 (or the minimum age required by local law). We do not knowingly collect personal information from children. If we learn that we have collected such information, we will delete it promptly.
               </p>
             </section>
 
