@@ -40,6 +40,33 @@ pop3_port = 54327
 enabled = true
 region = "us-east-1"
 
+[functions.tiktok-start]
+verify_jwt = true
+
+[functions.tiktok-callback]
+verify_jwt = false
+
+[functions.tiktok-sync]
+verify_jwt = true
+
+[functions.analytics-kpis]
+verify_jwt = true
+
+[functions.analytics-trend]
+verify_jwt = true
+
+[functions.analytics-heatmap]
+verify_jwt = true
+
+[functions.analytics-top-posts]
+verify_jwt = true
+
+[functions.insights-generate]
+verify_jwt = true
+
+[functions.report-generate]
+verify_jwt = true
+
 [auth]
 enabled = true
 port = 54328
