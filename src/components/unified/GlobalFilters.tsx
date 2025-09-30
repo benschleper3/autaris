@@ -138,7 +138,7 @@ export default function GlobalFilters({ filters, onFiltersChange }: GlobalFilter
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         <div className="flex items-center gap-4">
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-growth-accent bg-clip-text text-transparent">
+            <span className="text-xl font-bold text-primary">
               Autaris
             </span>
           </Link>
