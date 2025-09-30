@@ -41,7 +41,7 @@ export default function Navigation({}: NavigationProps) {
         {/* Logo */}
         <div className="flex items-center gap-2">
           <img src={logo} alt="Autaris Logo" className="w-8 h-8" />
-          <span className="text-xl font-bold bg-gradient-to-r from-autaris-primary to-autaris-secondary bg-clip-text text-transparent">
+          <span className="text-xl font-bold text-autaris-primary">
             Autaris
           </span>
         </div>
