@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { TrendingUp, Users, Clock, BarChart3 } from 'lucide-react';
 import { WaitlistForm } from './WaitlistForm';
-import dashboardPreview from '@/assets/dashboard-preview.jpg';
+import dashboardPreview from '@/assets/dashboard-screenshot.png';
 
 export function Hero() {
   const [showWaitlist, setShowWaitlist] = useState(false);
