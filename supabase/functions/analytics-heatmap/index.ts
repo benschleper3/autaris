@@ -1,62 +1,42 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { handleCors, corsHeaders } from '../_shared/cors.ts';
-import { getSupabaseAdmin } from '../_shared/supabaseAdmin.ts';
+import { supaAdmin, getUserIdFromRequest } from '../_shared/supabaseAdmin.ts';
 
 serve(async (req) => {
-  const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
-
   try {
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'unauthorized' }), {
+    const user_id = await getUserIdFromRequest(req);
+    if (!user_id) {
+      return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { 
         status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_ANON_KEY')!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return new Response(JSON.stringify({ error: 'unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const supaAdmin = getSupabaseAdmin();
+    console.log('[analytics-heatmap] Fetching heatmap for user:', user_id);
 
     const { data, error } = await supaAdmin
       .from('v_time_heatmap')
-      .select('*')
-      .eq('user_id', user.id);
+      .select('platform,dow,hour,avg_engagement_percent,posts_count')
+      .eq('user_id', user_id);
 
     if (error) {
-      console.error('[analytics-heatmap] Error:', error);
-      return new Response(JSON.stringify({ error: error.message }), {
+      console.error('[analytics-heatmap] Query error:', error);
+      return new Response(JSON.stringify({ ok: false, error: error.message }), { 
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    return new Response(
-      JSON.stringify({ ok: true, rows: data ?? [] }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    );
+    console.log('[analytics-heatmap] Found', data?.length ?? 0, 'heatmap rows');
+
+    return new Response(JSON.stringify({ ok: true, rows: data ?? [] }), { 
+      headers: { 'Content-Type': 'application/json' } 
+    });
   } catch (error) {
     console.error('[analytics-heatmap] Error:', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ error: message }), {
+    return new Response(JSON.stringify({ ok: false, error: message }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
     });
   }
 });

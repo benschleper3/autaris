@@ -1,63 +1,39 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { handleCors, corsHeaders } from '../_shared/cors.ts';
-import { getSupabaseAdmin } from '../_shared/supabaseAdmin.ts';
+import { supaAdmin, getUserIdFromRequest } from '../_shared/supabaseAdmin.ts';
 
 serve(async (req) => {
-  const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
-
   try {
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'unauthorized' }), {
+    const user_id = await getUserIdFromRequest(req);
+    if (!user_id) {
+      return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { 
         status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_ANON_KEY')!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return new Response(JSON.stringify({ error: 'unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const body = await req.json();
+    const body = await req.json().catch(() => ({}));
     const from = body.from ?? null;
     const to = body.to ?? null;
     const campaign_id = body.campaign_id ?? null;
 
-    const supaAdmin = getSupabaseAdmin();
+    console.log('[report-generate] Generating report for user:', user_id, { from, to, campaign_id });
 
-    // Fetch KPIs and top posts
-    const [kpiResult, topsResult] = await Promise.all([
-      supaAdmin.rpc('get_ugc_kpis', {
-        p_from: from,
-        p_to: to,
-        p_platform: 'all',
-      }),
-      supaAdmin
-        .from('v_posts_with_latest')
-        .select('title,platform,views,engagement_rate,url')
-        .eq('user_id', user.id)
-        .order('engagement_rate', { ascending: false })
-        .order('views', { ascending: false })
-        .limit(5),
-    ]);
+    // Fetch KPIs
+    const { data: kpi } = await supaAdmin.rpc('get_ugc_kpis', { 
+      p_from: from, 
+      p_to: to, 
+      p_platform: 'all' 
+    });
+    const krow = Array.isArray(kpi) ? kpi[0] : (kpi ?? {});
 
-    const kpis = Array.isArray(kpiResult.data) && kpiResult.data.length > 0
-      ? kpiResult.data[0]
-      : kpiResult.data;
-
-    const tops = topsResult.data ?? [];
+    // Fetch top posts
+    const { data: tops } = await supaAdmin
+      .from('v_posts_with_latest')
+      .select('title,platform,views,engagement_rate,url,likes,comments,shares,saves')
+      .eq('user_id', user_id)
+      .order('engagement_rate', { ascending: false })
+      .order('views', { ascending: false })
+      .limit(5);
 
     // Generate HTML report
     const html = `<!doctype html>
@@ -67,75 +43,121 @@ serve(async (req) => {
   <title>Growth OS Report</title>
   <style>
     body {
-      font-family: Inter, system-ui, sans-serif;
-      padding: 24px;
+      font-family: Inter, system-ui, -apple-system, sans-serif;
+      padding: 32px;
       background: #0c0c10;
       color: #e6e6f2;
       max-width: 1200px;
       margin: 0 auto;
     }
-    h1 { font-size: 28px; margin: 0 0 12px; }
-    h2 { font-size: 20px; margin: 24px 0 12px; }
-    .row { display: flex; gap: 12px; flex-wrap: wrap; margin: 24px 0; }
+    h1 {
+      font-size: 28px;
+      margin: 0 0 8px;
+      background: linear-gradient(135deg, #00dc82, #00b866);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle {
+      color: #94949e;
+      margin-bottom: 32px;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
     .card {
       background: #12121a;
       border: 1px solid #1f2030;
       border-radius: 12px;
-      padding: 16px;
-      min-width: 200px;
-      flex: 1;
+      padding: 20px;
     }
-    .card strong { font-size: 24px; display: block; margin-top: 8px; }
-    .post-card { margin-bottom: 12px; }
+    .card-title {
+      font-size: 14px;
+      color: #94949e;
+      margin-bottom: 8px;
+    }
+    .card-value {
+      font-size: 28px;
+      font-weight: 600;
+    }
+    h2 {
+      font-size: 20px;
+      margin: 32px 0 16px;
+    }
+    .post-card {
+      background: #12121a;
+      border: 1px solid #1f2030;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .post-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .post-meta {
+      color: #94949e;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
-  <h1>Growth OS — Performance Report</h1>
-  <p>Period: ${from ?? '—'} → ${to ?? '—'}${campaign_id ? ` (Campaign: ${campaign_id})` : ''}</p>
+  <h1>Growth OS Performance Report</h1>
+  <div class="subtitle">
+    Period: ${from ?? 'All time'} → ${to ?? 'Present'}
+    ${campaign_id ? ` • Campaign: ${campaign_id}` : ''}
+  </div>
   
   <div class="row">
     <div class="card">
-      <div>Views (30d)</div>
-      <strong>${kpis?.views_30d ?? '—'}</strong>
+      <div class="card-title">Total Views (30d)</div>
+      <div class="card-value">${(krow.views_30d ?? 0).toLocaleString()}</div>
     </div>
     <div class="card">
-      <div>Avg ER%</div>
-      <strong>${kpis?.avg_er_30d ?? '—'}%</strong>
+      <div class="card-title">Avg Engagement Rate</div>
+      <div class="card-value">${(krow.avg_er_30d ?? 0).toFixed(2)}%</div>
     </div>
     <div class="card">
-      <div>Posts</div>
-      <strong>${kpis?.posts_30d ?? '—'}</strong>
+      <div class="card-title">Posts Created</div>
+      <div class="card-value">${krow.posts_30d ?? 0}</div>
     </div>
     <div class="card">
-      <div>Active Campaigns</div>
-      <strong>${kpis?.active_campaigns ?? '—'}</strong>
+      <div class="card-title">Active Campaigns</div>
+      <div class="card-value">${krow.active_campaigns ?? 0}</div>
     </div>
   </div>
 
-  <h2>Top Performing Posts</h2>
-  ${tops.map((x: any) => `
-    <div class="card post-card">
-      <strong>${x.title ?? '(untitled)'}</strong>
-      <div>${x.platform} — ER ${x.engagement_rate}% — ${x.views} views</div>
+  <h2>Top Performing Content</h2>
+  ${(tops ?? []).map((post: any) => `
+    <div class="post-card">
+      <div class="post-title">${post.title ?? '(Untitled)'}</div>
+      <div class="post-meta">
+        ${post.platform} • ${(post.views ?? 0).toLocaleString()} views • 
+        ${(post.engagement_rate ?? 0).toFixed(2)}% ER • 
+        ${(post.likes ?? 0).toLocaleString()} likes
+      </div>
     </div>
   `).join('')}
 </body>
 </html>`;
 
-    const url = `data:text/html;base64,${btoa(html)}`;
+    // Create data URL
+    const url = `data:text/html;base64,${btoa(unescape(encodeURIComponent(html)))}`;
 
-    return new Response(
-      JSON.stringify({ ok: true, report_url: url }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    );
+    console.log('[report-generate] Report generated successfully');
+
+    return new Response(JSON.stringify({ ok: true, report_url: url }), { 
+      headers: { 'Content-Type': 'application/json' } 
+    });
   } catch (error) {
     console.error('[report-generate] Error:', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ error: message }), {
+    return new Response(JSON.stringify({ ok: false, error: message }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
     });
   }
 });
