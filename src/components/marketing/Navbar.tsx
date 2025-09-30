@@ -77,39 +77,6 @@ export function Navbar() {
         </div>
 
         <div className="flex flex-1 items-center justify-end space-x-4">
-          {/* Desktop Auth Buttons */}
-          <div className="hidden md:flex md:items-center md:space-x-3">
-            {session ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full">
-                    <User className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    Connect TikTok Account
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut}>
-                    Sign out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <>
-                <Button variant="ghost" size="sm" onClick={handleSignIn}>
-                  Sign in
-                </Button>
-                <Button size="sm" onClick={handleSignIn}>
-                  Get started
-                </Button>
-              </>
-            )}
-          </div>
-
           {/* Mobile Menu */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild className="md:hidden">
@@ -140,46 +107,6 @@ export function Navbar() {
                     </a>
                   )
                 )}
-                
-                <div className="border-t pt-6 space-y-3">
-                  {session ? (
-                    <Button 
-                      variant="ghost" 
-                      size="lg" 
-                      className="w-full justify-start"
-                      onClick={() => {
-                        handleSignOut();
-                        setIsOpen(false);
-                      }}
-                    >
-                      Sign out
-                    </Button>
-                  ) : (
-                    <>
-                      <Button 
-                        variant="ghost" 
-                        size="lg" 
-                        className="w-full justify-start"
-                        onClick={() => {
-                          handleSignIn();
-                          setIsOpen(false);
-                        }}
-                      >
-                        Sign in
-                      </Button>
-                      <Button 
-                        size="lg" 
-                        className="w-full"
-                        onClick={() => {
-                          handleSignIn();
-                          setIsOpen(false);
-                        }}
-                      >
-                        Get started
-                      </Button>
-                    </>
-                  )}
-                </div>
               </div>
             </SheetContent>
           </Sheet>
