@@ -21,7 +21,7 @@ export function SocialImpact() {
               </h2>
               
               <p className="text-lg text-muted-foreground leading-relaxed">
-                🌍 With every subscription to Autaris, a percentage of your plan goes directly toward building the <strong>Autaris Foundation</strong> — dedicated to helping dogs in need. By joining us, you're not only empowering creators, you're also making an impact on the lives of countless dogs waiting for care, shelter, and a second chance.
+                🌍 With every subscription to Autaris, <strong>20%</strong> of your plan goes directly toward building the <strong>Autaris Foundation</strong> — dedicated to helping dogs in need. By joining us, you're not only empowering creators, you're also making an impact on the lives of countless dogs waiting for care, shelter, and a second chance.
               </p>
               
               <p className="text-lg text-muted-foreground leading-relaxed">
