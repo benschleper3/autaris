@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Brain, ExternalLink } from 'lucide-react';
+import { Brain, ExternalLink, FolderPlus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface TopPostsTableProps {
@@ -92,31 +92,28 @@ export default function TopPostsTable({ filters }: TopPostsTableProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      const response = await fetch('https://your-n8n-domain.com/webhook/add-portfolio', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          post_id: post.post_id,
-          user_id: user.id
-        })
-      });
-
-      if (!response.ok) throw new Error('Failed to add to portfolio');
-
-      // Also add to local database
+      // Insert directly into portfolio_items table
       const { error } = await supabase
         .from('portfolio_items')
         .insert({
           user_id: user.id,
           post_id: post.post_id,
           title: post.title || 'Untitled',
+          description: `${post.platform} post with ${post.views?.toLocaleString() || 0} views and ${post.engagement_rate?.toFixed(2) || 0}% engagement rate`,
           image_url: null,
           featured: false
         });
 
-      if (error && !error.message.includes('duplicate')) {
+      if (error) {
+        // Check if it's a duplicate key error
+        if (error.message.includes('duplicate') || error.code === '23505') {
+          toast({
+            title: "Already in Portfolio",
+            description: "This post is already in your portfolio.",
+            variant: "destructive"
+          });
+          return;
+        }
         throw error;
       }
 
@@ -128,7 +125,7 @@ export default function TopPostsTable({ filters }: TopPostsTableProps) {
       console.error('Error adding to portfolio:', error);
       toast({
         title: "Addition Failed",
-        description: "Could not add post to portfolio. It may already exist.",
+        description: "Could not add post to portfolio. Please try again.",
         variant: "destructive"
       });
     }
@@ -283,6 +280,7 @@ export default function TopPostsTable({ filters }: TopPostsTableProps) {
                         onClick={() => handleAddToPortfolio(post)}
                         className="flex items-center gap-1"
                       >
+                        <FolderPlus className="w-3 h-3" />
                         Add to Portfolio
                       </Button>
                       {post.url && (
