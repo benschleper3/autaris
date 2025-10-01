@@ -853,7 +853,6 @@ export type Database = {
         Args:
           | Record<PropertyKey, never>
           | { p_from: string; p_platform: string; p_to: string }
-          | { p_from: string; p_platform: string; p_to: string }
         Returns: {
           active_campaigns: number
           avg_er_30d: number
