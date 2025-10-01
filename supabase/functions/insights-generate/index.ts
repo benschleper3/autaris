@@ -32,6 +32,7 @@ serve(async (req) => {
     // Fetch all data in parallel
     const [{ data: trend }, { data: tops }, { data: kpi }] = await Promise.all([
       supaAdmin.rpc('get_daily_perf', { 
+        p_user_id: user_id,
         p_from: fromISO, 
         p_to: toISO, 
         p_platform: 'all' 
@@ -44,6 +45,7 @@ serve(async (req) => {
         .order('views', { ascending: false })
         .limit(10),
       supaAdmin.rpc('get_ugc_kpis', { 
+        p_user_id: user_id,
         p_from: fromISO, 
         p_to: toISO, 
         p_platform: 'all' 

@@ -28,6 +28,7 @@ serve(async (req) => {
     console.log('[analytics-kpis] Fetching KPIs for user:', user_id, { p_from, p_to, p_platform });
 
     const { data, error } = await supaAdmin.rpc('get_ugc_kpis', { 
+      p_user_id: user_id,
       p_from, 
       p_to, 
       p_platform 

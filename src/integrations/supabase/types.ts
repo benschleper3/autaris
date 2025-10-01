@@ -842,7 +842,14 @@ export type Database = {
         }[]
       }
       get_daily_perf: {
-        Args: { p_from: string; p_platform: string; p_to: string }
+        Args:
+          | { p_from: string; p_platform: string; p_to: string }
+          | {
+              p_from: string
+              p_platform: string
+              p_to: string
+              p_user_id: string
+            }
         Returns: {
           avg_er_percent: number
           day: string
@@ -853,6 +860,12 @@ export type Database = {
         Args:
           | Record<PropertyKey, never>
           | { p_from: string; p_platform: string; p_to: string }
+          | {
+              p_from: string
+              p_platform: string
+              p_to: string
+              p_user_id: string
+            }
         Returns: {
           active_campaigns: number
           avg_er_30d: number

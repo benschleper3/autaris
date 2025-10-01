@@ -20,6 +20,7 @@ serve(async (req) => {
 
     // Fetch KPIs
     const { data: kpi } = await supaAdmin.rpc('get_ugc_kpis', { 
+      p_user_id: user_id,
       p_from: from, 
       p_to: to, 
       p_platform: 'all' 

@@ -28,6 +28,7 @@ serve(async (req) => {
     console.log('[analytics-trend] Fetching trends for user:', user_id, { p_from, p_to, p_platform });
 
     const { data, error } = await supaAdmin.rpc('get_daily_perf', { 
+      p_user_id: user_id,
       p_from, 
       p_to, 
       p_platform 
