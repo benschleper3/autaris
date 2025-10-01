@@ -2,13 +2,22 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { supaAdmin, getUserIdFromRequest } from '../_shared/supabaseAdmin.ts';
 import { weeklySummary } from '../_shared/ai.ts';
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
 serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
   try {
     const user_id = await getUserIdFromRequest(req);
     if (!user_id) {
       return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { 
         status: 401,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
@@ -76,14 +85,14 @@ serve(async (req) => {
     console.log('[insights-generate] Insights saved successfully');
 
     return new Response(JSON.stringify({ ok: true, insight }), { 
-      headers: { 'Content-Type': 'application/json' } 
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
     });
   } catch (error) {
     console.error('[insights-generate] Error:', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
     return new Response(JSON.stringify({ ok: false, error: message }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });
