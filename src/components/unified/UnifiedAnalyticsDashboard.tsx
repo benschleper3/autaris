@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { FileText, FolderOpen, Code, Home } from 'lucide-react';
+import { FileText, FolderOpen, Code, Home, RefreshCw } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import GlobalFilters from './GlobalFilters';
 import KPIStrip from './KPIStrip';
 import TrendChart from './TrendChart';
@@ -16,6 +18,7 @@ import ExportAppJsonModal from './ExportAppJsonModal';
 
 export default function UnifiedAnalyticsDashboard() {
   const { isOwnerOrAdmin } = useUserRole();
+  const { toast } = useToast();
   
   const [filters, setFilters] = useState({
     from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
@@ -26,6 +29,49 @@ export default function UnifiedAnalyticsDashboard() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [showPortfolioModal, setShowPortfolioModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+
+  const handleConnectTikTok = () => {
+    window.open('https://gjfbxqsjxasubvnpeeie.supabase.co/functions/v1/tiktok-start', '_blank');
+  };
+
+  const handleSyncData = async () => {
+    try {
+      setSyncing(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await fetch(
+        'https://gjfbxqsjxasubvnpeeie.supabase.co/functions/v1/tiktok-sync',
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session?.access_token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      const data = await response.json();
+      if (!data.ok) throw new Error(data.error);
+
+      toast({
+        title: "Sync Complete",
+        description: `Synced ${data.synced.posts} posts and ${data.synced.metrics} metrics from TikTok.`
+      });
+
+      // Trigger refresh by updating filters slightly
+      setFilters({ ...filters });
+    } catch (error) {
+      console.error('Error syncing data:', error);
+      toast({
+        title: "Sync Failed",
+        description: "Could not sync TikTok data. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-background/80">
@@ -43,7 +89,11 @@ export default function UnifiedAnalyticsDashboard() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button onClick={() => setShowReportModal(true)} className="flex items-center gap-2">
+            <Button onClick={handleSyncData} disabled={syncing} variant="default" className="flex items-center gap-2">
+              <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+              {syncing ? 'Syncing...' : 'Sync TikTok Data'}
+            </Button>
+            <Button onClick={() => setShowReportModal(true)} variant="outline" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
               Generate Report
             </Button>
