@@ -29,14 +29,31 @@ export default function KPIStrip({ filters }: KPIStripProps) {
   const fetchKPIs = async () => {
     try {
       setLoading(true);
-      const { data: kpiData, error } = await supabase.rpc('get_ugc_kpis', {
-        p_from: filters.from?.toISOString().split('T')[0] || null,
-        p_to: filters.to?.toISOString().split('T')[0] || null,
-        p_platform: filters.platform
-      });
+      const params = new URLSearchParams();
+      if (filters.from) params.set('from', filters.from.toISOString().split('T')[0]);
+      if (filters.to) params.set('to', filters.to.toISOString().split('T')[0]);
+      params.set('platform', filters.platform);
 
-      if (error) throw error;
-      setData(kpiData[0] || { views_30d: 0, avg_er_30d: 0, posts_30d: 0, active_campaigns: 0 });
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await fetch(
+        `https://gjfbxqsjxasubvnpeeie.supabase.co/functions/v1/analytics-kpis?${params.toString()}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${session?.access_token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      const data = await response.json();
+      if (!data.ok) throw new Error(data.error);
+      
+      setData({
+        views_30d: data.views_30d || 0,
+        avg_er_30d: data.avg_er_30d || 0,
+        posts_30d: data.posts_30d || 0,
+        active_campaigns: data.active_campaigns || 0
+      });
     } catch (error) {
       console.error('Error fetching KPIs:', error);
       setData({ views_30d: 0, avg_er_30d: 0, posts_30d: 0, active_campaigns: 0 });

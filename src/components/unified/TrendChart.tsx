@@ -29,15 +29,26 @@ export default function TrendChart({ filters }: TrendChartProps) {
   const fetchTrendData = async () => {
     try {
       setLoading(true);
-      const { data: trendData, error } = await supabase.rpc('get_daily_perf', {
-        p_from: filters.from?.toISOString().split('T')[0] || null,
-        p_to: filters.to?.toISOString().split('T')[0] || null,
-        p_platform: filters.platform
-      });
+      const params = new URLSearchParams();
+      if (filters.from) params.set('from', filters.from.toISOString().split('T')[0]);
+      if (filters.to) params.set('to', filters.to.toISOString().split('T')[0]);
+      params.set('platform', filters.platform);
 
-      if (error) throw error;
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await fetch(
+        `https://gjfbxqsjxasubvnpeeie.supabase.co/functions/v1/analytics-trend?${params.toString()}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${session?.access_token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
 
-      const formattedData = (trendData || []).map((item: any) => ({
+      const data = await response.json();
+      if (!data.ok) throw new Error(data.error);
+
+      const formattedData = (data.rows || []).map((item: any) => ({
         date: new Date(item.day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         day_views: item.day_views || 0,
         avg_er_percent: item.avg_er_percent || 0
