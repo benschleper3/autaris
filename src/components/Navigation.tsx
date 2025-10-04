@@ -16,6 +16,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '@/assets/logo.png';
+import { supabase } from '@/integrations/supabase/client';
+import { useEffect, useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 interface NavigationProps {
   // Remove old props since we'll detect current route
@@ -24,9 +27,79 @@ interface NavigationProps {
 export default function Navigation({}: NavigationProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
+  const [isTikTokConnected, setIsTikTokConnected] = useState(false);
+  const [loading, setLoading] = useState(true);
   
   const isCreatorDashboard = location.pathname === '/dashboard-creator';
   const isUGCDashboard = location.pathname === '/dashboard-ugc';
+  
+  useEffect(() => {
+    checkTikTokConnection();
+  }, []);
+
+  const checkTikTokConnection = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('social_accounts')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('platform', 'tiktok')
+        .maybeSingle();
+
+      if (error) throw error;
+      setIsTikTokConnected(!!data);
+    } catch (error) {
+      console.error('Error checking TikTok connection:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTikTokConnect = async () => {
+    try {
+      const functionUrl = 'https://gjfbxqsjxasubvnpeeie.supabase.co/functions/v1/tiktok-start';
+      window.location.href = functionUrl;
+    } catch (error) {
+      console.error('Error connecting TikTok:', error);
+      toast({
+        title: "Connection Failed",
+        description: "Could not initiate TikTok connection.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleTikTokDisconnect = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const { error } = await supabase
+        .from('social_accounts')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('platform', 'tiktok');
+
+      if (error) throw error;
+
+      setIsTikTokConnected(false);
+      toast({
+        title: "Disconnected",
+        description: "TikTok account has been disconnected."
+      });
+    } catch (error) {
+      console.error('Error disconnecting TikTok:', error);
+      toast({
+        title: "Disconnection Failed",
+        description: "Could not disconnect TikTok account.",
+        variant: "destructive"
+      });
+    }
+  };
   
   const handleDashboardSwitch = (type: 'creator' | 'ugc') => {
     if (type === 'creator') {
@@ -82,8 +155,11 @@ export default function Navigation({}: NavigationProps) {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              Connect TikTok Account
+            <DropdownMenuItem
+              onClick={isTikTokConnected ? handleTikTokDisconnect : handleTikTokConnect}
+              disabled={loading}
+            >
+              {loading ? 'Loading...' : isTikTokConnected ? 'Disconnect from TikTok' : 'Connect TikTok Account'}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
