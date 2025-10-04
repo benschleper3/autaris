@@ -14,6 +14,7 @@ import Auth from "./pages/Auth";
 import AuthDebug from "./pages/AuthDebug";
 import RequireAuth from "./components/auth/RequireAuth";
 import WiringExport from "./pages/WiringExport";
+import ReviewerTest from "./pages/ReviewerTest";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ function App() {
               <Route path="/auth/debug" element={<AuthDebug />} />
               <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
               <Route path="/dev/wiring-export" element={<WiringExport />} />
+              <Route path="/dev/reviewer" element={<RequireAuth><ReviewerTest /></RequireAuth>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
