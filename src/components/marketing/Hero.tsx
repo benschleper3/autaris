@@ -44,22 +44,6 @@ export function Hero() {
             </DialogContent>
           </Dialog>
         </div>
-        
-        {/* Stats Preview */}
-        <div className="grid grid-cols-3 gap-8 pt-12 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-          <div className="space-y-2">
-            <div className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary to-autaris-accent bg-clip-text text-transparent">10K+</div>
-            <div className="text-sm text-muted-foreground">Active Creators</div>
-          </div>
-          <div className="space-y-2">
-            <div className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary to-autaris-accent bg-clip-text text-transparent">$2M+</div>
-            <div className="text-sm text-muted-foreground">Deals Secured</div>
-          </div>
-          <div className="space-y-2">
-            <div className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary to-autaris-accent bg-clip-text text-transparent">50+</div>
-            <div className="text-sm text-muted-foreground">Brand Partners</div>
-          </div>
-        </div>
       </div>
     </section>
   );
