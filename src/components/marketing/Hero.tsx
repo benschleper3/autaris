@@ -8,26 +8,34 @@ export function Hero() {
 
 
   return (
-    <section id="hero" className="container py-24 lg:py-32">
-      <div className="flex flex-col justify-center items-center text-center space-y-8 max-w-4xl mx-auto">
-        <div className="space-y-6">
-          <h1 className="text-4xl font-bold tracking-tight lg:text-6xl">
-            <span className="bg-gradient-to-r from-primary to-autaris-accent bg-clip-text text-transparent">
+    <section id="hero" className="container py-32 lg:py-40 relative">
+      {/* Decorative elements */}
+      <div className="absolute top-20 right-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-float" />
+      <div className="absolute bottom-20 left-10 w-72 h-72 bg-autaris-accent/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '3s' }} />
+      
+      <div className="flex flex-col justify-center items-center text-center space-y-10 max-w-5xl mx-auto relative z-10">
+        <div className="space-y-8 animate-fade-in">
+          <div className="inline-block px-4 py-2 bg-primary/10 border border-primary/20 rounded-full text-sm font-medium text-primary mb-4 animate-pulse-slow">
+            🚀 The Future of Creator Analytics
+          </div>
+          
+          <h1 className="text-5xl font-bold tracking-tight lg:text-7xl leading-tight">
+            <span className="bg-gradient-to-r from-primary via-autaris-accent to-autaris-purple bg-clip-text text-transparent animate-gradient inline-block">
               Prove your value.
             </span>
             <br />
             <span className="text-foreground">Grow your deals.</span>
           </h1>
           
-          <p className="text-xl text-muted-foreground lg:text-2xl">
-            Autaris is the complete analytics platform for content creators and UGC professionals. Track performance across all platforms, optimize posting times with AI that adapts to your unique content style, manage campaigns, build portfolios, and generate professional reports that secure bigger brand deals.
+          <p className="text-xl text-muted-foreground lg:text-2xl max-w-3xl mx-auto leading-relaxed">
+            The complete analytics platform for content creators and UGC professionals. Track performance, optimize with AI, and generate professional reports that secure bigger brand deals.
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
           <Dialog open={showWaitlist} onOpenChange={setShowWaitlist}>
             <DialogTrigger asChild>
-              <Button size="lg" className="bg-primary hover:bg-primary/90">
+              <Button size="lg" className="bg-gradient-to-r from-primary to-autaris-accent hover:opacity-90 transition-all text-lg px-8 py-6 glow-effect">
                 Join Waitlist
               </Button>
             </DialogTrigger>
@@ -35,6 +43,22 @@ export function Hero() {
               <WaitlistForm onSuccess={() => setShowWaitlist(false)} />
             </DialogContent>
           </Dialog>
+        </div>
+        
+        {/* Stats Preview */}
+        <div className="grid grid-cols-3 gap-8 pt-12 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+          <div className="space-y-2">
+            <div className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary to-autaris-accent bg-clip-text text-transparent">10K+</div>
+            <div className="text-sm text-muted-foreground">Active Creators</div>
+          </div>
+          <div className="space-y-2">
+            <div className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary to-autaris-accent bg-clip-text text-transparent">$2M+</div>
+            <div className="text-sm text-muted-foreground">Deals Secured</div>
+          </div>
+          <div className="space-y-2">
+            <div className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary to-autaris-accent bg-clip-text text-transparent">50+</div>
+            <div className="text-sm text-muted-foreground">Brand Partners</div>
+          </div>
         </div>
       </div>
     </section>

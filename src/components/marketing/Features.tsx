@@ -37,14 +37,20 @@ export function Features() {
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {features.map((feature, index) => (
-            <Card key={index} className="bg-card/50 backdrop-blur-sm border-border/50 hover:bg-card/70 transition-colors">
-              <CardHeader>
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                  <feature.icon className="w-6 h-6 text-primary" />
+            <Card 
+              key={index} 
+              className="group bg-card/30 backdrop-blur-sm border-border/50 hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary/20 relative overflow-hidden"
+            >
+              {/* Gradient overlay on hover */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-autaris-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              
+              <CardHeader className="relative z-10">
+                <div className="w-14 h-14 bg-gradient-to-br from-primary/20 to-autaris-accent/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <feature.icon className="w-7 h-7 text-primary" />
                 </div>
-                <CardTitle className="text-xl">{feature.title}</CardTitle>
+                <CardTitle className="text-xl group-hover:text-primary transition-colors">{feature.title}</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="relative z-10">
                 <CardDescription className="text-base">
                   {feature.description}
                 </CardDescription>
