@@ -19,7 +19,11 @@ function buildMeta(fullName?: string, phone?: string) {
   }
 }
 
-export default function AuthForm() {
+interface AuthFormProps {
+  onSuccess?: () => void;
+}
+
+export default function AuthForm({ onSuccess }: AuthFormProps = {}) {
   const [view, setView] = useState<View>("sign-in")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -55,6 +59,7 @@ export default function AuthForm() {
 
       setMessage("✅ Account created. If email confirmation is enabled, check your inbox, then sign in.")
       setView("sign-in")
+      onSuccess?.();
     } catch (err: any) {
       console.error("SIGN UP ERROR", err)
       setMessage("❌ " + (err?.message || "Sign-up failed"))
@@ -88,7 +93,10 @@ export default function AuthForm() {
         console.log("PROFILE AFTER AUTH", { profileRow, profileErr })
       }
 
-      if (signInData.user) setMessage("✅ Signed in")
+      if (signInData.user) {
+        setMessage("✅ Signed in")
+        onSuccess?.();
+      }
     } catch (err: any) {
       console.error("SIGN IN ERROR", err)
       // Show exact error message

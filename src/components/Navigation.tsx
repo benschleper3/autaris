@@ -71,7 +71,7 @@ export default function Navigation({}: NavigationProps) {
 
   const handleTikTokConnect = () => {
     // Direct top-level navigation to TikTok OAuth (no fetch/iframe)
-    window.location.href = 'https://gjfbxqsjxasubvnpeeie.supabase.co/functions/v1/tiktok-start';
+    window.location.href = '/functions/v1/tiktok-start';
   };
 
   const handleTikTokDisconnect = async () => {

@@ -3,23 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { WaitlistForm } from './WaitlistForm';
 import { ArrowRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { ConnectTikTokButton } from '@/components/ConnectTikTokButton';
 
 export function Hero() {
   const [showWaitlist, setShowWaitlist] = useState(false);
-  const navigate = useNavigate();
-
-  const handleTikTokLogin = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate('/auth');
-      return;
-    }
-    
-    // Direct top-level navigation to TikTok OAuth
-    window.location.href = 'https://gjfbxqsjxasubvnpeeie.supabase.co/functions/v1/tiktok-start';
-  };
 
 
   return (
@@ -48,14 +35,13 @@ export function Hero() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          <Button 
+          <ConnectTikTokButton 
             size="lg" 
-            onClick={handleTikTokLogin}
             className="bg-gradient-to-r from-primary to-autaris-accent hover:opacity-90 transition-all text-lg px-8 py-6 glow-effect"
           >
             Login with TikTok
             <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
+          </ConnectTikTokButton>
           
           <Dialog open={showWaitlist} onOpenChange={setShowWaitlist}>
             <DialogTrigger asChild>
