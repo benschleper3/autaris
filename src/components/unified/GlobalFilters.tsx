@@ -33,6 +33,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { connectTikTok } from '@/lib/tiktok';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -97,8 +98,7 @@ export default function GlobalFilters({ filters, onFiltersChange }: GlobalFilter
   };
 
   const handleTikTokConnect = () => {
-    // Direct top-level navigation to TikTok OAuth (no fetch/iframe)
-    window.location.href = '/functions/v1/tiktok-start';
+    connectTikTok();
   };
 
   const handleTikTokDisconnect = async () => {

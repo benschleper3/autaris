@@ -21,6 +21,7 @@ import logo from '@/assets/logo.png';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { connectTikTok } from '@/lib/tiktok';
 
 interface TikTokProfile {
   display_name: string | null;
@@ -70,8 +71,7 @@ export default function Navigation({}: NavigationProps) {
   };
 
   const handleTikTokConnect = () => {
-    // Direct top-level navigation to TikTok OAuth (no fetch/iframe)
-    window.location.href = '/functions/v1/tiktok-start';
+    connectTikTok();
   };
 
   const handleTikTokDisconnect = async () => {
