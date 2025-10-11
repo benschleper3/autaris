@@ -409,22 +409,28 @@ export default function OAuthCheck() {
                 ))}
 
                 {authUrl && (
-                  <Alert>
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertTitle>Preview Auth URL</AlertTitle>
-                    <AlertDescription>
-                      <a 
-                        href={authUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline break-all flex items-center gap-1"
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4" />
+                        TikTok Authorization Preview
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <p className="text-sm text-muted-foreground">
+                        Note: This is a preview URL. The real flow happens automatically without the dryrun parameter.
+                      </p>
+                      <code className="text-xs break-all block bg-muted p-2 rounded">{authUrl}</code>
+                      <Button 
+                        onClick={() => window.open(authUrl, '_blank', 'noopener,noreferrer')}
+                        className="w-full"
+                        variant="outline"
                       >
-                        Open TikTok Authorization (Test Only)
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                      <p className="text-xs mt-2">Note: This is a preview. Real flow happens without dryrun parameter.</p>
-                    </AlertDescription>
-                  </Alert>
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        Open TikTok Authorize Preview
+                      </Button>
+                    </CardContent>
+                  </Card>
                 )}
               </div>
             )}

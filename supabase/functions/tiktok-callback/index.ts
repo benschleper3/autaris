@@ -1,9 +1,10 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { supaAdmin, getUserIdFromRequest } from '../_shared/supabaseAdmin.ts';
+import { supaAdmin } from '../_shared/supabaseAdmin.ts';
 import { exchangeCode, getUserInfo, getUserStats } from '../_shared/tiktok.ts';
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://www.autaris.company',
+  'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
@@ -38,23 +39,31 @@ serve(async (req) => {
     const stateParam = url.searchParams.get('state');
     const sandbox = (Deno.env.get('SANDBOX_TIKTOK') ?? 'true').toLowerCase() === 'true';
 
-    // Decode user ID from state parameter
+    // Verify state parameter against cookie
     let userId: string;
     try {
       if (!stateParam) throw new Error('Missing state parameter');
+      
+      // Get state from cookie
+      const cookies = req.headers.get('cookie') || '';
+      const cookieState = cookies.split(';')
+        .find(c => c.trim().startsWith('tiktok_oauth_state='))
+        ?.split('=')[1];
+      
+      if (!cookieState || cookieState !== stateParam) {
+        throw new Error('State mismatch - possible CSRF attempt');
+      }
+      
       const decoded = JSON.parse(atob(stateParam));
       userId = decoded.userId;
       if (!userId) throw new Error('Invalid state: missing userId');
       console.log('[tiktok-callback] Retrieved user ID from state:', userId);
     } catch (e) {
-      console.error('[tiktok-callback] Failed to decode state:', e);
-      return new Response(
-        JSON.stringify({ error: 'Invalid state parameter' }),
-        { 
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+      console.error('[tiktok-callback] Failed to verify state:', e);
+      return new Response(null, { 
+        status: 302, 
+        headers: { Location: `${appBase}/landing?error=tiktok_oauth` }
+      });
     }
 
     let open_id = 'sandbox_open_id';
@@ -113,15 +122,29 @@ serve(async (req) => {
     }
 
     console.log('[tiktok-callback] Successfully connected TikTok account for user:', userId);
+    
+    // Clear state cookie and redirect to dashboard
+    const headers = new Headers({
+      'Location': `${appBase}/dashboard?connected=tiktok`,
+      'Set-Cookie': 'tiktok_oauth_state=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0',
+    });
+    
     return new Response(null, { 
       status: 302, 
-      headers: { Location: `${appBase}/dashboard?connected=tiktok` }
+      headers
     });
   } catch (error) {
     console.error('[tiktok-callback] Error:', error);
+    
+    // Clear state cookie on error
+    const headers = new Headers({
+      'Location': `${appBase}/landing?error=tiktok_oauth`,
+      'Set-Cookie': 'tiktok_oauth_state=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0',
+    });
+    
     return new Response(null, { 
       status: 302, 
-      headers: { Location: `${appBase}/dashboard?error=tiktok_connection_failed` }
+      headers
     });
   }
 });

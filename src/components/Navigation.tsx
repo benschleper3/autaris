@@ -69,18 +69,9 @@ export default function Navigation({}: NavigationProps) {
     }
   };
 
-  const handleTikTokConnect = async () => {
-    try {
-      const functionUrl = 'https://gjfbxqsjxasubvnpeeie.supabase.co/functions/v1/tiktok-start';
-      window.location.href = functionUrl;
-    } catch (error) {
-      console.error('Error connecting TikTok:', error);
-      toast({
-        title: "Connection Failed",
-        description: "Could not initiate TikTok connection.",
-        variant: "destructive"
-      });
-    }
+  const handleTikTokConnect = () => {
+    // Direct top-level navigation to TikTok OAuth (no fetch/iframe)
+    window.location.href = 'https://gjfbxqsjxasubvnpeeie.supabase.co/functions/v1/tiktok-start';
   };
 
   const handleTikTokDisconnect = async () => {

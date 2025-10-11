@@ -17,7 +17,8 @@ export function Hero() {
       return;
     }
     
-    window.location.href = `https://gjfbxqsjxasubvnpeeie.supabase.co/functions/v1/tiktok-start`;
+    // Direct top-level navigation to TikTok OAuth
+    window.location.href = 'https://gjfbxqsjxasubvnpeeie.supabase.co/functions/v1/tiktok-start';
   };
 
 

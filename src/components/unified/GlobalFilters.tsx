@@ -96,34 +96,9 @@ export default function GlobalFilters({ filters, onFiltersChange }: GlobalFilter
     }
   };
 
-  const handleTikTokConnect = async () => {
-    try {
-      setTiktokLoading(true);
-      
-      const { data, error } = await supabase.functions.invoke('tiktok-start', {
-        method: 'GET'
-      });
-
-      if (error) {
-        console.error('[GlobalFilters] TikTok connect error:', error);
-        throw error;
-      }
-
-      if (data?.url) {
-        console.log('[GlobalFilters] Redirecting to TikTok auth URL');
-        window.location.href = data.url;
-      } else {
-        throw new Error('No auth URL returned from tiktok-start function');
-      }
-    } catch (error) {
-      console.error('[GlobalFilters] Error connecting TikTok:', error);
-      toast({
-        title: "Connection Failed",
-        description: "Could not initiate TikTok connection. Please try again.",
-        variant: "destructive"
-      });
-      setTiktokLoading(false);
-    }
+  const handleTikTokConnect = () => {
+    // Direct top-level navigation to TikTok OAuth (no fetch/iframe)
+    window.location.href = 'https://gjfbxqsjxasubvnpeeie.supabase.co/functions/v1/tiktok-start';
   };
 
   const handleTikTokDisconnect = async () => {

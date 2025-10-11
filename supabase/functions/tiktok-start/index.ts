@@ -3,7 +3,8 @@ import { buildAuthUrl } from '../_shared/tiktok.ts';
 import { getUserIdFromRequest } from '../_shared/supabaseAdmin.ts';
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://www.autaris.company',
+  'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
@@ -30,8 +31,10 @@ serve(async (req) => {
     const url = new URL(req.url);
     const isDryrun = url.searchParams.get('dryrun') === '1';
 
-    // Encode user ID in state parameter so we can retrieve it in callback
-    const state = btoa(JSON.stringify({ userId, timestamp: Date.now() }));
+    // Generate random state and encode with user ID
+    const randomState = crypto.randomUUID();
+    const stateData = { userId, timestamp: Date.now(), nonce: randomState };
+    const state = btoa(JSON.stringify(stateData));
     const authUrl = buildAuthUrl(state);
     
     // If dryrun mode, return diagnostic info instead of redirecting
@@ -58,14 +61,16 @@ serve(async (req) => {
     
     console.log('[tiktok-start] Generated TikTok auth URL for user:', userId);
     
-    // Return the URL as JSON so the frontend can redirect
-    return new Response(
-      JSON.stringify({ url: authUrl }), 
-      { 
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
-    );
+    // Set secure state cookie and redirect
+    const headers = new Headers({
+      'Location': authUrl,
+      'Set-Cookie': `tiktok_oauth_state=${state}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600`,
+    });
+    
+    return new Response(null, { 
+      status: 302,
+      headers
+    });
   } catch (error) {
     console.error('[tiktok-start] Error:', error);
     return new Response(
