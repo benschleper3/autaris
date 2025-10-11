@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { SUPABASE_URL } from '@/integrations/supabase/config';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -48,7 +49,7 @@ export default function OAuthCheck() {
       
       // Call tiktok-start with dryrun to get env info
       const response = await fetch(
-        '/functions/v1/tiktok-start?dryrun=1',
+        `${SUPABASE_URL}/functions/v1/tiktok-start?dryrun=1`,
         {
           headers: {
             'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
@@ -108,7 +109,7 @@ export default function OAuthCheck() {
       }
 
       const startResponse = await fetch(
-        '/functions/v1/tiktok-start?dryrun=1',
+        `${SUPABASE_URL}/functions/v1/tiktok-start?dryrun=1`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -186,7 +187,7 @@ export default function OAuthCheck() {
         // 4. /tiktok-callback availability
         try {
           const callbackResponse = await fetch(
-            '/functions/v1/tiktok-callback?dryrun=1',
+            `${SUPABASE_URL}/functions/v1/tiktok-callback?dryrun=1`,
             {
               headers: {
                 'Authorization': `Bearer ${token}`,
@@ -233,7 +234,7 @@ export default function OAuthCheck() {
         // 6. Sync probe (optional)
         try {
           const syncResponse = await fetch(
-            '/functions/v1/tiktok-sync',
+            `${SUPABASE_URL}/functions/v1/tiktok-sync`,
             {
               method: 'POST',
               headers: {
