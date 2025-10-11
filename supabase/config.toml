@@ -41,7 +41,7 @@ enabled = true
 region = "us-east-1"
 
 [functions.tiktok-start]
-verify_jwt = false
+verify_jwt = true
 
 [functions.tiktok-callback]
 verify_jwt = false

@@ -1,24 +1,53 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { buildAuthUrl } from '../_shared/tiktok.ts';
+import { getUserIdFromRequest } from '../_shared/supabaseAdmin.ts';
 
-serve(async (_req) => {
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+serve(async (req) => {
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
   try {
-    const state = crypto.randomUUID();
+    // Get the authenticated user's ID
+    const userId = await getUserIdFromRequest(req);
+    if (!userId) {
+      return new Response(
+        JSON.stringify({ error: 'Not authenticated' }), 
+        { 
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    // Encode user ID in state parameter so we can retrieve it in callback
+    const state = btoa(JSON.stringify({ userId, timestamp: Date.now() }));
     const url = buildAuthUrl(state);
     
-    console.log('[tiktok-start] Redirecting to TikTok auth with state:', state);
+    console.log('[tiktok-start] Generated TikTok auth URL for user:', userId);
     
-    // State storage omitted in sandbox; production uses a KV/session
-    return new Response(null, { 
-      status: 302, 
-      headers: { Location: url }
-    });
+    // Return the URL as JSON so the frontend can redirect
+    return new Response(
+      JSON.stringify({ url }), 
+      { 
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
   } catch (error) {
     console.error('[tiktok-start] Error:', error);
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ error: message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ error: 'Failed to generate TikTok auth URL' }), 
+      { 
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
   }
 });

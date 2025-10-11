@@ -6,15 +6,23 @@ serve(async (req) => {
   try {
     const url = new URL(req.url);
     const code = url.searchParams.get('code');
+    const stateParam = url.searchParams.get('state');
     const sandbox = (Deno.env.get('SANDBOX_TIKTOK') ?? 'true').toLowerCase() === 'true';
+    const appBase = Deno.env.get('APP_BASE_URL') || 'http://localhost:8080';
 
-    // Get authenticated user
-    const userId = await getUserIdFromRequest(req);
-    if (!userId) {
-      const appBase = Deno.env.get('APP_BASE_URL')!;
+    // Decode user ID from state parameter
+    let userId: string;
+    try {
+      if (!stateParam) throw new Error('Missing state parameter');
+      const decoded = JSON.parse(atob(stateParam));
+      userId = decoded.userId;
+      if (!userId) throw new Error('Invalid state: missing userId');
+      console.log('[tiktok-callback] Retrieved user ID from state:', userId);
+    } catch (e) {
+      console.error('[tiktok-callback] Failed to decode state:', e);
       return new Response(null, { 
         status: 302, 
-        headers: { Location: `${appBase}/?error=not_authenticated` }
+        headers: { Location: `${appBase}/dashboard?error=invalid_state` }
       });
     }
 
@@ -73,14 +81,15 @@ serve(async (req) => {
       throw upsertError;
     }
 
-    const appBase = Deno.env.get('APP_BASE_URL')!;
+    console.log('[tiktok-callback] Successfully connected TikTok account for user:', userId);
+    const appBase = Deno.env.get('APP_BASE_URL') || 'http://localhost:8080';
     return new Response(null, { 
       status: 302, 
       headers: { Location: `${appBase}/dashboard?connected=tiktok` }
     });
   } catch (error) {
     console.error('[tiktok-callback] Error:', error);
-    const appBase = Deno.env.get('APP_BASE_URL')!;
+    const appBase = Deno.env.get('APP_BASE_URL') || 'http://localhost:8080';
     return new Response(null, { 
       status: 302, 
       headers: { Location: `${appBase}/dashboard?error=tiktok_connection_failed` }

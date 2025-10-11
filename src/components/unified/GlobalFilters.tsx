@@ -96,8 +96,49 @@ export default function GlobalFilters({ filters, onFiltersChange }: GlobalFilter
     }
   };
 
-  const handleTikTokConnect = () => {
-    window.location.href = 'https://gjfbxqsjxasubvnpeeie.supabase.co/functions/v1/tiktok-start';
+  const handleTikTokConnect = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Authentication required",
+          description: "Please log in to connect your TikTok account.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const response = await fetch(
+        'https://gjfbxqsjxasubvnpeeie.supabase.co/functions/v1/tiktok-start',
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.redirected || response.status === 302) {
+        // Follow the redirect
+        window.location.href = response.url;
+      } else if (response.ok) {
+        // If the function returns a URL in JSON, use that
+        const data = await response.json();
+        if (data.url) {
+          window.location.href = data.url;
+        }
+      } else {
+        throw new Error('Failed to initiate TikTok connection');
+      }
+    } catch (error) {
+      console.error('Error connecting TikTok:', error);
+      toast({
+        title: "Connection Failed",
+        description: "Could not initiate TikTok connection. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleTikTokDisconnect = async () => {
