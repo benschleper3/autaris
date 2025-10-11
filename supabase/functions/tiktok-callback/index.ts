@@ -1,12 +1,22 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { supaAdmin } from '../_shared/supabaseAdmin.ts';
-import { exchangeCode } from '../_shared/tiktok.ts';
+import { supaAdmin, getUserIdFromRequest } from '../_shared/supabaseAdmin.ts';
+import { exchangeCode, getUserInfo, getUserStats } from '../_shared/tiktok.ts';
 
 serve(async (req) => {
   try {
     const url = new URL(req.url);
     const code = url.searchParams.get('code');
     const sandbox = (Deno.env.get('SANDBOX_TIKTOK') ?? 'true').toLowerCase() === 'true';
+
+    // Get authenticated user
+    const userId = await getUserIdFromRequest(req);
+    if (!userId) {
+      const appBase = Deno.env.get('APP_BASE_URL')!;
+      return new Response(null, { 
+        status: 302, 
+        headers: { Location: `${appBase}/?error=not_authenticated` }
+      });
+    }
 
     let open_id = 'sandbox_open_id';
     let access_token = 'sandbox_access';
@@ -27,8 +37,42 @@ serve(async (req) => {
       console.log('[tiktok-callback] Sandbox mode - using mock tokens');
     }
 
-    // NOTE: Without state/user context, we can't know which user is connecting during sandbox.
-    // For MVP, we allow creating the social account on first sync instead (tiktok-sync).
+    // Fetch user info and stats
+    const userInfo = await getUserInfo(access_token, open_id, userId);
+    const userStats = await getUserStats(access_token, open_id, userId);
+
+    console.log('[tiktok-callback] User info:', userInfo);
+    console.log('[tiktok-callback] User stats:', userStats);
+
+    // Store/update social account with profile info
+    const expiresAt = new Date(Date.now() + expires_in * 1000).toISOString();
+    const { error: upsertError } = await supaAdmin
+      .from('social_accounts')
+      .upsert({
+        user_id: userId,
+        platform: 'tiktok',
+        external_id: open_id,
+        access_token,
+        refresh_token,
+        token_expires_at: expiresAt,
+        display_name: userInfo.display_name,
+        avatar_url: userInfo.avatar_url,
+        follower_count: userStats.follower_count,
+        following_count: userStats.following_count,
+        like_count: userStats.likes_count,
+        video_count: userStats.video_count,
+        status: 'active',
+        last_synced_at: new Date().toISOString(),
+      }, { 
+        onConflict: 'user_id,platform',
+        ignoreDuplicates: false 
+      });
+
+    if (upsertError) {
+      console.error('[tiktok-callback] Error storing social account:', upsertError);
+      throw upsertError;
+    }
+
     const appBase = Deno.env.get('APP_BASE_URL')!;
     return new Response(null, { 
       status: 302, 

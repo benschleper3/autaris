@@ -150,7 +150,16 @@ export default function ReviewerTest() {
     }
   };
 
-  const handleStartTikTokLogin = () => {
+  const handleStartTikTokLogin = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in first before connecting TikTok",
+        variant: "destructive",
+      });
+      return;
+    }
     const functionUrl = `${SUPABASE_URL}/functions/v1/tiktok-start`;
     window.location.href = functionUrl;
   };

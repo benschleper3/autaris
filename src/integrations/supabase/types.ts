@@ -465,31 +465,37 @@ export type Database = {
         Row: {
           captured_at: string | null
           comments: number | null
+          engagement_rate: number | null
           id: string
           likes: number | null
           post_id: string
           saves: number | null
           shares: number | null
+          tiktok_video_id: string | null
           views: number | null
         }
         Insert: {
           captured_at?: string | null
           comments?: number | null
+          engagement_rate?: number | null
           id?: string
           likes?: number | null
           post_id: string
           saves?: number | null
           shares?: number | null
+          tiktok_video_id?: string | null
           views?: number | null
         }
         Update: {
           captured_at?: string | null
           comments?: number | null
+          engagement_rate?: number | null
           id?: string
           likes?: number | null
           post_id?: string
           saves?: number | null
           shares?: number | null
+          tiktok_video_id?: string | null
           views?: number | null
         }
         Relationships: [
@@ -521,8 +527,11 @@ export type Database = {
           scheduled_at: string | null
           social_account_id: string | null
           status: string | null
+          thumbnail_url: string | null
+          tiktok_video_id: string | null
           title: string | null
           user_id: string
+          video_url: string | null
         }
         Insert: {
           asset_url?: string | null
@@ -535,8 +544,11 @@ export type Database = {
           scheduled_at?: string | null
           social_account_id?: string | null
           status?: string | null
+          thumbnail_url?: string | null
+          tiktok_video_id?: string | null
           title?: string | null
           user_id: string
+          video_url?: string | null
         }
         Update: {
           asset_url?: string | null
@@ -549,8 +561,11 @@ export type Database = {
           scheduled_at?: string | null
           social_account_id?: string | null
           status?: string | null
+          thumbnail_url?: string | null
+          tiktok_video_id?: string | null
           title?: string | null
           user_id?: string
+          video_url?: string | null
         }
         Relationships: [
           {
@@ -656,34 +671,61 @@ export type Database = {
       }
       social_accounts: {
         Row: {
+          access_token: string | null
+          avatar_url: string | null
           created_at: string | null
+          display_name: string | null
           external_id: string | null
+          follower_count: number | null
+          following_count: number | null
           handle: string | null
           id: string
           last_synced_at: string | null
+          like_count: number | null
           platform: string
+          refresh_token: string | null
           status: string | null
+          token_expires_at: string | null
           user_id: string
+          video_count: number | null
         }
         Insert: {
+          access_token?: string | null
+          avatar_url?: string | null
           created_at?: string | null
+          display_name?: string | null
           external_id?: string | null
+          follower_count?: number | null
+          following_count?: number | null
           handle?: string | null
           id?: string
           last_synced_at?: string | null
+          like_count?: number | null
           platform: string
+          refresh_token?: string | null
           status?: string | null
+          token_expires_at?: string | null
           user_id: string
+          video_count?: number | null
         }
         Update: {
+          access_token?: string | null
+          avatar_url?: string | null
           created_at?: string | null
+          display_name?: string | null
           external_id?: string | null
+          follower_count?: number | null
+          following_count?: number | null
           handle?: string | null
           id?: string
           last_synced_at?: string | null
+          like_count?: number | null
           platform?: string
+          refresh_token?: string | null
           status?: string | null
+          token_expires_at?: string | null
           user_id?: string
+          video_count?: number | null
         }
         Relationships: []
       }
@@ -879,6 +921,17 @@ export type Database = {
       }
       set_user_role: {
         Args: { p_role: string }
+        Returns: undefined
+      }
+      update_tiktok_stats: {
+        Args: {
+          p_avatar: string
+          p_followers: number
+          p_following: number
+          p_likes: number
+          p_user_id: string
+          p_videos: number
+        }
         Returns: undefined
       }
       upsert_metrics: {

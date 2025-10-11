@@ -92,3 +92,48 @@ export async function getVideoStats(accessToken: string, videoId: string, userId
   console.log('[TikTok] getVideoStats real API - implement after app approval');
   return { views: 0, likes: 0, comments: 0, shares: 0, saves: 0 };
 }
+
+/** Sandbox helper: deterministic user info */
+export async function getUserInfoSandbox(userId: string) {
+  const s = seedFrom(userId);
+  const names = ['Sarah Chen', 'Mike Johnson', 'Alex Rivera', 'Jordan Taylor', 'Casey Morgan'];
+  const displayName = names[s % names.length];
+  
+  return {
+    display_name: displayName,
+    avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`,
+  };
+}
+
+/** Sandbox helper: deterministic user stats */
+export async function getUserStatsSandbox(userId: string) {
+  const s = seedFrom(userId);
+  return {
+    follower_count: 1200 + (s % 8800), // 1200-10000
+    following_count: 300 + (s % 700), // 300-1000
+    likes_count: 30000 + (s % 70000), // 30k-100k
+    video_count: 58 + (s % 142), // 58-200
+  };
+}
+
+export async function getUserInfo(accessToken: string, openId: string, userIdForSandbox?: string) {
+  if (SANDBOX) return getUserInfoSandbox(userIdForSandbox!);
+  // TODO: replace with real TikTok API call (user.info.basic)
+  const res = await fetch(`${BASE}/user/info/?fields=display_name,avatar_url`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!res.ok) throw new Error(`getUserInfo failed: ${res.status}`);
+  const json = await res.json() as { data: { user: { display_name: string; avatar_url: string } } };
+  return json.data.user;
+}
+
+export async function getUserStats(accessToken: string, openId: string, userIdForSandbox?: string) {
+  if (SANDBOX) return getUserStatsSandbox(userIdForSandbox!);
+  // TODO: replace with real TikTok API call (user.info.stats)
+  const res = await fetch(`${BASE}/user/info/?fields=follower_count,following_count,likes_count,video_count`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!res.ok) throw new Error(`getUserStats failed: ${res.status}`);
+  const json = await res.json() as { data: { user: { follower_count: number; following_count: number; likes_count: number; video_count: number } } };
+  return json.data.user;
+}
