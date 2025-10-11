@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import UnifiedAnalyticsDashboard from '@/components/unified/UnifiedAnalyticsDashboard';
-import TikTokProfileCard from '@/components/dashboard/TikTokProfileCard';
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -49,10 +48,5 @@ export default function Dashboard() {
     return <Navigate to="/" replace />;
   }
 
-  return (
-    <div className="space-y-6">
-      <TikTokProfileCard />
-      <UnifiedAnalyticsDashboard />
-    </div>
-  );
+  return <UnifiedAnalyticsDashboard />;
 }
