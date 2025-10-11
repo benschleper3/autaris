@@ -78,6 +78,12 @@ export default function TikTokProfileCard() {
     );
   }
 
+  const displayName = profile.display_name || 'TikTok User';
+  const avatarUrl = profile.avatar_url || undefined;
+  const username = profile.display_name 
+    ? `@${profile.display_name.toLowerCase().replace(/\s+/g, '')}` 
+    : '@tiktokuser';
+
   return (
     <Card className="overflow-hidden">
       <CardHeader className="bg-gradient-to-br from-primary/10 to-accent/10">
@@ -87,12 +93,12 @@ export default function TikTokProfileCard() {
         {/* Profile Header */}
         <div className="flex items-center gap-4">
           <Avatar className="h-16 w-16 border-2 border-primary/20">
-            <AvatarImage src={profile.avatar_url} alt={profile.display_name} />
-            <AvatarFallback>{profile.display_name[0]}</AvatarFallback>
+            <AvatarImage src={avatarUrl} alt={displayName} />
+            <AvatarFallback>{displayName[0].toUpperCase()}</AvatarFallback>
           </Avatar>
           <div>
-            <h3 className="text-xl font-semibold">{profile.display_name}</h3>
-            <p className="text-sm text-muted-foreground">@{profile.display_name.toLowerCase().replace(/\s+/g, '')}</p>
+            <h3 className="text-xl font-semibold">{displayName}</h3>
+            <p className="text-sm text-muted-foreground">{username}</p>
           </div>
         </div>
 
