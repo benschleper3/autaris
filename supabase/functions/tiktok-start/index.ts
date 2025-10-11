@@ -5,7 +5,7 @@ import { getUserIdFromRequest } from '../_shared/supabaseAdmin.ts';
 const APP_BASE_URL = Deno.env.get('APP_BASE_URL') || 'https://www.autaris.company';
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': APP_BASE_URL,
+  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
@@ -18,16 +18,16 @@ serve(async (req) => {
 
   try {
     // Get the authenticated user's ID from the request
-    // This works even without JWT verification because the user's session cookie is sent
     const userId = await getUserIdFromRequest(req);
     if (!userId) {
-      // Redirect to login page if not authenticated
-      return new Response(null, {
-        status: 302,
-        headers: {
-          'Location': 'https://www.autaris.company/auth?error=login_required'
+      // Return error as JSON instead of redirecting
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }), 
+        { 
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
-      });
+      );
     }
 
     // Check for dryrun mode
@@ -40,7 +40,7 @@ serve(async (req) => {
     const state = btoa(JSON.stringify(stateData));
     const authUrl = buildAuthUrl(state);
     
-    // If dryrun mode, return diagnostic info instead of redirecting
+    // If dryrun mode, return diagnostic info
     if (isDryrun) {
       const clientKey = Deno.env.get('TIKTOK_CLIENT_ID') || '';
       const redirectUri = Deno.env.get('TIKTOK_REDIRECT_URI') || '';
@@ -72,16 +72,19 @@ serve(async (req) => {
     
     console.log('[tiktok-start] Generated TikTok auth URL for user:', userId, 'Sandbox:', getSandboxMode());
     
-    // Set secure state cookie and redirect
-    const headers = new Headers({
-      'Location': authUrl,
-      'Set-Cookie': `tiktok_oauth_state=${state}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600`,
-    });
-    
-    return new Response(null, { 
-      status: 302,
-      headers
-    });
+    // Return the auth URL and state as JSON for the client to handle navigation
+    // We also set the cookie here for when TikTok redirects back
+    return new Response(
+      JSON.stringify({ redirect_url: authUrl }), 
+      { 
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+          'Set-Cookie': `tiktok_oauth_state=${state}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600`,
+        }
+      }
+    );
   } catch (error) {
     console.error('[tiktok-start] Error:', error);
     return new Response(
