@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { Users, Heart, Video } from 'lucide-react';
 
 interface TikTokProfile {
@@ -63,16 +64,26 @@ export default function TikTokProfileCard() {
     );
   }
 
-  if (!profile) {
+  const handleConnect = () => {
+    window.location.href = `https://gjfbxqsjxasubvnpeeie.supabase.co/functions/v1/tiktok-start`;
+  };
+
+  // Show connect button if no profile or if profile data is incomplete
+  if (!profile || !profile.display_name) {
     return (
       <Card>
         <CardHeader>
           <CardTitle>TikTok Profile</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <p className="text-muted-foreground text-sm">
-            No TikTok account connected. Click "Login with TikTok" to get started.
+            {!profile 
+              ? "No TikTok account connected. Connect your TikTok to view analytics."
+              : "TikTok account needs to be connected. Click below to complete setup."}
           </p>
+          <Button onClick={handleConnect} className="w-full">
+            {!profile ? "Connect TikTok Account" : "Complete TikTok Connection"}
+          </Button>
         </CardContent>
       </Card>
     );
