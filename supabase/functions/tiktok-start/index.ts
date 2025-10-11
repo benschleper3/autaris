@@ -1,9 +1,11 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { buildAuthUrl } from '../_shared/tiktok.ts';
+import { buildAuthUrl, getSandboxMode } from '../_shared/tiktok.ts';
 import { getUserIdFromRequest } from '../_shared/supabaseAdmin.ts';
 
+const APP_BASE_URL = Deno.env.get('APP_BASE_URL') || 'https://www.autaris.company';
+
 const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://www.autaris.company',
+  'Access-Control-Allow-Origin': APP_BASE_URL,
   'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
@@ -42,13 +44,21 @@ serve(async (req) => {
     if (isDryrun) {
       const clientKey = Deno.env.get('TIKTOK_CLIENT_ID') || '';
       const redirectUri = Deno.env.get('TIKTOK_REDIRECT_URI') || '';
-      const scopes = ['user.info.basic', 'user.info.stats'];
+      const scopesStr = Deno.env.get('TIKTOK_SCOPES') || 'user.info.basic,user.info.stats';
+      const scopes = scopesStr.split(',').map(s => s.trim());
+      const sandbox = getSandboxMode();
+      
+      // Mask client key for security
+      const maskedClientKey = clientKey.length > 8 
+        ? clientKey.slice(0, 3) + '•'.repeat(clientKey.length - 6) + clientKey.slice(-3)
+        : clientKey;
       
       return new Response(
         JSON.stringify({ 
           ok: true,
           mode: 'dryrun',
-          client_key: clientKey,
+          sandbox,
+          client_key: maskedClientKey,
           scopes,
           redirect_uri: redirectUri,
           auth_url_preview: authUrl
@@ -60,7 +70,7 @@ serve(async (req) => {
       );
     }
     
-    console.log('[tiktok-start] Generated TikTok auth URL for user:', userId);
+    console.log('[tiktok-start] Generated TikTok auth URL for user:', userId, 'Sandbox:', getSandboxMode());
     
     // Set secure state cookie and redirect
     const headers = new Headers({

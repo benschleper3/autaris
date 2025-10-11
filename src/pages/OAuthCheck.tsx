@@ -48,7 +48,7 @@ export default function OAuthCheck() {
       
       // Call tiktok-start with dryrun to get env info
       const response = await fetch(
-        'https://gjfbxqsjxasubvnpeeie.supabase.co/functions/v1/tiktok-start?dryrun=1',
+        '/functions/v1/tiktok-start?dryrun=1',
         {
           headers: {
             'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
@@ -65,12 +65,14 @@ export default function OAuthCheck() {
       const appBase = 'https://www.autaris.company';
       const redirectUri = data?.redirect_uri || '';
       const clientId = data?.client_key || '';
-      const sandbox = (data?.mode === 'dryrun');
+      const sandbox = data?.sandbox === true;
+      const scopes = data?.scopes || [];
 
       setEnvSummary({
         app_base_url: appBase,
         tiktok_client_id: clientId,
         tiktok_redirect_uri: redirectUri,
+        tiktok_scopes: scopes.join(', '),
         sandbox_tiktok: sandbox,
         user_email: user?.email,
         user_id: user?.id
@@ -106,7 +108,7 @@ export default function OAuthCheck() {
       }
 
       const startResponse = await fetch(
-        'https://gjfbxqsjxasubvnpeeie.supabase.co/functions/v1/tiktok-start?dryrun=1',
+        '/functions/v1/tiktok-start?dryrun=1',
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -184,7 +186,7 @@ export default function OAuthCheck() {
         // 4. /tiktok-callback availability
         try {
           const callbackResponse = await fetch(
-            'https://gjfbxqsjxasubvnpeeie.supabase.co/functions/v1/tiktok-callback?dryrun=1',
+            '/functions/v1/tiktok-callback?dryrun=1',
             {
               headers: {
                 'Authorization': `Bearer ${token}`,
@@ -231,7 +233,7 @@ export default function OAuthCheck() {
         // 6. Sync probe (optional)
         try {
           const syncResponse = await fetch(
-            'https://gjfbxqsjxasubvnpeeie.supabase.co/functions/v1/tiktok-sync',
+            '/functions/v1/tiktok-sync',
             {
               method: 'POST',
               headers: {
@@ -268,7 +270,7 @@ export default function OAuthCheck() {
           tiktok_redirect_uri: actualRedirect,
           expected_redirect_uri: expectedRedirect,
           match,
-          sandbox: startData?.mode === 'dryrun',
+          sandbox: startData?.sandbox === true,
           endpoints,
           notes
         };
@@ -354,10 +356,14 @@ export default function OAuthCheck() {
                     <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">TIKTOK_SCOPES:</span>
+                  <span className="text-xs">{envSummary.tiktok_scopes || 'N/A'}</span>
+                </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">SANDBOX_TIKTOK:</span>
                   <Badge variant={envSummary.sandbox_tiktok ? "secondary" : "default"}>
-                    {envSummary.sandbox_tiktok ? 'true' : 'false'}
+                    {envSummary.sandbox_tiktok ? 'true (sandbox mode)' : 'false (production mode)'}
                   </Badge>
                 </div>
                 <div className="flex justify-between">

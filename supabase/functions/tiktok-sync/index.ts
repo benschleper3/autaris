@@ -1,9 +1,12 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { supaAdmin, getUserIdFromRequest } from '../_shared/supabaseAdmin.ts';
-import { listVideos, getVideoStats, refreshToken } from '../_shared/tiktok.ts';
+import { listVideos, getVideoStats, refreshToken, getSandboxMode } from '../_shared/tiktok.ts';
+
+const APP_BASE_URL = Deno.env.get('APP_BASE_URL') || 'https://www.autaris.company';
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': APP_BASE_URL,
+  'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
@@ -19,12 +22,16 @@ serve(async (req) => {
     const isDryrun = body.dryrun === true;
 
     if (isDryrun) {
+      const sandbox = getSandboxMode();
       return new Response(
         JSON.stringify({ 
           ok: true, 
-          mode: 'dryrun', 
-          message: 'Sync endpoint reachable',
-          mock_data: { posts: 0, metrics: 0 }
+          mode: 'dryrun',
+          sandbox,
+          follower_count: 1245,
+          likes_count: 31877,
+          video_count: 61,
+          message: 'Sync endpoint reachable (mock data)'
         }),
         { 
           status: 200,
@@ -70,7 +77,7 @@ serve(async (req) => {
     }
 
     // Refresh token if needed (skipped in sandbox)
-    const sandbox = (Deno.env.get('SANDBOX_TIKTOK') ?? 'true').toLowerCase() === 'true';
+    const sandbox = getSandboxMode();
     if (!sandbox && account?.token_expires_at && new Date(account.token_expires_at) < new Date()) {
       try {
         console.log('[tiktok-sync] Refreshing expired token');

@@ -1,20 +1,41 @@
-const BASE = 'https://www.tiktok.com/v2';
 const SANDBOX = (Deno.env.get('SANDBOX_TIKTOK') ?? 'true').toLowerCase() === 'true';
 
+// Determine base URLs based on sandbox mode
+const AUTH_BASE = SANDBOX 
+  ? 'https://open-sandbox.tiktok.com/auth/authorize/'
+  : 'https://www.tiktok.com/auth/authorize/';
+
+const TOKEN_BASE = SANDBOX
+  ? 'https://open-sandbox.tiktok.com/oauth/access_token/'
+  : 'https://open.tiktokapis.com/v2/oauth/token/';
+
+const USER_INFO_BASE = SANDBOX
+  ? 'https://open-sandbox.tiktok.com/api/user/info/'
+  : 'https://open.tiktokapis.com/v2/user/info/';
+
+const USER_STATS_BASE = SANDBOX
+  ? 'https://open-sandbox.tiktok.com/api/user/stats/'
+  : 'https://open.tiktokapis.com/v2/user/stats/';
+
 export function buildAuthUrl(state: string) {
+  const scopes = Deno.env.get('TIKTOK_SCOPES') || 'user.info.basic,user.info.stats';
   const qs = new URLSearchParams({
     client_key: Deno.env.get('TIKTOK_CLIENT_ID')!,
-    scope: 'user.info.basic,user.info.stats',
+    scope: scopes,
     response_type: 'code',
     redirect_uri: Deno.env.get('TIKTOK_REDIRECT_URI')!,
     state,
   });
-  return `${BASE}/auth/authorize/?${qs.toString()}`;
+  return `${AUTH_BASE}?${qs.toString()}`;
 }
 
-/** Real token exchange (unused while SANDBOX=true) */
+export function getSandboxMode() {
+  return SANDBOX;
+}
+
+/** Token exchange (production or sandbox) */
 export async function exchangeCode(code: string) {
-  const res = await fetch(`${BASE}/oauth/token/`, {
+  const res = await fetch(TOKEN_BASE, {
     method: 'POST',
     headers: { 'Content-Type':'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
@@ -25,14 +46,18 @@ export async function exchangeCode(code: string) {
       code,
     }),
   });
-  if (!res.ok) throw new Error(`Token exchange failed: ${res.status}`);
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error('[TikTok] Token exchange failed:', res.status, errorText);
+    throw new Error(`Token exchange failed: ${res.status}`);
+  }
   return res.json() as Promise<{ data: {
     open_id: string; access_token: string; refresh_token: string; expires_in: number;
   }}>;
 }
 
 export async function refreshToken(refresh_token: string) {
-  const res = await fetch(`${BASE}/oauth/token/`, {
+  const res = await fetch(TOKEN_BASE, {
     method: 'POST',
     headers: { 'Content-Type':'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
@@ -118,22 +143,30 @@ export async function getUserStatsSandbox(userId: string) {
 
 export async function getUserInfo(accessToken: string, openId: string, userIdForSandbox?: string) {
   if (SANDBOX) return getUserInfoSandbox(userIdForSandbox!);
-  // TODO: replace with real TikTok API call (user.info.basic)
-  const res = await fetch(`${BASE}/user/info/?fields=display_name,avatar_url`, {
+  
+  const res = await fetch(`${USER_INFO_BASE}?fields=display_name,avatar_url`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
-  if (!res.ok) throw new Error(`getUserInfo failed: ${res.status}`);
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error('[TikTok] getUserInfo failed:', res.status, errorText);
+    throw new Error(`getUserInfo failed: ${res.status}`);
+  }
   const json = await res.json() as { data: { user: { display_name: string; avatar_url: string } } };
   return json.data.user;
 }
 
 export async function getUserStats(accessToken: string, openId: string, userIdForSandbox?: string) {
   if (SANDBOX) return getUserStatsSandbox(userIdForSandbox!);
-  // TODO: replace with real TikTok API call (user.info.stats)
-  const res = await fetch(`${BASE}/user/info/?fields=follower_count,following_count,likes_count,video_count`, {
+  
+  const res = await fetch(`${USER_STATS_BASE}?fields=follower_count,following_count,likes_count,video_count`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
-  if (!res.ok) throw new Error(`getUserStats failed: ${res.status}`);
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error('[TikTok] getUserStats failed:', res.status, errorText);
+    throw new Error(`getUserStats failed: ${res.status}`);
+  }
   const json = await res.json() as { data: { user: { follower_count: number; following_count: number; likes_count: number; video_count: number } } };
   return json.data.user;
 }

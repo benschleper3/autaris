@@ -1,9 +1,11 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { supaAdmin } from '../_shared/supabaseAdmin.ts';
-import { exchangeCode, getUserInfo, getUserStats } from '../_shared/tiktok.ts';
+import { exchangeCode, getUserInfo, getUserStats, getSandboxMode } from '../_shared/tiktok.ts';
+
+const APP_BASE_URL = Deno.env.get('APP_BASE_URL') || 'https://www.autaris.company';
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://www.autaris.company',
+  'Access-Control-Allow-Origin': APP_BASE_URL,
   'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
@@ -14,18 +16,18 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const appBase = Deno.env.get('APP_BASE_URL') || 'https://www.autaris.company';
-
   try {
     const url = new URL(req.url);
     const isDryrun = url.searchParams.get('dryrun') === '1';
     
     // If dryrun mode, just confirm endpoint is reachable
     if (isDryrun) {
+      const sandbox = getSandboxMode();
       return new Response(
         JSON.stringify({ 
           ok: true, 
-          mode: 'dryrun', 
+          mode: 'dryrun',
+          sandbox,
           message: 'Callback reachable' 
         }),
         { 
@@ -62,7 +64,7 @@ serve(async (req) => {
       console.error('[tiktok-callback] Failed to verify state:', e);
       return new Response(null, { 
         status: 302, 
-        headers: { Location: `${appBase}/landing?error=tiktok_oauth` }
+        headers: { Location: `${APP_BASE_URL}/landing?error=state_mismatch` }
       });
     }
 
@@ -121,11 +123,11 @@ serve(async (req) => {
       throw upsertError;
     }
 
-    console.log('[tiktok-callback] Successfully connected TikTok account for user:', userId);
+    console.log('[tiktok-callback] Successfully connected TikTok account for user:', userId, 'Sandbox:', getSandboxMode());
     
     // Clear state cookie and redirect to dashboard
     const headers = new Headers({
-      'Location': `${appBase}/dashboard?connected=tiktok`,
+      'Location': `${APP_BASE_URL}/dashboard?connected=tiktok`,
       'Set-Cookie': 'tiktok_oauth_state=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0',
     });
     
@@ -136,9 +138,9 @@ serve(async (req) => {
   } catch (error) {
     console.error('[tiktok-callback] Error:', error);
     
-    // Clear state cookie on error
+    // Clear state cookie on error and return JSON error for better debugging
     const headers = new Headers({
-      'Location': `${appBase}/landing?error=tiktok_oauth`,
+      'Location': `${APP_BASE_URL}/landing?error=tiktok_oauth`,
       'Set-Cookie': 'tiktok_oauth_state=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0',
     });
     
