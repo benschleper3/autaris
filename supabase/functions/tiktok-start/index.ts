@@ -15,16 +15,17 @@ serve(async (req) => {
   }
 
   try {
-    // Get the authenticated user's ID
+    // Get the authenticated user's ID from the request
+    // This works even without JWT verification because the user's session cookie is sent
     const userId = await getUserIdFromRequest(req);
     if (!userId) {
-      return new Response(
-        JSON.stringify({ error: 'Not authenticated' }), 
-        { 
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      // Redirect to login page if not authenticated
+      return new Response(null, {
+        status: 302,
+        headers: {
+          'Location': 'https://www.autaris.company/auth?error=login_required'
         }
-      );
+      });
     }
 
     // Check for dryrun mode
