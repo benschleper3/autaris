@@ -2,7 +2,19 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { supaAdmin, getUserIdFromRequest } from '../_shared/supabaseAdmin.ts';
 import { exchangeCode, getUserInfo, getUserStats } from '../_shared/tiktok.ts';
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
 serve(async (req) => {
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  const appBase = Deno.env.get('APP_BASE_URL') || 'https://www.autaris.company';
+
   try {
     const url = new URL(req.url);
     const isDryrun = url.searchParams.get('dryrun') === '1';
@@ -17,7 +29,7 @@ serve(async (req) => {
         }),
         { 
           status: 200,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
@@ -25,7 +37,6 @@ serve(async (req) => {
     const code = url.searchParams.get('code');
     const stateParam = url.searchParams.get('state');
     const sandbox = (Deno.env.get('SANDBOX_TIKTOK') ?? 'true').toLowerCase() === 'true';
-    const appBase = Deno.env.get('APP_BASE_URL') || 'http://localhost:8080';
 
     // Decode user ID from state parameter
     let userId: string;
@@ -37,10 +48,13 @@ serve(async (req) => {
       console.log('[tiktok-callback] Retrieved user ID from state:', userId);
     } catch (e) {
       console.error('[tiktok-callback] Failed to decode state:', e);
-      return new Response(null, { 
-        status: 302, 
-        headers: { Location: `${appBase}/dashboard?error=invalid_state` }
-      });
+      return new Response(
+        JSON.stringify({ error: 'Invalid state parameter' }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     let open_id = 'sandbox_open_id';
@@ -99,14 +113,12 @@ serve(async (req) => {
     }
 
     console.log('[tiktok-callback] Successfully connected TikTok account for user:', userId);
-    const appBase = Deno.env.get('APP_BASE_URL') || 'http://localhost:8080';
     return new Response(null, { 
       status: 302, 
       headers: { Location: `${appBase}/dashboard?connected=tiktok` }
     });
   } catch (error) {
     console.error('[tiktok-callback] Error:', error);
-    const appBase = Deno.env.get('APP_BASE_URL') || 'http://localhost:8080';
     return new Response(null, { 
       status: 302, 
       headers: { Location: `${appBase}/dashboard?error=tiktok_connection_failed` }

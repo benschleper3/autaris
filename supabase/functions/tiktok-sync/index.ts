@@ -14,6 +14,25 @@ serve(async (req) => {
   }
 
   try {
+    // Handle dry-run mode
+    const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
+    const isDryrun = body.dryrun === true;
+
+    if (isDryrun) {
+      return new Response(
+        JSON.stringify({ 
+          ok: true, 
+          mode: 'dryrun', 
+          message: 'Sync endpoint reachable',
+          mock_data: { posts: 0, metrics: 0 }
+        }),
+        { 
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     const user_id = await getUserIdFromRequest(req);
     if (!user_id) {
       return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { 
