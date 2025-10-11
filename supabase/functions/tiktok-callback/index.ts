@@ -5,6 +5,23 @@ import { exchangeCode, getUserInfo, getUserStats } from '../_shared/tiktok.ts';
 serve(async (req) => {
   try {
     const url = new URL(req.url);
+    const isDryrun = url.searchParams.get('dryrun') === '1';
+    
+    // If dryrun mode, just confirm endpoint is reachable
+    if (isDryrun) {
+      return new Response(
+        JSON.stringify({ 
+          ok: true, 
+          mode: 'dryrun', 
+          message: 'Callback reachable' 
+        }),
+        { 
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+    
     const code = url.searchParams.get('code');
     const stateParam = url.searchParams.get('state');
     const sandbox = (Deno.env.get('SANDBOX_TIKTOK') ?? 'true').toLowerCase() === 'true';
