@@ -5,6 +5,7 @@ import { FileText, FolderOpen, Code, Home, RefreshCw } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import Navigation from '@/components/Navigation';
 import GlobalFilters from './GlobalFilters';
 import KPIStrip from './KPIStrip';
 import TrendChart from './TrendChart';
@@ -75,6 +76,7 @@ export default function UnifiedAnalyticsDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-background/80">
+      <Navigation />
       <GlobalFilters filters={filters} onFiltersChange={setFilters} />
       
       <div className="p-6 space-y-6 max-w-7xl mx-auto">
