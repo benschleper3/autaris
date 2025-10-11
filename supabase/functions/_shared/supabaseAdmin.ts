@@ -9,14 +9,29 @@ export const supaAdmin = createClient(SUPABASE_URL, SERVICE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
 
-/** Get the authenticated user_id from the incoming Authorization Bearer token */
+/** Get the authenticated user_id from the incoming request (Authorization header or cookies) */
 export async function getUserIdFromRequest(req: Request): Promise<string | null> {
+  // Try Authorization header first
   const auth = req.headers.get('Authorization') ?? '';
-  if (!auth.startsWith('Bearer ')) return null;
-  const userClient = createClient(SUPABASE_URL, ANON_KEY, {
-    global: { headers: { Authorization: auth } },
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-  const { data } = await userClient.auth.getUser();
-  return data.user?.id ?? null;
+  if (auth.startsWith('Bearer ')) {
+    const userClient = createClient(SUPABASE_URL, ANON_KEY, {
+      global: { headers: { Authorization: auth } },
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data } = await userClient.auth.getUser();
+    if (data.user?.id) return data.user.id;
+  }
+  
+  // Try cookie-based session
+  const cookieHeader = req.headers.get('Cookie') ?? '';
+  if (cookieHeader) {
+    const userClient = createClient(SUPABASE_URL, ANON_KEY, {
+      global: { headers: { Cookie: cookieHeader } },
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data } = await userClient.auth.getUser();
+    return data.user?.id ?? null;
+  }
+  
+  return null;
 }
