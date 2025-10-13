@@ -52,7 +52,7 @@ serve(async (req) => {
     const code = url.searchParams.get('code');
     const stateParam = url.searchParams.get('state');
 
-    // Verify state parameter against cookie
+    // Verify state parameter and extract userId
     let userId: string;
     try {
       if (!stateParam) throw new Error('Missing state parameter');
@@ -72,10 +72,11 @@ serve(async (req) => {
       console.log('[tiktok-callback] Retrieved user ID from state:', userId);
     } catch (e) {
       console.error('[tiktok-callback] State verification failed:', e);
-      return new Response(null, { 
-        status: 302, 
-        headers: { Location: `${APP_BASE_URL}/landing?error=state_mismatch` }
+      const headers = new Headers({
+        'Location': `${APP_BASE_URL}/landing?error=state_mismatch`,
+        'Set-Cookie': 'tiktok_oauth_state=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0',
       });
+      return new Response(null, { status: 302, headers });
     }
 
     if (!code) {
@@ -171,13 +172,14 @@ serve(async (req) => {
         external_id: openId,
         handle: displayName,
         avatar_url: avatarUrl,
+        access_token: accessToken,
         follower_count: followerCount,
         likes_count: likesCount,
         video_count: videoCount,
         last_synced_at: new Date().toISOString(),
         status: 'active',
       }, { 
-        onConflict: 'user_id,platform',
+        onConflict: 'user_id,platform'
       });
 
     if (upsertError) {

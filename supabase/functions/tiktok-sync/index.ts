@@ -51,10 +51,11 @@ serve(async (req) => {
     // Get current user
     const userId = await getUserIdFromRequest(req);
     if (!userId) {
+      console.error('[tiktok-sync] No authenticated user');
       return new Response(
         JSON.stringify({ ok: false, error: 'no_session' }),
         {
-          status: 400,
+          status: 401,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
       );
@@ -79,8 +80,21 @@ serve(async (req) => {
       );
     }
 
-    if (!account.access_token || !account.external_id) {
-      console.error('[tiktok-sync] Missing tokens for user:', userId);
+    // Note: We may not be storing access_token, so we'll work with what we have
+    if (!account.external_id) {
+      console.error('[tiktok-sync] Missing external_id for user:', userId);
+      return new Response(
+        JSON.stringify({ ok: false, error: 'no_account_data' }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    // If we don't have access_token stored, we can't sync
+    if (!account.access_token) {
+      console.error('[tiktok-sync] No access token stored for user:', userId);
       return new Response(
         JSON.stringify({ ok: false, error: 'no_tokens' }),
         {
