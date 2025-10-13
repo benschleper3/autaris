@@ -1,193 +1,163 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { supaAdmin, getUserIdFromRequest } from '../_shared/supabaseAdmin.ts';
-import { listVideos, getVideoStats, refreshToken, getSandboxMode } from '../_shared/tiktok.ts';
 
 const APP_BASE_URL = Deno.env.get('APP_BASE_URL') || 'https://www.autaris.company';
+const SANDBOX = Deno.env.get('SANDBOX_TIKTOK') === 'true';
+
+const userStatsUrl = SANDBOX
+  ? 'https://open-sandbox.tiktok.com/api/user/stats/'
+  : 'https://open.tiktokapis.com/v2/user/stats/';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': APP_BASE_URL,
   'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
+  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Handle dry-run mode
-    const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
+    // Parse body
+    let body: any = {};
+    try {
+      body = await req.json();
+    } catch (e) {
+      // Empty body is fine
+    }
+
     const isDryrun = body.dryrun === true;
 
+    // Dryrun mode
     if (isDryrun) {
-      const sandbox = getSandboxMode();
       return new Response(
-        JSON.stringify({ 
-          ok: true, 
-          mode: 'dryrun',
-          sandbox,
+        JSON.stringify({
+          ok: true,
+          sandbox: SANDBOX,
           follower_count: 1245,
           likes_count: 31877,
           video_count: 61,
-          message: 'Sync endpoint reachable (mock data)'
         }),
-        { 
+        {
           status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
       );
     }
 
-    const user_id = await getUserIdFromRequest(req);
-    if (!user_id) {
-      return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { 
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+    // Get current user
+    const userId = await getUserIdFromRequest(req);
+    if (!userId) {
+      return new Response(
+        JSON.stringify({ ok: false, error: 'no_session' }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
     }
 
-    console.log('[tiktok-sync] Starting sync for user:', user_id);
-
-    // Load or create sandbox account
-    const { data: acct } = await supaAdmin
+    // Find user's TikTok account
+    const { data: account, error: accountError } = await supaAdmin
       .from('social_accounts')
       .select('*')
-      .eq('user_id', user_id)
+      .eq('user_id', userId)
       .eq('platform', 'tiktok')
-      .maybeSingle();
+      .single();
 
-    let account = acct;
-    if (!account) {
-      console.log('[tiktok-sync] Creating new TikTok account for user');
-      // Create a placeholder when sandbox is enabled
-      const { data: created } = await supaAdmin
-        .from('social_accounts')
-        .insert({
-          user_id, 
-          platform: 'tiktok', 
-          external_id: 'sandbox_open_id', 
-          status: 'active',
-          handle: 'creator'
-        })
-        .select('*')
-        .single();
-      account = created!;
-    }
-
-    // Refresh token if needed (skipped in sandbox)
-    const sandbox = getSandboxMode();
-    if (!sandbox && account?.token_expires_at && new Date(account.token_expires_at) < new Date()) {
-      try {
-        console.log('[tiktok-sync] Refreshing expired token');
-        const r = await refreshToken(account.refresh_token);
-        const exp = new Date(Date.now() + r.data.expires_in * 1000).toISOString();
-        await supaAdmin
-          .from('social_accounts')
-          .update({
-            access_token: r.data.access_token, 
-            refresh_token: r.data.refresh_token, 
-            token_expires_at: exp
-          })
-          .eq('id', account.id);
-        account.access_token = r.data.access_token;
-      } catch (err) {
-        console.error('[tiktok-sync] Token refresh failed:', err);
-      }
-    }
-
-    const since = new Date(); 
-    since.setDate(since.getDate() - 90);
-    const videos = await listVideos(
-      account.access_token ?? 'sandbox', 
-      account.external_id, 
-      since.toISOString(), 
-      user_id
-    );
-
-    console.log('[tiktok-sync] Found', videos.length, 'videos');
-
-    let postsUpserted = 0, metricSnapshots = 0;
-    for (const v of videos) {
-      const videoUrl = v.url ?? `https://www.tiktok.com/@creator/video/${v.id}`;
-      
-      // Check if post exists
-      const { data: existingPost } = await supaAdmin
-        .from('posts')
-        .select('id')
-        .eq('user_id', user_id)
-        .eq('asset_url', videoUrl)
-        .maybeSingle();
-
-      let postId = existingPost?.id;
-
-      if (!postId) {
-        // Create new post
-        const { data: newPost, error: insertErr } = await supaAdmin
-          .from('posts')
-          .insert({
-            user_id,
-            social_account_id: account.id,
-            title: v.title ?? null,
-            caption: v.desc ?? null,
-            asset_url: videoUrl,
-            published_at: v.create_time ? new Date(v.create_time).toISOString() : null,
-          })
-          .select('id')
-          .single();
-
-        if (insertErr || !newPost) {
-          console.error('[tiktok-sync] Failed to insert post:', insertErr);
-          continue;
+    if (accountError || !account) {
+      console.error('[tiktok-sync] No TikTok account found for user:', userId);
+      return new Response(
+        JSON.stringify({ ok: false, error: 'no_account' }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
-        postId = newPost.id;
-      }
-
-      postsUpserted++;
-
-      // Get stats and insert metrics
-      const stats = await getVideoStats(
-        account.access_token ?? 'sandbox', 
-        v.id, 
-        user_id
       );
-      
-      await supaAdmin.from('post_metrics').insert({
-        post_id: postId,
-        captured_at: new Date().toISOString(),
-        views: stats.views ?? 0,
-        likes: stats.likes ?? 0,
-        comments: stats.comments ?? 0,
-        shares: stats.shares ?? 0,
-        saves: stats.saves ?? 0,
-      });
-      metricSnapshots++;
     }
 
-    // Update last synced
-    await supaAdmin
+    if (!account.access_token || !account.external_id) {
+      console.error('[tiktok-sync] Missing tokens for user:', userId);
+      return new Response(
+        JSON.stringify({ ok: false, error: 'no_tokens' }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    // Fetch fresh stats from TikTok
+    let followerCount = 0;
+    let likesCount = 0;
+    let videoCount = 0;
+
+    try {
+      const statsResponse = await fetch(
+        `${userStatsUrl}?access_token=${account.access_token}&open_id=${account.external_id}`,
+        {
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+      const statsData = await statsResponse.json();
+      console.log('[tiktok-sync] User stats response:', statsData);
+
+      followerCount = statsData.data?.follower_count || 0;
+      likesCount = statsData.data?.likes_count || 0;
+      videoCount = statsData.data?.video_count || 0;
+    } catch (e) {
+      console.error('[tiktok-sync] Failed to fetch stats:', e);
+      return new Response(
+        JSON.stringify({ ok: false, error: 'stats_fetch_failed' }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    // Update the account with fresh stats
+    const { error: updateError } = await supaAdmin
       .from('social_accounts')
-      .update({ last_synced_at: new Date().toISOString() })
+      .update({
+        follower_count: followerCount,
+        likes_count: likesCount,
+        video_count: videoCount,
+        last_synced_at: new Date().toISOString(),
+      })
       .eq('id', account.id);
 
-    console.log('[tiktok-sync] Sync complete:', { posts: postsUpserted, metrics: metricSnapshots });
+    if (updateError) {
+      console.error('[tiktok-sync] Failed to update account:', updateError);
+      return new Response(
+        JSON.stringify({ ok: false, error: 'update_failed' }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    console.log('[tiktok-sync] Successfully synced stats for user:', userId);
 
     return new Response(
-      JSON.stringify({ 
-        ok: true, 
-        synced: { posts: postsUpserted, metrics: metricSnapshots } 
-      }), 
+      JSON.stringify({ ok: true }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
   } catch (error) {
-    console.error('[tiktok-sync] Error:', error);
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ ok: false, error: message }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    console.error('[tiktok-sync] Unhandled error:', error);
+    return new Response(
+      JSON.stringify({ ok: false, error: 'internal_error' }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
   }
 });

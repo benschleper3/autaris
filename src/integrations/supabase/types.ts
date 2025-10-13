@@ -682,6 +682,7 @@ export type Database = {
           id: string
           last_synced_at: string | null
           like_count: number | null
+          likes_count: number | null
           platform: string
           refresh_token: string | null
           status: string | null
@@ -701,6 +702,7 @@ export type Database = {
           id?: string
           last_synced_at?: string | null
           like_count?: number | null
+          likes_count?: number | null
           platform: string
           refresh_token?: string | null
           status?: string | null
@@ -720,6 +722,7 @@ export type Database = {
           id?: string
           last_synced_at?: string | null
           like_count?: number | null
+          likes_count?: number | null
           platform?: string
           refresh_token?: string | null
           status?: string | null

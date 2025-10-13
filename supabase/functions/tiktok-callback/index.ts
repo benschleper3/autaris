@@ -1,13 +1,26 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { supaAdmin } from '../_shared/supabaseAdmin.ts';
-import { exchangeCode, getUserInfo, getUserStats, getSandboxMode } from '../_shared/tiktok.ts';
+import { supaAdmin, getUserIdFromRequest } from '../_shared/supabaseAdmin.ts';
 
 const APP_BASE_URL = Deno.env.get('APP_BASE_URL') || 'https://www.autaris.company';
+const SANDBOX = Deno.env.get('SANDBOX_TIKTOK') === 'true';
+const CLIENT_KEY = Deno.env.get('TIKTOK_CLIENT_ID')!;
+const CLIENT_SECRET = Deno.env.get('TIKTOK_CLIENT_SECRET')!;
+const REDIRECT_URI = Deno.env.get('TIKTOK_REDIRECT_URI')!;
+
+const tokenUrl = SANDBOX
+  ? 'https://open-sandbox.tiktok.com/oauth/access_token/'
+  : 'https://open.tiktokapis.com/v2/oauth/token/';
+const userInfoUrl = SANDBOX
+  ? 'https://open-sandbox.tiktok.com/api/user/info/'
+  : 'https://open.tiktokapis.com/v2/user/info/';
+const userStatsUrl = SANDBOX
+  ? 'https://open-sandbox.tiktok.com/api/user/stats/'
+  : 'https://open.tiktokapis.com/v2/user/stats/';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': APP_BASE_URL,
   'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
 serve(async (req) => {
@@ -20,14 +33,13 @@ serve(async (req) => {
     const url = new URL(req.url);
     const isDryrun = url.searchParams.get('dryrun') === '1';
     
-    // If dryrun mode, just confirm endpoint is reachable
+    // Dryrun mode
     if (isDryrun) {
-      const sandbox = getSandboxMode();
       return new Response(
         JSON.stringify({ 
           ok: true, 
           mode: 'dryrun',
-          sandbox,
+          sandbox: SANDBOX,
           message: 'Callback reachable' 
         }),
         { 
@@ -39,14 +51,12 @@ serve(async (req) => {
     
     const code = url.searchParams.get('code');
     const stateParam = url.searchParams.get('state');
-    const sandbox = (Deno.env.get('SANDBOX_TIKTOK') ?? 'true').toLowerCase() === 'true';
 
     // Verify state parameter against cookie
     let userId: string;
     try {
       if (!stateParam) throw new Error('Missing state parameter');
       
-      // Get state from cookie
       const cookies = req.headers.get('cookie') || '';
       const cookieState = cookies.split(';')
         .find(c => c.trim().startsWith('tiktok_oauth_state='))
@@ -61,61 +71,113 @@ serve(async (req) => {
       if (!userId) throw new Error('Invalid state: missing userId');
       console.log('[tiktok-callback] Retrieved user ID from state:', userId);
     } catch (e) {
-      console.error('[tiktok-callback] Failed to verify state:', e);
+      console.error('[tiktok-callback] State verification failed:', e);
       return new Response(null, { 
         status: 302, 
         headers: { Location: `${APP_BASE_URL}/landing?error=state_mismatch` }
       });
     }
 
-    let open_id = 'sandbox_open_id';
-    let access_token = 'sandbox_access';
-    let refresh_token = 'sandbox_refresh';
-    let expires_in = 86400*30;
-
-    if (!sandbox) {
-      if (!code) {
-        return new Response('Missing code parameter', { status: 400 });
-      }
-      const { data } = await exchangeCode(code);
-      open_id = data.open_id;
-      access_token = data.access_token;
-      refresh_token = data.refresh_token;
-      expires_in = data.expires_in;
-      console.log('[tiktok-callback] Exchanged code for tokens, open_id:', open_id);
-    } else {
-      console.log('[tiktok-callback] Sandbox mode - using mock tokens');
+    if (!code) {
+      console.error('[tiktok-callback] Missing code parameter');
+      return new Response(null, { 
+        status: 302, 
+        headers: { Location: `${APP_BASE_URL}/landing?error=no_code` }
+      });
     }
 
-    // Fetch user info and stats
-    const userInfo = await getUserInfo(access_token, open_id, userId);
-    const userStats = await getUserStats(access_token, open_id, userId);
+    // Exchange code for token
+    let accessToken: string;
+    let openId: string;
+    
+    try {
+      const tokenBody = new URLSearchParams({
+        client_key: CLIENT_KEY,
+        client_secret: CLIENT_SECRET,
+        code: code,
+        grant_type: 'authorization_code',
+        redirect_uri: REDIRECT_URI,
+      });
 
-    console.log('[tiktok-callback] User info:', userInfo);
-    console.log('[tiktok-callback] User stats:', userStats);
+      const tokenResponse = await fetch(tokenUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: tokenBody.toString(),
+      });
 
-    // Store/update social account with profile info
-    const expiresAt = new Date(Date.now() + expires_in * 1000).toISOString();
+      const tokenData = await tokenResponse.json();
+      console.log('[tiktok-callback] Token exchange response:', tokenData);
+
+      if (!tokenResponse.ok || tokenData.error) {
+        throw new Error(tokenData.error?.message || 'Token exchange failed');
+      }
+
+      accessToken = tokenData.data?.access_token || tokenData.access_token;
+      openId = tokenData.data?.open_id || tokenData.open_id;
+
+      if (!accessToken || !openId) {
+        throw new Error('Missing access_token or open_id in response');
+      }
+    } catch (e) {
+      console.error('[tiktok-callback] Token exchange error:', e);
+      return new Response(null, { 
+        status: 302, 
+        headers: { Location: `${APP_BASE_URL}/landing?error=token_exchange` }
+      });
+    }
+
+    // Fetch user info
+    let displayName = 'TikTok User';
+    let avatarUrl = '';
+    
+    try {
+      const userInfoResponse = await fetch(`${userInfoUrl}?access_token=${accessToken}&open_id=${openId}`, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const userInfoData = await userInfoResponse.json();
+      console.log('[tiktok-callback] User info response:', userInfoData);
+      
+      displayName = userInfoData.data?.user?.display_name || displayName;
+      avatarUrl = userInfoData.data?.user?.avatar_url || '';
+    } catch (e) {
+      console.error('[tiktok-callback] User info fetch failed:', e);
+    }
+
+    // Fetch user stats
+    let followerCount = 0;
+    let likesCount = 0;
+    let videoCount = 0;
+    
+    try {
+      const statsResponse = await fetch(`${userStatsUrl}?access_token=${accessToken}&open_id=${openId}`, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const statsData = await statsResponse.json();
+      console.log('[tiktok-callback] User stats response:', statsData);
+      
+      followerCount = statsData.data?.follower_count || 0;
+      likesCount = statsData.data?.likes_count || 0;
+      videoCount = statsData.data?.video_count || 0;
+    } catch (e) {
+      console.error('[tiktok-callback] User stats fetch failed:', e);
+    }
+
+    // Upsert to social_accounts
     const { error: upsertError } = await supaAdmin
       .from('social_accounts')
       .upsert({
         user_id: userId,
         platform: 'tiktok',
-        external_id: open_id,
-        access_token,
-        refresh_token,
-        token_expires_at: expiresAt,
-        display_name: userInfo.display_name,
-        avatar_url: userInfo.avatar_url,
-        follower_count: userStats.follower_count,
-        following_count: userStats.following_count,
-        like_count: userStats.likes_count,
-        video_count: userStats.video_count,
-        status: 'active',
+        external_id: openId,
+        handle: displayName,
+        avatar_url: avatarUrl,
+        follower_count: followerCount,
+        likes_count: likesCount,
+        video_count: videoCount,
         last_synced_at: new Date().toISOString(),
+        status: 'active',
       }, { 
         onConflict: 'user_id,platform',
-        ignoreDuplicates: false 
       });
 
     if (upsertError) {
@@ -123,7 +185,7 @@ serve(async (req) => {
       throw upsertError;
     }
 
-    console.log('[tiktok-callback] Successfully connected TikTok account for user:', userId, 'Sandbox:', getSandboxMode());
+    console.log('[tiktok-callback] Successfully connected TikTok for user:', userId);
     
     // Clear state cookie and redirect to dashboard
     const headers = new Headers({
@@ -136,9 +198,8 @@ serve(async (req) => {
       headers
     });
   } catch (error) {
-    console.error('[tiktok-callback] Error:', error);
+    console.error('[tiktok-callback] Unhandled error:', error);
     
-    // Clear state cookie on error and return JSON error for better debugging
     const headers = new Headers({
       'Location': `${APP_BASE_URL}/landing?error=tiktok_oauth`,
       'Set-Cookie': 'tiktok_oauth_state=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0',
