@@ -10,7 +10,8 @@ function corsHeaders(origin: string) {
 }
 
 serve(async (req: Request) => {
-  const origin = Deno.env.get("APP_BASE_URL") ?? "*";
+  // Use actual request origin or fallback to wildcard for public endpoints
+  const origin = req.headers.get("origin") || Deno.env.get("APP_BASE_URL") || "*";
 
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders(origin) });
