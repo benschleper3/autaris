@@ -1,9 +1,7 @@
 const SANDBOX = (Deno.env.get('SANDBOX_TIKTOK') ?? 'true').toLowerCase() === 'true';
 
-// Determine base URLs based on sandbox mode
-const AUTH_BASE = SANDBOX 
-  ? 'https://open-sandbox.tiktok.com/auth/authorize/'
-  : 'https://www.tiktok.com/auth/authorize/';
+// Always use v2 auth endpoint (sandbox mode affects behavior, not URL)
+const AUTH_BASE = 'https://www.tiktok.com/v2/auth/authorize/';
 
 const TOKEN_BASE = SANDBOX
   ? 'https://open-sandbox.tiktok.com/oauth/access_token/'
