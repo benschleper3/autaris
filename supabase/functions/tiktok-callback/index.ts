@@ -23,6 +23,12 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
+function mask(val?: string) {
+  if (!val) return '';
+  if (val.length <= 6) return '****';
+  return `${val.slice(0, 3)}•••${val.slice(-3)}`;
+}
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -40,6 +46,8 @@ serve(async (req) => {
           ok: true, 
           mode: 'dryrun',
           sandbox: SANDBOX,
+          redirect_uri: REDIRECT_URI,
+          client_key: mask(CLIENT_KEY),
           message: 'Callback reachable' 
         }),
         { 
