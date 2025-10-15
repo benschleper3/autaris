@@ -27,8 +27,8 @@ export async function connectTikTok() {
 
     console.log('[TikTok] Redirecting to:', data.redirect_url);
     
-    // Navigate to TikTok's OAuth page
-    window.location.href = data.redirect_url;
+    // Use window.location.assign for better redirect handling
+    window.location.assign(data.redirect_url);
   } catch (err) {
     console.error('[TikTok] Connection error:', err);
     alert(`Failed to connect to TikTok: ${err instanceof Error ? err.message : 'Unknown error'}`);
