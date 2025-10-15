@@ -32,24 +32,35 @@ serve(async (req: Request) => {
     const code = url.searchParams.get("code");
     const state = url.searchParams.get("state");
     const error = url.searchParams.get("error");
+    const errorDesc = url.searchParams.get("error_description") || "";
 
+    // TikTok returned an error
     if (error) {
-      console.error("[tiktok-callback] OAuth error:", error);
+      console.error("[tiktok-callback] OAuth error:", error, errorDesc);
+      const errorMsg = errorDesc ? `${error}:${errorDesc}` : error;
       return new Response(null, { 
         status: 302, 
-        headers: { Location: `${APP_BASE_URL}/dashboard?error=tiktok_denied` } 
+        headers: { Location: `${APP_BASE_URL}/dashboard?error=${encodeURIComponent(errorMsg)}` } 
       });
     }
 
-    if (!code || !state) {
-      console.error("[tiktok-callback] Missing code or state");
+    if (!code) {
+      console.error("[tiktok-callback] Missing code");
       return new Response(null, { 
         status: 302, 
-        headers: { Location: `${APP_BASE_URL}/dashboard?error=tiktok_invalid` } 
+        headers: { Location: `${APP_BASE_URL}/dashboard?error=${encodeURIComponent('missing_code')}` } 
       });
     }
 
-    // Decode state to get user ID (skip cookie validation for sandbox/testing)
+    if (!state) {
+      console.error("[tiktok-callback] Missing state");
+      return new Response(null, { 
+        status: 302, 
+        headers: { Location: `${APP_BASE_URL}/dashboard?error=${encodeURIComponent('missing_state')}` } 
+      });
+    }
+
+    // Decode state to get user ID
     let userId: string;
     try {
       const stateData = JSON.parse(atob(state));
@@ -59,16 +70,26 @@ serve(async (req: Request) => {
       console.error("[tiktok-callback] Invalid state data:", e);
       return new Response(null, { 
         status: 302, 
-        headers: { Location: `${APP_BASE_URL}/dashboard?error=tiktok_invalid_state` } 
+        headers: { Location: `${APP_BASE_URL}/dashboard?error=${encodeURIComponent('invalid_state')}` } 
       });
     }
 
     console.log(`[tiktok-callback] Processing OAuth for user ${userId}, sandbox=${sandbox}`);
 
     // Exchange code for tokens
-    const tokenData = await exchangeCode(code);
-    const { access_token, refresh_token, expires_in, open_id } = tokenData.data;
+    let tokenData;
+    try {
+      tokenData = await exchangeCode(code);
+    } catch (e) {
+      console.error("[tiktok-callback] Token exchange failed:", e);
+      const errorMsg = e instanceof Error ? e.message : 'token_exchange_failed';
+      return new Response(null, { 
+        status: 302, 
+        headers: { Location: `${APP_BASE_URL}/dashboard?error=${encodeURIComponent(errorMsg)}` } 
+      });
+    }
 
+    const { access_token, refresh_token, expires_in, open_id } = tokenData.data;
     console.log(`[tiktok-callback] Token exchange successful, open_id=${open_id}`);
 
     // Fetch user info and stats
@@ -110,9 +131,10 @@ serve(async (req: Request) => {
 
     if (dbError) {
       console.error("[tiktok-callback] Database error:", dbError);
+      const errorMsg = `save_failed:${dbError.message || 'unknown'}`;
       return new Response(null, { 
         status: 302, 
-        headers: { Location: `${APP_BASE_URL}/dashboard?error=tiktok_save_failed` } 
+        headers: { Location: `${APP_BASE_URL}/dashboard?error=${encodeURIComponent(errorMsg)}` } 
       });
     }
 
@@ -198,9 +220,10 @@ serve(async (req: Request) => {
 
   } catch (err) {
     console.error("[tiktok-callback] Unexpected error:", err);
+    const errorMsg = err instanceof Error ? err.message : 'unexpected_error';
     return new Response(null, { 
       status: 302, 
-      headers: { Location: `${APP_BASE_URL}/dashboard?error=tiktok_oauth` } 
+      headers: { Location: `${APP_BASE_URL}/dashboard?error=${encodeURIComponent(errorMsg)}` } 
     });
   }
 });

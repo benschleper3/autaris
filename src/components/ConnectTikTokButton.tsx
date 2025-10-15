@@ -10,6 +10,11 @@ interface ConnectTikTokButtonProps {
   children?: React.ReactNode;
 }
 
+function nonce() {
+  return Array.from(crypto.getRandomValues(new Uint8Array(12)))
+    .map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 export function ConnectTikTokButton({ 
   variant = 'default', 
   size = 'default',
@@ -47,26 +52,21 @@ export function ConnectTikTokButton({
       return;
     }
 
-    // Get user ID for state parameter
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       console.error('[ConnectTikTok] No user found');
       return;
     }
 
-    // Build TikTok OAuth URL directly - no preview/dryrun
     const clientKey = import.meta.env.VITE_TIKTOK_CLIENT_KEY;
     const redirectUri = encodeURIComponent('https://gjfbxqsjxasubvnpeeie.supabase.co/functions/v1/tiktok-callback');
     const scopes = encodeURIComponent('user.info.basic,user.info.stats');
-    
-    // Create state with user ID
-    const stateData = { userId: user.id, timestamp: Date.now(), nonce: crypto.randomUUID() };
-    const state = btoa(JSON.stringify(stateData));
+    const state = btoa(JSON.stringify({ userId: user.id, n: nonce(), ts: Date.now() }));
     
     const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${clientKey}&scope=${scopes}&response_type=code&redirect_uri=${redirectUri}&state=${state}`;
     
     console.log('[ConnectTikTok] Redirecting to TikTok OAuth');
-    window.location.assign(authUrl);
+    window.location.href = authUrl;
   };
 
   const handleAuthSuccess = () => {

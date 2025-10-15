@@ -25,14 +25,24 @@ export default function Dashboard() {
     const error = searchParams.get('error');
     if (error) {
       console.error('[Dashboard] TikTok connection error:', error);
-      const errorMessages: Record<string, string> = {
-        'tiktok_denied': 'You denied the TikTok authorization',
-        'tiktok_invalid': 'Invalid TikTok authorization parameters',
-        'tiktok_invalid_state': 'Invalid TikTok authorization state',
-        'tiktok_save_failed': 'Failed to save TikTok connection',
-        'tiktok_oauth': 'TikTok authorization failed'
+      const decodedError = decodeURIComponent(error);
+      
+      // Show user-friendly message for common errors, or the raw error for debugging
+      const errorMap: Record<string, string> = {
+        'access_denied': 'You denied TikTok authorization',
+        'missing_code': 'TikTok did not provide authorization code',
+        'missing_state': 'Invalid OAuth state',
+        'invalid_state': 'Invalid OAuth state - please try again',
+        'token_exchange_failed': 'Failed to exchange authorization code'
       };
-      toast.error(errorMessages[error] || 'Failed to connect TikTok');
+      
+      // Check if it's a known error type
+      const knownError = Object.keys(errorMap).find(key => decodedError.startsWith(key));
+      const message = knownError 
+        ? errorMap[knownError]
+        : `TikTok connection failed: ${decodedError}`;
+      
+      toast.error(message);
       setSearchParams({});
     }
   }, [searchParams, setSearchParams]);
