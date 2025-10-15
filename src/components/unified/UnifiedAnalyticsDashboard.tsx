@@ -18,7 +18,11 @@ import PortfolioManagerModal from './PortfolioManagerModal';
 import ExportAppJsonModal from './ExportAppJsonModal';
 import { CleanupTikTokButton } from '../CleanupTikTokButton';
 
-export default function UnifiedAnalyticsDashboard() {
+interface UnifiedAnalyticsDashboardProps {
+  refreshTrigger?: number;
+}
+
+export default function UnifiedAnalyticsDashboard({ refreshTrigger }: UnifiedAnalyticsDashboardProps = {}) {
   const { isOwnerOrAdmin } = useUserRole();
   const { toast } = useToast();
   
@@ -35,9 +39,10 @@ export default function UnifiedAnalyticsDashboard() {
   const [tiktokConnected, setTiktokConnected] = useState(false);
   const [checkingConnection, setCheckingConnection] = useState(true);
 
+  // Check connection on mount and when refreshTrigger changes
   useEffect(() => {
     checkTikTokConnection();
-  }, []);
+  }, [refreshTrigger]);
 
   const checkTikTokConnection = async () => {
     try {
