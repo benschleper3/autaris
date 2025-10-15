@@ -16,6 +16,7 @@ import ReportGeneratorModal from './ReportGeneratorModal';
 import PortfolioManagerModal from './PortfolioManagerModal';
 import ExportAppJsonModal from './ExportAppJsonModal';
 import { CleanupTikTokButton } from '../CleanupTikTokButton';
+import { UpdateTikTokUsername } from '../UpdateTikTokUsername';
 
 export default function UnifiedAnalyticsDashboard() {
   const { isOwnerOrAdmin } = useUserRole();
@@ -132,6 +133,7 @@ export default function UnifiedAnalyticsDashboard() {
                   <Code className="w-4 h-4" />
                   Export App JSON
                 </Button>
+                {tiktokConnected && <UpdateTikTokUsername />}
                 <CleanupTikTokButton />
               </>
             )}
