@@ -16,14 +16,17 @@ const USER_STATS_BASE = SANDBOX
   : 'https://open.tiktokapis.com/v2/user/stats/';
 
 export function buildAuthUrl(state: string) {
+  // Prefer TIKTOK_CLIENT_KEY, fallback to TIKTOK_CLIENT_ID for backward compatibility
+  const CLIENT_KEY = Deno.env.get('TIKTOK_CLIENT_KEY') || Deno.env.get('TIKTOK_CLIENT_ID') || '';
   const scopes = Deno.env.get('TIKTOK_SCOPES') || 'user.info.basic,user.info.stats';
   const qs = new URLSearchParams({
-    client_key: Deno.env.get('TIKTOK_CLIENT_ID')!,
+    client_key: CLIENT_KEY,
     scope: scopes,
     response_type: 'code',
     redirect_uri: Deno.env.get('TIKTOK_REDIRECT_URI')!,
     state,
   });
+  console.log('[TikTok] buildAuthUrl: using client_key parameter');
   return `${AUTH_BASE}?${qs.toString()}`;
 }
 
@@ -33,14 +36,18 @@ export function getSandboxMode() {
 
 /** Token exchange (production or sandbox) */
 export async function exchangeCode(code: string) {
-  console.log(`[TikTok] Exchanging code for tokens (sandbox=${SANDBOX})`);
+  // Prefer TIKTOK_CLIENT_KEY, fallback to TIKTOK_CLIENT_ID for backward compatibility
+  const CLIENT_KEY = Deno.env.get('TIKTOK_CLIENT_KEY') || Deno.env.get('TIKTOK_CLIENT_ID') || '';
+  const CLIENT_SECRET = Deno.env.get('TIKTOK_CLIENT_SECRET') || '';
+  
+  console.log(`[TikTok] Exchanging code for tokens (sandbox=${SANDBOX}, using client_key)`);
   
   const res = await fetch(TOKEN_BASE, {
     method: 'POST',
     headers: { 'Content-Type':'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      client_key: Deno.env.get('TIKTOK_CLIENT_ID')!,
-      client_secret: Deno.env.get('TIKTOK_CLIENT_SECRET')!,
+      client_key: CLIENT_KEY,
+      client_secret: CLIENT_SECRET,
       grant_type: 'authorization_code',
       redirect_uri: Deno.env.get('TIKTOK_REDIRECT_URI')!,
       code,
@@ -59,12 +66,16 @@ export async function exchangeCode(code: string) {
 }
 
 export async function refreshToken(refresh_token: string) {
+  // Prefer TIKTOK_CLIENT_KEY, fallback to TIKTOK_CLIENT_ID for backward compatibility
+  const CLIENT_KEY = Deno.env.get('TIKTOK_CLIENT_KEY') || Deno.env.get('TIKTOK_CLIENT_ID') || '';
+  const CLIENT_SECRET = Deno.env.get('TIKTOK_CLIENT_SECRET') || '';
+  
   const res = await fetch(TOKEN_BASE, {
     method: 'POST',
     headers: { 'Content-Type':'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      client_key: Deno.env.get('TIKTOK_CLIENT_ID')!,
-      client_secret: Deno.env.get('TIKTOK_CLIENT_SECRET')!,
+      client_key: CLIENT_KEY,
+      client_secret: CLIENT_SECRET,
       grant_type: 'refresh_token',
       refresh_token,
     }),
