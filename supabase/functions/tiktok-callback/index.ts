@@ -96,11 +96,18 @@ serve(async (req: Request) => {
 
     console.log(`[tiktok-callback] User info fetched: ${userInfo.display_name}`);
 
-    // Store in social_accounts table
+    // Delete any existing TikTok connection for this user first
+    await supaAdmin
+      .from('social_accounts')
+      .delete()
+      .eq('user_id', userId)
+      .eq('platform', 'tiktok');
+
+    // Insert fresh TikTok account data
     const expiresAt = new Date(Date.now() + expires_in * 1000);
     const { error: dbError } = await supaAdmin
       .from('social_accounts')
-      .upsert({
+      .insert({
         user_id: userId,
         platform: 'tiktok',
         external_id: open_id,
@@ -116,8 +123,6 @@ serve(async (req: Request) => {
         video_count: userStats.video_count,
         status: 'active',
         last_synced_at: new Date().toISOString(),
-      }, {
-        onConflict: 'user_id,platform'
       });
 
     if (dbError) {
