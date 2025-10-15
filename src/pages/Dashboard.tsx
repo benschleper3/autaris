@@ -2,10 +2,37 @@ import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import UnifiedAnalyticsDashboard from '@/components/unified/UnifiedAnalyticsDashboard';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  // Handle TikTok OAuth callback query params
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const connected = url.searchParams.get('connected');
+    const error = url.searchParams.get('error');
+
+    if (connected === 'tiktok') {
+      toast({
+        title: 'Success',
+        description: 'TikTok connected successfully 🎉',
+      });
+      // Clean the URL
+      url.searchParams.delete('connected');
+      window.history.replaceState({}, '', url.toString());
+    } else if (error) {
+      toast({
+        title: 'Error',
+        description: `TikTok connection failed: ${decodeURIComponent(error)}`,
+        variant: 'destructive',
+      });
+      url.searchParams.delete('error');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, [toast]);
 
   useEffect(() => {
     const checkAccess = async () => {
