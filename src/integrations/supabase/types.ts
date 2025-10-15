@@ -877,6 +877,10 @@ export type Database = {
       }
     }
     Functions: {
+      fix_tiktok_connection: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_creator_kpis: {
         Args: Record<PropertyKey, never>
         Returns: {
