@@ -5,10 +5,6 @@ import { supabase } from '@/integrations/supabase/client';
  * Navigate to TikTok OAuth
  * Calls the edge function first to get the auth URL, then navigates
  */
-/**
- * Navigate to TikTok OAuth
- * Calls the edge function first to get the auth URL, then navigates
- */
 export async function connectTikTok() {
   try {
     // Call edge function with auth to get the TikTok auth URL

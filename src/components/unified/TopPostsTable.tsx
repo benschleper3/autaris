@@ -177,8 +177,7 @@ export default function TopPostsTable({ filters }: TopPostsTableProps) {
     }
   };
 
-  const getPlatformColor = (platform: string | null) => {
-    if (!platform) return 'bg-gray-500';
+  const getPlatformColor = (platform: string) => {
     const colors = {
       tiktok: 'bg-pink-500',
       instagram: 'bg-purple-500',

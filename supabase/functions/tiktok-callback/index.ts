@@ -1,6 +1,6 @@
 // TikTok OAuth Callback Handler
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
-import { exchangeCode, getUserInfo, getUserStats, getSandboxMode, listVideos, getVideoStats } from '../_shared/tiktok.ts';
+import { exchangeCode, getUserInfo, getUserStats, getSandboxMode } from '../_shared/tiktok.ts';
 import { supaAdmin } from '../_shared/supabaseAdmin.ts';
 
 function corsHeaders(origin: string) {
@@ -96,18 +96,11 @@ serve(async (req: Request) => {
 
     console.log(`[tiktok-callback] User info fetched: ${userInfo.display_name}`);
 
-    // Delete any existing TikTok connection for this user first
-    await supaAdmin
-      .from('social_accounts')
-      .delete()
-      .eq('user_id', userId)
-      .eq('platform', 'tiktok');
-
-    // Insert fresh TikTok account data
+    // Store in social_accounts table
     const expiresAt = new Date(Date.now() + expires_in * 1000);
     const { error: dbError } = await supaAdmin
       .from('social_accounts')
-      .insert({
+      .upsert({
         user_id: userId,
         platform: 'tiktok',
         external_id: open_id,
@@ -123,6 +116,8 @@ serve(async (req: Request) => {
         video_count: userStats.video_count,
         status: 'active',
         last_synced_at: new Date().toISOString(),
+      }, {
+        onConflict: 'user_id,platform'
       });
 
     if (dbError) {
@@ -134,75 +129,6 @@ serve(async (req: Request) => {
     }
 
     console.log(`[tiktok-callback] Successfully connected TikTok account for user ${userId}`);
-
-    // Start background sync of videos/metrics (don't await - runs after redirect)
-    const syncTask = async () => {
-      try {
-        console.log(`[tiktok-callback] Starting background sync for user ${userId}`);
-        const sinceDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(); // Last 30 days
-        
-        const videos = await listVideos(access_token, open_id, sinceDate, userId);
-        console.log(`[tiktok-callback] Found ${videos.length} videos to sync`);
-        
-        let syncedPosts = 0;
-        let syncedMetrics = 0;
-
-        for (const video of videos) {
-          // Create/update post
-          const { data: post, error: postError } = await supaAdmin
-            .from('posts')
-            .upsert({
-              user_id: userId,
-              social_account_id: (await supaAdmin
-                .from('social_accounts')
-                .select('id')
-                .eq('user_id', userId)
-                .eq('platform', 'tiktok')
-                .single()).data?.id,
-              external_id: video.id,
-              title: video.title,
-              caption: video.desc,
-              video_url: video.url,
-              published_at: video.create_time,
-              status: 'published'
-            }, {
-              onConflict: 'user_id,external_id'
-            })
-            .select('id')
-            .single();
-
-          if (postError) {
-            console.error(`[tiktok-callback] Error syncing post ${video.id}:`, postError);
-            continue;
-          }
-
-          syncedPosts++;
-
-          // Fetch and store metrics
-          const stats = await getVideoStats(access_token, video.id, userId);
-          const { error: metricsError } = await supaAdmin
-            .from('post_metrics')
-            .insert({
-              post_id: post.id,
-              views: stats.views,
-              likes: stats.likes,
-              comments: stats.comments,
-              shares: stats.shares,
-              saves: stats.saves,
-              captured_at: new Date().toISOString()
-            });
-
-          if (!metricsError) syncedMetrics++;
-        }
-
-        console.log(`[tiktok-callback] Sync complete: ${syncedPosts} posts, ${syncedMetrics} metrics`);
-      } catch (err) {
-        console.error('[tiktok-callback] Background sync error:', err);
-      }
-    };
-
-    // Run sync in background (non-blocking)
-    EdgeRuntime.waitUntil(syncTask());
 
     // Clear the state cookie and redirect to dashboard
     return new Response(null, { 

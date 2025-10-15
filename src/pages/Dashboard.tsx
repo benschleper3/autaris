@@ -62,5 +62,5 @@ export default function Dashboard() {
     return <Navigate to="/" replace />;
   }
 
-  return <UnifiedAnalyticsDashboard refreshTrigger={refreshKey} />;
+  return <UnifiedAnalyticsDashboard key={refreshKey} />;
 }
