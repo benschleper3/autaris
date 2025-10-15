@@ -134,6 +134,73 @@ export default function UnifiedAnalyticsDashboard({ refreshTrigger }: UnifiedAna
     }
   };
 
+  // Show empty state if no TikTok account is connected
+  if (!checkingConnection && !tiktokConnected) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-background/80">
+        <GlobalFilters filters={filters} onFiltersChange={setFilters} />
+        
+        <div className="p-6 space-y-6 max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-growth-primary to-growth-secondary bg-clip-text text-transparent">
+                Analytics Dashboard
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Track your content performance and optimize your strategy
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                onClick={handleTikTokConnect} 
+                variant="default" 
+                className="flex items-center gap-2"
+              >
+                <Link2 className="w-4 h-4" />
+                Connect TikTok
+              </Button>
+              {isOwnerOrAdmin && (
+                <>
+                  <Button onClick={() => setShowExportModal(true)} variant="outline" size="sm" className="flex items-center gap-2">
+                    <Code className="w-4 h-4" />
+                    Export App JSON
+                  </Button>
+                  <CleanupTikTokButton />
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Empty State */}
+          <div className="flex flex-col items-center justify-center py-20 space-y-6">
+            <div className="rounded-full bg-primary/10 p-8">
+              <Link2 className="w-16 h-16 text-primary" />
+            </div>
+            <div className="text-center space-y-2">
+              <h2 className="text-2xl font-bold">No TikTok Account Connected</h2>
+              <p className="text-muted-foreground max-w-md">
+                Connect your TikTok account to start tracking your content performance, viewing analytics, and getting AI-powered insights.
+              </p>
+            </div>
+            <Button 
+              onClick={handleTikTokConnect} 
+              size="lg"
+              className="flex items-center gap-2"
+            >
+              <Link2 className="w-5 h-5" />
+              Connect TikTok Account
+            </Button>
+          </div>
+        </div>
+
+        <ReportGeneratorModal open={showReportModal} onOpenChange={setShowReportModal} />
+        <PortfolioManagerModal open={showPortfolioModal} onOpenChange={setShowPortfolioModal} />
+        <ExportAppJsonModal open={showExportModal} onOpenChange={setShowExportModal} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-background/80">
       <GlobalFilters filters={filters} onFiltersChange={setFilters} />
