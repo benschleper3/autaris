@@ -16,7 +16,6 @@ import ReportGeneratorModal from './ReportGeneratorModal';
 import PortfolioManagerModal from './PortfolioManagerModal';
 import ExportAppJsonModal from './ExportAppJsonModal';
 import { CleanupTikTokButton } from '../CleanupTikTokButton';
-import { TikTokStats } from '../TikTokStats';
 
 export default function UnifiedAnalyticsDashboard() {
   const { isOwnerOrAdmin } = useUserRole();
@@ -37,13 +36,6 @@ export default function UnifiedAnalyticsDashboard() {
 
   useEffect(() => {
     checkTikTokConnection();
-    
-    // Also check when URL params change (e.g., after OAuth redirect)
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('connected') === 'tiktok') {
-      // Recheck after a short delay to ensure data is saved
-      setTimeout(() => checkTikTokConnection(), 500);
-    }
   }, []);
 
   const checkTikTokConnection = async () => {
@@ -145,11 +137,6 @@ export default function UnifiedAnalyticsDashboard() {
             )}
           </div>
         </div>
-
-        {/* TikTok Stats */}
-        {tiktokConnected && (
-          <TikTokStats />
-        )}
 
         {/* KPI Strip */}
         <KPIStrip filters={filters} />
