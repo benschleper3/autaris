@@ -1,34 +1,45 @@
-import { SUPABASE_URL } from '@/integrations/supabase/config';
 import { supabase } from '@/integrations/supabase/client';
+
+// TikTok OAuth configuration
+const TIKTOK_CLIENT_ID = 'aw1i8zw7k4u93q6b'; // Your TikTok client key
+const REDIRECT_URI = 'https://www.autaris.company/functions/v1/tiktok-callback';
+const SCOPES = 'user.info.basic,user.info.stats';
 
 /**
  * Navigate to TikTok OAuth
- * Calls the edge function first to get the auth URL, then navigates
+ * Constructs the auth URL directly and redirects
  */
 export async function connectTikTok() {
   try {
-    // Call edge function with auth to get the TikTok auth URL
-    const { data, error } = await supabase.functions.invoke('tiktok-start', {
-      method: 'GET',
-    });
-
-    if (error) {
-      console.error('Error getting TikTok auth URL:', error);
-      // Fallback to direct navigation
-      window.location.href = `${SUPABASE_URL}/functions/v1/tiktok-start`;
+    // Get authenticated user
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      console.error('User not authenticated');
       return;
     }
 
-    // If we got a redirect URL, navigate to it
-    if (data?.redirect_url) {
-      window.location.href = data.redirect_url;
-    } else {
-      // Fallback to direct navigation
-      window.location.href = `${SUPABASE_URL}/functions/v1/tiktok-start`;
-    }
+    // Generate state with user ID for callback validation
+    const randomState = crypto.randomUUID();
+    const stateData = { 
+      userId: session.user.id, 
+      timestamp: Date.now(), 
+      nonce: randomState 
+    };
+    const state = btoa(JSON.stringify(stateData));
+
+    // Store state in sessionStorage for callback validation
+    sessionStorage.setItem('tiktok_oauth_state', state);
+
+    // Construct TikTok auth URL
+    const redirectUri = encodeURIComponent(REDIRECT_URI);
+    const scopes = encodeURIComponent(SCOPES);
+    const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${TIKTOK_CLIENT_ID}&scope=${scopes}&response_type=code&redirect_uri=${redirectUri}&state=${encodeURIComponent(state)}`;
+
+    console.log('[tiktok] Redirecting to TikTok OAuth:', authUrl);
+    
+    // Redirect to TikTok
+    window.location.href = authUrl;
   } catch (err) {
     console.error('Error connecting to TikTok:', err);
-    // Fallback to direct navigation
-    window.location.href = `${SUPABASE_URL}/functions/v1/tiktok-start`;
   }
 }
