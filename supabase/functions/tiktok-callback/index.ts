@@ -94,7 +94,8 @@ serve(async (req: Request) => {
       getUserStats(access_token, open_id, userId),
     ]);
 
-    console.log(`[tiktok-callback] User info fetched: ${userInfo.display_name}`);
+    const username = userInfo.username || userInfo.display_name;
+    console.log(`[tiktok-callback] User info fetched: ${username}`);
 
     // Delete any existing TikTok connection for this user first
     await supaAdmin
@@ -111,7 +112,7 @@ serve(async (req: Request) => {
         user_id: userId,
         platform: 'tiktok',
         external_id: open_id,
-        handle: userInfo.display_name,
+        handle: username,
         display_name: userInfo.display_name,
         avatar_url: userInfo.avatar_url,
         access_token,
@@ -119,7 +120,6 @@ serve(async (req: Request) => {
         token_expires_at: expiresAt.toISOString(),
         follower_count: userStats.follower_count,
         following_count: userStats.following_count,
-        like_count: userStats.likes_count,
         video_count: userStats.video_count,
         status: 'active',
         last_synced_at: new Date().toISOString(),
