@@ -33,7 +33,6 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { connectTikTok } from '@/lib/tiktok';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -97,8 +96,20 @@ export default function GlobalFilters({ filters, onFiltersChange }: GlobalFilter
     }
   };
 
-  const handleTikTokConnect = () => {
-    connectTikTok();
+  const handleTikTokConnect = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const clientKey = import.meta.env.VITE_TIKTOK_CLIENT_KEY;
+    const redirectUri = encodeURIComponent('https://gjfbxqsjxasubvnpeeie.supabase.co/functions/v1/tiktok-callback');
+    const scopes = encodeURIComponent('user.info.basic,user.info.stats');
+    
+    const stateData = { userId: user.id, timestamp: Date.now(), nonce: crypto.randomUUID() };
+    const state = btoa(JSON.stringify(stateData));
+    
+    const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${clientKey}&scope=${scopes}&response_type=code&redirect_uri=${redirectUri}&state=${state}`;
+    
+    window.location.assign(authUrl);
   };
 
   const handleTikTokDisconnect = async () => {

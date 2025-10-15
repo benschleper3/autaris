@@ -35,58 +35,27 @@ export function getSandboxMode() {
 export async function exchangeCode(code: string) {
   console.log(`[TikTok] Exchanging code for tokens (sandbox=${SANDBOX})`);
   
-  // Try to exchange with TikTok API
-  try {
-    const res = await fetch(TOKEN_BASE, {
-      method: 'POST',
-      headers: { 'Content-Type':'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        client_key: Deno.env.get('TIKTOK_CLIENT_ID')!,
-        client_secret: Deno.env.get('TIKTOK_CLIENT_SECRET')!,
-        grant_type: 'authorization_code',
-        redirect_uri: Deno.env.get('TIKTOK_REDIRECT_URI')!,
-        code,
-      }),
-    });
-    
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error('[TikTok] Token exchange failed:', res.status, errorText);
-      
-      // In sandbox mode, fall back to mock tokens if API fails
-      if (SANDBOX) {
-        console.log('[TikTok] Falling back to mock tokens due to API error');
-        return {
-          data: {
-            access_token: `sandbox_token_${code.slice(0, 10)}`,
-            refresh_token: `sandbox_refresh_${code.slice(0, 10)}`,
-            expires_in: 86400,
-            open_id: `sandbox_${code.slice(0, 10)}`,
-          }
-        };
-      }
-      
-      throw new Error(`Token exchange failed: ${res.status}`);
-    }
-    
-    return res.json() as Promise<{ data: {
-      open_id: string; access_token: string; refresh_token: string; expires_in: number;
-    }}>;
-  } catch (error) {
-    // Handle DNS/network errors in sandbox mode
-    if (SANDBOX) {
-      console.log('[TikTok] Network error, using mock tokens in sandbox:', error);
-      return {
-        data: {
-          access_token: `sandbox_token_${code.slice(0, 10)}`,
-          refresh_token: `sandbox_refresh_${code.slice(0, 10)}`,
-          expires_in: 86400,
-          open_id: `sandbox_${code.slice(0, 10)}`,
-        }
-      };
-    }
-    throw error;
+  const res = await fetch(TOKEN_BASE, {
+    method: 'POST',
+    headers: { 'Content-Type':'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_key: Deno.env.get('TIKTOK_CLIENT_ID')!,
+      client_secret: Deno.env.get('TIKTOK_CLIENT_SECRET')!,
+      grant_type: 'authorization_code',
+      redirect_uri: Deno.env.get('TIKTOK_REDIRECT_URI')!,
+      code,
+    }),
+  });
+  
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error('[TikTok] Token exchange failed:', res.status, errorText);
+    throw new Error(`Token exchange failed: ${res.status} - ${errorText}`);
   }
+  
+  return res.json() as Promise<{ data: {
+    open_id: string; access_token: string; refresh_token: string; expires_in: number;
+  }}>;
 }
 
 export async function refreshToken(refresh_token: string) {
@@ -177,65 +146,33 @@ export async function getUserStatsSandbox(userId: string) {
 export async function getUserInfo(accessToken: string, openId: string, userIdForSandbox?: string) {
   console.log(`[TikTok] Fetching user info (sandbox=${SANDBOX})`);
   
-  try {
-    const res = await fetch(`${USER_INFO_BASE}?fields=display_name,avatar_url`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error('[TikTok] getUserInfo failed:', res.status, errorText);
-      
-      // Fallback to mock data in sandbox mode
-      if (SANDBOX && userIdForSandbox) {
-        console.log('[TikTok] Using mock user info due to API error');
-        return getUserInfoSandbox(userIdForSandbox);
-      }
-      
-      throw new Error(`getUserInfo failed: ${res.status}`);
-    }
-    
-    const json = await res.json() as { data: { user: { display_name: string; avatar_url: string } } };
-    return json.data.user;
-  } catch (error) {
-    // Handle DNS/network errors in sandbox mode
-    if (SANDBOX && userIdForSandbox) {
-      console.log('[TikTok] Network error, using mock user info:', error);
-      return getUserInfoSandbox(userIdForSandbox);
-    }
-    throw error;
+  const res = await fetch(`${USER_INFO_BASE}?fields=display_name,avatar_url`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error('[TikTok] getUserInfo failed:', res.status, errorText);
+    throw new Error(`getUserInfo failed: ${res.status} - ${errorText}`);
   }
+  
+  const json = await res.json() as { data: { user: { display_name: string; avatar_url: string } } };
+  return json.data.user;
 }
 
 export async function getUserStats(accessToken: string, openId: string, userIdForSandbox?: string) {
   console.log(`[TikTok] Fetching user stats (sandbox=${SANDBOX})`);
   
-  try {
-    const res = await fetch(`${USER_STATS_BASE}?fields=follower_count,following_count,likes_count,video_count`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error('[TikTok] getUserStats failed:', res.status, errorText);
-      
-      // Fallback to mock data in sandbox mode
-      if (SANDBOX && userIdForSandbox) {
-        console.log('[TikTok] Using mock user stats due to API error');
-        return getUserStatsSandbox(userIdForSandbox);
-      }
-      
-      throw new Error(`getUserStats failed: ${res.status}`);
-    }
-    
-    const json = await res.json() as { data: { user: { follower_count: number; following_count: number; likes_count: number; video_count: number } } };
-    return json.data.user;
-  } catch (error) {
-    // Handle DNS/network errors in sandbox mode
-    if (SANDBOX && userIdForSandbox) {
-      console.log('[TikTok] Network error, using mock user stats:', error);
-      return getUserStatsSandbox(userIdForSandbox);
-    }
-    throw error;
+  const res = await fetch(`${USER_STATS_BASE}?fields=follower_count,following_count,likes_count,video_count`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error('[TikTok] getUserStats failed:', res.status, errorText);
+    throw new Error(`getUserStats failed: ${res.status} - ${errorText}`);
   }
+  
+  const json = await res.json() as { data: { user: { follower_count: number; following_count: number; likes_count: number; video_count: number } } };
+  return json.data.user;
 }

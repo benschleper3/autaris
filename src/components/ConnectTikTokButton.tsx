@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { AuthModal } from '@/components/AuthModal';
-import { connectTikTok } from '@/lib/tiktok';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ConnectTikTokButtonProps {
@@ -42,20 +41,37 @@ export function ConnectTikTokButton({
     }
   };
 
-  const handleClick = () => {
-    if (isAuthenticated) {
-      // User is signed in, go straight to TikTok OAuth
-      connectTikTok();
-    } else {
-      // User is not signed in, show auth modal
+  const handleClick = async () => {
+    if (!isAuthenticated) {
       setShowAuthModal(true);
+      return;
     }
+
+    // Get user ID for state parameter
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.error('[ConnectTikTok] No user found');
+      return;
+    }
+
+    // Build TikTok OAuth URL directly - no preview/dryrun
+    const clientKey = import.meta.env.VITE_TIKTOK_CLIENT_KEY;
+    const redirectUri = encodeURIComponent('https://gjfbxqsjxasubvnpeeie.supabase.co/functions/v1/tiktok-callback');
+    const scopes = encodeURIComponent('user.info.basic,user.info.stats');
+    
+    // Create state with user ID
+    const stateData = { userId: user.id, timestamp: Date.now(), nonce: crypto.randomUUID() };
+    const state = btoa(JSON.stringify(stateData));
+    
+    const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${clientKey}&scope=${scopes}&response_type=code&redirect_uri=${redirectUri}&state=${state}`;
+    
+    console.log('[ConnectTikTok] Redirecting to TikTok OAuth');
+    window.location.assign(authUrl);
   };
 
   const handleAuthSuccess = () => {
-    // After successful sign-in, immediately continue to TikTok OAuth
     setShowAuthModal(false);
-    setTimeout(() => connectTikTok(), 100);
+    setTimeout(() => handleClick(), 100);
   };
 
   return (

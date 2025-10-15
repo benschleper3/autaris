@@ -21,7 +21,6 @@ import logo from '@/assets/logo.png';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { connectTikTok } from '@/lib/tiktok';
 
 interface TikTokProfile {
   display_name: string | null;
@@ -70,8 +69,20 @@ export default function Navigation({}: NavigationProps) {
     }
   };
 
-  const handleTikTokConnect = () => {
-    connectTikTok();
+  const handleTikTokConnect = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const clientKey = import.meta.env.VITE_TIKTOK_CLIENT_KEY;
+    const redirectUri = encodeURIComponent('https://gjfbxqsjxasubvnpeeie.supabase.co/functions/v1/tiktok-callback');
+    const scopes = encodeURIComponent('user.info.basic,user.info.stats');
+    
+    const stateData = { userId: user.id, timestamp: Date.now(), nonce: crypto.randomUUID() };
+    const state = btoa(JSON.stringify(stateData));
+    
+    const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${clientKey}&scope=${scopes}&response_type=code&redirect_uri=${redirectUri}&state=${state}`;
+    
+    window.location.assign(authUrl);
   };
 
   const handleTikTokDisconnect = async () => {

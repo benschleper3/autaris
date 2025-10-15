@@ -26,25 +26,8 @@ serve(async (req: Request) => {
 
   const APP_BASE_URL = Deno.env.get("APP_BASE_URL") ?? "";
   const sandbox = getSandboxMode();
-  const redirectUri = Deno.env.get("TIKTOK_REDIRECT_URI") ?? "";
-  const clientKey = Deno.env.get("TIKTOK_CLIENT_ID") ?? "";
-  const dryrun = url.searchParams.get("dryrun") === "1";
 
   try {
-    if (dryrun) {
-      return new Response(JSON.stringify({
-        ok: true,
-        mode: "dryrun",
-        sandbox,
-        redirect_uri: redirectUri,
-        client_key: mask(clientKey),
-        message: "Callback reachable"
-      }), {
-        status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders(origin) },
-      });
-    }
-
     // Extract OAuth parameters
     const code = url.searchParams.get("code");
     const state = url.searchParams.get("state");

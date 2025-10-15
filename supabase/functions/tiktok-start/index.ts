@@ -30,45 +30,11 @@ serve(async (req) => {
       );
     }
 
-    // Check for dryrun mode
-    const url = new URL(req.url);
-    const isDryrun = url.searchParams.get('dryrun') === '1';
-
     // Generate random state and encode with user ID
     const randomState = crypto.randomUUID();
     const stateData = { userId, timestamp: Date.now(), nonce: randomState };
     const state = btoa(JSON.stringify(stateData));
     const authUrl = buildAuthUrl(state);
-    
-    // If dryrun mode, return diagnostic info
-    if (isDryrun) {
-      const clientKey = Deno.env.get('TIKTOK_CLIENT_ID') || '';
-      const redirectUri = Deno.env.get('TIKTOK_REDIRECT_URI') || '';
-      const scopesStr = Deno.env.get('TIKTOK_SCOPES') || 'user.info.basic,user.info.stats';
-      const scopes = scopesStr.split(',').map(s => s.trim());
-      const sandbox = getSandboxMode();
-      
-      // Mask client key for security
-      const maskedClientKey = clientKey.length > 8 
-        ? clientKey.slice(0, 3) + '•'.repeat(clientKey.length - 6) + clientKey.slice(-3)
-        : clientKey;
-      
-      return new Response(
-        JSON.stringify({ 
-          ok: true,
-          mode: 'dryrun',
-          sandbox,
-          client_key: maskedClientKey,
-          scopes,
-          redirect_uri: redirectUri,
-          auth_url_preview: authUrl
-        }), 
-        { 
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
     
     console.log('[tiktok-start] Generated TikTok auth URL for user:', userId, 'Sandbox:', getSandboxMode());
     
