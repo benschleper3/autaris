@@ -8,10 +8,27 @@ import { supabase } from '@/integrations/supabase/client';
 export async function connectTikTok() {
   console.log('[connectTikTok] Starting TikTok OAuth flow...');
   
-  // Navigate directly to the tiktok-start edge function
-  // This is simpler and more reliable than using supabase.functions.invoke
-  const authUrl = `${SUPABASE_URL}/functions/v1/tiktok-start`;
-  console.log('[connectTikTok] Redirecting to:', authUrl);
-  
-  window.location.href = authUrl;
+  try {
+    // Use the Supabase client to invoke the function - this automatically includes auth
+    const { data, error } = await supabase.functions.invoke('tiktok-start');
+    
+    if (error) {
+      console.error('[connectTikTok] Error from tiktok-start:', error);
+      throw error;
+    }
+    
+    console.log('[connectTikTok] Got response:', data);
+    
+    // The function returns a redirect_url - navigate to it
+    if (data?.redirect_url) {
+      console.log('[connectTikTok] Redirecting to TikTok auth:', data.redirect_url);
+      window.location.href = data.redirect_url;
+    } else {
+      console.error('[connectTikTok] No redirect_url in response:', data);
+      throw new Error('No redirect URL returned from tiktok-start');
+    }
+  } catch (err) {
+    console.error('[connectTikTok] Failed to start TikTok OAuth:', err);
+    throw err;
+  }
 }
