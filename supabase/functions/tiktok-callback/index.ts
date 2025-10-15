@@ -117,7 +117,7 @@ serve(async (req: Request) => {
         status: 'active',
         last_synced_at: new Date().toISOString(),
       }, {
-        onConflict: 'user_id,platform,handle'
+        onConflict: 'user_id,platform'
       });
 
     if (dbError) {
