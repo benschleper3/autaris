@@ -1,3 +1,4 @@
+// TikTok OAuth Callback Handler
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { exchangeCode, getUserInfo, getUserStats, getSandboxMode } from '../_shared/tiktok.ts';
 import { supaAdmin } from '../_shared/supabaseAdmin.ts';
