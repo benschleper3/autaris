@@ -37,6 +37,13 @@ export default function UnifiedAnalyticsDashboard() {
 
   useEffect(() => {
     checkTikTokConnection();
+    
+    // Also check when URL params change (e.g., after OAuth redirect)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('connected') === 'tiktok') {
+      // Recheck after a short delay to ensure data is saved
+      setTimeout(() => checkTikTokConnection(), 500);
+    }
   }, []);
 
   const checkTikTokConnection = async () => {

@@ -18,12 +18,24 @@ export function TikTokStats() {
 
   useEffect(() => {
     fetchTikTokData();
+    
+    // Listen for URL changes (after OAuth redirect)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('connected') === 'tiktok') {
+      // Delay to ensure backend has saved the data
+      setTimeout(() => fetchTikTokData(), 1000);
+    }
   }, []);
 
   const fetchTikTokData = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        console.log('[TikTokStats] No authenticated user');
+        return;
+      }
+
+      console.log('[TikTokStats] Fetching TikTok account for user:', user.id);
 
       const { data: account, error } = await supabase
         .from('social_accounts')
@@ -32,7 +44,10 @@ export function TikTokStats() {
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (!error && account) {
+      if (error) {
+        console.error('[TikTokStats] Query error:', error);
+      } else if (account) {
+        console.log('[TikTokStats] Found account:', account.handle || account.display_name);
         setData({
           username: account.handle || account.display_name,
           display_name: account.display_name,
@@ -41,9 +56,11 @@ export function TikTokStats() {
           following_count: account.following_count || 0,
           video_count: account.video_count || 0,
         });
+      } else {
+        console.log('[TikTokStats] No TikTok account found');
       }
     } catch (error) {
-      console.error('Error fetching TikTok data:', error);
+      console.error('[TikTokStats] Error fetching TikTok data:', error);
     } finally {
       setLoading(false);
     }

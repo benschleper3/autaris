@@ -98,40 +98,57 @@ serve(async (req: Request) => {
     console.log(`[tiktok-callback] User info fetched: ${username}`);
 
     // Delete any existing TikTok connection for this user first
-    await supaAdmin
+    const { error: deleteError } = await supaAdmin
       .from('social_accounts')
       .delete()
       .eq('user_id', userId)
       .eq('platform', 'tiktok');
 
+    if (deleteError) {
+      console.error("[tiktok-callback] Delete error:", deleteError);
+    }
+
     // Insert fresh TikTok account data
     const expiresAt = new Date(Date.now() + expires_in * 1000);
-    const { error: dbError } = await supaAdmin
+    const accountData = {
+      user_id: userId,
+      platform: 'tiktok',
+      external_id: open_id,
+      handle: username,
+      display_name: userInfo.display_name,
+      avatar_url: userInfo.avatar_url,
+      access_token,
+      refresh_token,
+      token_expires_at: expiresAt.toISOString(),
+      follower_count: userStats.follower_count || 0,
+      following_count: userStats.following_count || 0,
+      video_count: userStats.video_count || 0,
+      status: 'active',
+      last_synced_at: new Date().toISOString(),
+    };
+
+    console.log("[tiktok-callback] Inserting account data:", {
+      user_id: userId,
+      platform: 'tiktok',
+      username,
+      follower_count: userStats.follower_count,
+    });
+
+    const { data: insertedData, error: dbError } = await supaAdmin
       .from('social_accounts')
-      .insert({
-        user_id: userId,
-        platform: 'tiktok',
-        external_id: open_id,
-        handle: username,
-        display_name: userInfo.display_name,
-        avatar_url: userInfo.avatar_url,
-        access_token,
-        refresh_token,
-        token_expires_at: expiresAt.toISOString(),
-        follower_count: userStats.follower_count,
-        following_count: userStats.following_count,
-        video_count: userStats.video_count,
-        status: 'active',
-        last_synced_at: new Date().toISOString(),
-      });
+      .insert(accountData)
+      .select()
+      .single();
 
     if (dbError) {
-      console.error("[tiktok-callback] Database error:", dbError);
+      console.error("[tiktok-callback] Database insert error:", JSON.stringify(dbError));
       return new Response(null, { 
         status: 302, 
-        headers: { Location: `${APP_BASE_URL}/dashboard?error=tiktok_save_failed` } 
+        headers: { Location: `${APP_BASE_URL}/dashboard?error=tiktok_save_failed&detail=${encodeURIComponent(dbError.message)}` } 
       });
     }
+
+    console.log("[tiktok-callback] Successfully inserted account:", insertedData?.id);
 
     console.log(`[tiktok-callback] Successfully connected TikTok account for user ${userId}`);
 
