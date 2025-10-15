@@ -7,28 +7,30 @@ import { supabase } from '@/integrations/supabase/client';
  */
 export async function connectTikTok() {
   try {
+    console.log('[TikTok] Starting OAuth flow...');
+    
     // Call edge function with auth to get the TikTok auth URL
     const { data, error } = await supabase.functions.invoke('tiktok-start', {
       method: 'GET',
     });
 
     if (error) {
-      console.error('Error getting TikTok auth URL:', error);
-      // Fallback to direct navigation
-      window.location.href = `${SUPABASE_URL}/functions/v1/tiktok-start`;
-      return;
+      console.error('[TikTok] Error getting auth URL:', error);
+      throw new Error(`Failed to get TikTok auth URL: ${error.message}`);
     }
 
-    // If we got a redirect URL, navigate to it
-    if (data?.redirect_url) {
-      window.location.href = data.redirect_url;
-    } else {
-      // Fallback to direct navigation
-      window.location.href = `${SUPABASE_URL}/functions/v1/tiktok-start`;
+    // Verify we got a valid redirect URL
+    if (!data?.redirect_url) {
+      console.error('[TikTok] No redirect URL in response:', data);
+      throw new Error('No redirect URL received from server');
     }
+
+    console.log('[TikTok] Redirecting to:', data.redirect_url);
+    
+    // Navigate to TikTok's OAuth page
+    window.location.href = data.redirect_url;
   } catch (err) {
-    console.error('Error connecting to TikTok:', err);
-    // Fallback to direct navigation
-    window.location.href = `${SUPABASE_URL}/functions/v1/tiktok-start`;
+    console.error('[TikTok] Connection error:', err);
+    alert(`Failed to connect to TikTok: ${err instanceof Error ? err.message : 'Unknown error'}`);
   }
 }
