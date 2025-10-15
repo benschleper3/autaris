@@ -33,20 +33,9 @@ export function getSandboxMode() {
 
 /** Token exchange (production or sandbox) */
 export async function exchangeCode(code: string) {
-  // In sandbox mode, return mock tokens
-  if (SANDBOX) {
-    console.log('[TikTok] Sandbox mode - returning mock tokens');
-    return {
-      data: {
-        open_id: 'sandbox_' + code.slice(0, 16),
-        access_token: 'sandbox_access_' + Date.now(),
-        refresh_token: 'sandbox_refresh_' + Date.now(),
-        expires_in: 86400 // 24 hours
-      }
-    };
-  }
-
-  // Production mode - call real API
+  // Call the appropriate API endpoint (sandbox or production)
+  console.log(`[TikTok] Exchanging code for tokens (sandbox=${SANDBOX})`);
+  
   const res = await fetch(TOKEN_BASE, {
     method: 'POST',
     headers: { 'Content-Type':'application/x-www-form-urlencoded' },
@@ -154,7 +143,8 @@ export async function getUserStatsSandbox(userId: string) {
 }
 
 export async function getUserInfo(accessToken: string, openId: string, userIdForSandbox?: string) {
-  if (SANDBOX) return getUserInfoSandbox(userIdForSandbox!);
+  // Call the appropriate API endpoint (sandbox or production)
+  console.log(`[TikTok] Fetching user info (sandbox=${SANDBOX})`);
   
   const res = await fetch(`${USER_INFO_BASE}?fields=display_name,avatar_url`, {
     headers: { Authorization: `Bearer ${accessToken}` },
@@ -169,7 +159,8 @@ export async function getUserInfo(accessToken: string, openId: string, userIdFor
 }
 
 export async function getUserStats(accessToken: string, openId: string, userIdForSandbox?: string) {
-  if (SANDBOX) return getUserStatsSandbox(userIdForSandbox!);
+  // Call the appropriate API endpoint (sandbox or production)
+  console.log(`[TikTok] Fetching user stats (sandbox=${SANDBOX})`);
   
   const res = await fetch(`${USER_STATS_BASE}?fields=follower_count,following_count,likes_count,video_count`, {
     headers: { Authorization: `Bearer ${accessToken}` },

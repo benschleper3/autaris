@@ -877,6 +877,10 @@ export type Database = {
       }
     }
     Functions: {
+      cleanup_tiktok_data: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       fix_tiktok_connection: {
         Args: Record<PropertyKey, never>
         Returns: undefined

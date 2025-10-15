@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { FileText, FolderOpen, Code, Home, RefreshCw, Link2, Unlink } from 'lucide-react';
+import { FileText, FolderOpen, Code, RefreshCw } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { connectTikTok } from '@/lib/tiktok';
 import GlobalFilters from './GlobalFilters';
 import KPIStrip from './KPIStrip';
 import TrendChart from './TrendChart';
@@ -16,6 +15,7 @@ import AIInsightsList from './AIInsightsList';
 import ReportGeneratorModal from './ReportGeneratorModal';
 import PortfolioManagerModal from './PortfolioManagerModal';
 import ExportAppJsonModal from './ExportAppJsonModal';
+import { CleanupTikTokButton } from '../CleanupTikTokButton';
 
 export default function UnifiedAnalyticsDashboard() {
   const { isOwnerOrAdmin } = useUserRole();
@@ -55,38 +55,6 @@ export default function UnifiedAnalyticsDashboard() {
       console.error('Error checking TikTok connection:', error);
     } finally {
       setCheckingConnection(false);
-    }
-  };
-
-  const handleTikTokConnect = () => {
-    connectTikTok();
-  };
-
-  const handleTikTokDisconnect = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
-
-      const { error } = await supabase
-        .from('social_accounts')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('platform', 'tiktok');
-
-      if (error) throw error;
-
-      setTiktokConnected(false);
-      toast({
-        title: "Disconnected",
-        description: "TikTok account has been disconnected."
-      });
-    } catch (error) {
-      console.error('Error disconnecting TikTok:', error);
-      toast({
-        title: "Disconnection Failed",
-        description: "Could not disconnect TikTok account.",
-        variant: "destructive"
-      });
     }
   };
 
@@ -144,26 +112,10 @@ export default function UnifiedAnalyticsDashboard() {
             </p>
           </div>
           <div className="flex gap-2">
-            {tiktokConnected ? (
-              <>
-                <Button onClick={handleSyncData} disabled={syncing} variant="default" className="flex items-center gap-2">
-                  <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
-                  {syncing ? 'Syncing...' : 'Sync TikTok Data'}
-                </Button>
-                <Button onClick={handleTikTokDisconnect} variant="outline" className="flex items-center gap-2">
-                  <Unlink className="w-4 h-4" />
-                  Disconnect TikTok
-                </Button>
-              </>
-            ) : (
-              <Button 
-                onClick={handleTikTokConnect} 
-                disabled={checkingConnection}
-                variant="default" 
-                className="flex items-center gap-2"
-              >
-                <Link2 className="w-4 h-4" />
-                {checkingConnection ? 'Checking...' : 'Connect TikTok'}
+            {tiktokConnected && (
+              <Button onClick={handleSyncData} disabled={syncing} variant="default" className="flex items-center gap-2">
+                <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+                {syncing ? 'Syncing...' : 'Sync TikTok Data'}
               </Button>
             )}
             <Button onClick={() => setShowReportModal(true)} variant="outline" className="flex items-center gap-2">
@@ -175,10 +127,13 @@ export default function UnifiedAnalyticsDashboard() {
               Portfolio Manager
             </Button>
             {isOwnerOrAdmin && (
-              <Button onClick={() => setShowExportModal(true)} variant="outline" size="sm" className="flex items-center gap-2">
-                <Code className="w-4 h-4" />
-                Export App JSON
-              </Button>
+              <>
+                <Button onClick={() => setShowExportModal(true)} variant="outline" size="sm" className="flex items-center gap-2">
+                  <Code className="w-4 h-4" />
+                  Export App JSON
+                </Button>
+                <CleanupTikTokButton />
+              </>
             )}
           </div>
         </div>
