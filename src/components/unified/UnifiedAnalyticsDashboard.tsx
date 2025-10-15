@@ -16,6 +16,7 @@ import AIInsightsList from './AIInsightsList';
 import ReportGeneratorModal from './ReportGeneratorModal';
 import PortfolioManagerModal from './PortfolioManagerModal';
 import ExportAppJsonModal from './ExportAppJsonModal';
+import { CleanupTikTokButton } from '../CleanupTikTokButton';
 
 export default function UnifiedAnalyticsDashboard() {
   const { isOwnerOrAdmin } = useUserRole();
@@ -175,10 +176,13 @@ export default function UnifiedAnalyticsDashboard() {
               Portfolio Manager
             </Button>
             {isOwnerOrAdmin && (
-              <Button onClick={() => setShowExportModal(true)} variant="outline" size="sm" className="flex items-center gap-2">
-                <Code className="w-4 h-4" />
-                Export App JSON
-              </Button>
+              <>
+                <Button onClick={() => setShowExportModal(true)} variant="outline" size="sm" className="flex items-center gap-2">
+                  <Code className="w-4 h-4" />
+                  Export App JSON
+                </Button>
+                <CleanupTikTokButton />
+              </>
             )}
           </div>
         </div>
