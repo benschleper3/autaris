@@ -16,7 +16,6 @@ import RequireAuth from "./components/auth/RequireAuth";
 import WiringExport from "./pages/WiringExport";
 import ReviewerTest from "./pages/ReviewerTest";
 import OAuthCheck from "./pages/OAuthCheck";
-import TikTokHelp from "./pages/TikTokHelp";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,7 +41,6 @@ function App() {
               <Route path="/dev/wiring-export" element={<WiringExport />} />
               <Route path="/dev/reviewer" element={<RequireAuth><ReviewerTest /></RequireAuth>} />
               <Route path="/dev/oauth-check" element={<RequireAuth><OAuthCheck /></RequireAuth>} />
-              <Route path="/dev/tiktok-help" element={<TikTokHelp />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

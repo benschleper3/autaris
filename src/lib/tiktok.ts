@@ -1,66 +1,45 @@
 import { supabase } from '@/integrations/supabase/client';
 
-type SessionUser = { id: string | null };
-
-export function buildTikTokAuthUrl(userId?: string | null) {
-  const clientKey = import.meta.env.VITE_TIKTOK_CLIENT_KEY;
-  const redirectUri = import.meta.env.VITE_TIKTOK_REDIRECT_URI;
-  const scopes = import.meta.env.VITE_TIKTOK_SCOPES || 'user.info.basic,user.info.stats';
-
-  // We pass state as a JSON string containing userId + a nonce
-  const state = btoa(
-    JSON.stringify({
-      userId: userId ?? null,
-      ts: Date.now(),
-      nonce: crypto.getRandomValues(new Uint32Array(1))[0].toString(16),
-    })
-  );
-
-  const q = new URLSearchParams({
-    client_key: clientKey,
-    scope: scopes,
-    response_type: 'code',
-    redirect_uri: redirectUri,
-    state,
-  });
-
-  return `https://www.tiktok.com/v2/auth/authorize/?${q.toString()}`;
-}
-
-export async function getCurrentUser(): Promise<SessionUser> {
-  const { data } = await supabase.auth.getUser();
-  return { id: data.user?.id ?? null };
-}
+// TikTok OAuth configuration
+const TIKTOK_CLIENT_ID = 'aw1i8zw7k4u93q6b'; // Your TikTok client key
+const REDIRECT_URI = 'https://www.autaris.company/functions/v1/tiktok-callback';
+const SCOPES = 'user.info.basic,user.info.stats';
 
 /**
- * Checks if the current user has a saved TikTok connection in Supabase.
- * Requires RLS policy: user can SELECT where user_id = auth.uid().
- */
-export async function isTikTokConnected(): Promise<boolean> {
-  const { data: auth } = await supabase.auth.getUser();
-  const uid = auth.user?.id;
-  if (!uid) return false;
-
-  const { data, error } = await supabase
-    .from('social_accounts')
-    .select('id')
-    .eq('platform', 'tiktok')
-    .eq('user_id', uid)
-    .limit(1)
-    .maybeSingle();
-
-  if (error) {
-    console.warn('isTikTokConnected error:', error);
-    return false;
-  }
-  return Boolean(data?.id);
-}
-
-/**
- * Legacy function for backward compatibility
+ * Navigate to TikTok OAuth
+ * Constructs the auth URL directly and redirects
  */
 export async function connectTikTok() {
-  const { id } = await getCurrentUser();
-  const url = buildTikTokAuthUrl(id);
-  window.location.href = url;
+  try {
+    // Get authenticated user
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      console.error('User not authenticated');
+      return;
+    }
+
+    // Generate state with user ID for callback validation
+    const randomState = crypto.randomUUID();
+    const stateData = { 
+      userId: session.user.id, 
+      timestamp: Date.now(), 
+      nonce: randomState 
+    };
+    const state = btoa(JSON.stringify(stateData));
+
+    // Store state in sessionStorage for callback validation
+    sessionStorage.setItem('tiktok_oauth_state', state);
+
+    // Construct TikTok auth URL
+    const redirectUri = encodeURIComponent(REDIRECT_URI);
+    const scopes = encodeURIComponent(SCOPES);
+    const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${TIKTOK_CLIENT_ID}&scope=${scopes}&response_type=code&redirect_uri=${redirectUri}&state=${encodeURIComponent(state)}`;
+
+    console.log('[tiktok] Redirecting to TikTok OAuth:', authUrl);
+    
+    // Redirect to TikTok
+    window.location.href = authUrl;
+  } catch (err) {
+    console.error('Error connecting to TikTok:', err);
+  }
 }
