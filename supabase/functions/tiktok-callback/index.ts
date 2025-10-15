@@ -28,6 +28,18 @@ serve(async (req: Request) => {
   const sandbox = getSandboxMode();
 
   try {
+    // Check for dryrun mode (diagnostic check)
+    const isDryrun = url.searchParams.get("dryrun") === "1";
+    if (isDryrun) {
+      return new Response(
+        JSON.stringify({ ok: true, message: 'Callback endpoint is deployed' }),
+        {
+          status: 200,
+          headers: { ...corsHeaders(origin), 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     // Extract OAuth parameters
     const code = url.searchParams.get("code");
     const state = url.searchParams.get("state");

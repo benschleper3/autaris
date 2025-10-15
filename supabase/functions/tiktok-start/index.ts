@@ -17,6 +17,36 @@ serve(async (req) => {
   }
 
   try {
+    const url = new URL(req.url);
+    const isDryrun = url.searchParams.get('dryrun') === '1';
+
+    // If dryrun, return diagnostic info without requiring auth
+    if (isDryrun) {
+      const CLIENT_KEY = Deno.env.get('TIKTOK_CLIENT_KEY') || Deno.env.get('TIKTOK_CLIENT_ID') || '';
+      const REDIRECT_URI = Deno.env.get('TIKTOK_REDIRECT_URI') || '';
+      const SCOPES = Deno.env.get('TIKTOK_SCOPES') || 'user.info.basic,user.info.stats';
+      const sandbox = getSandboxMode();
+
+      // Generate a preview auth URL with dummy state
+      const dummyState = btoa(JSON.stringify({ userId: 'preview', timestamp: Date.now(), nonce: crypto.randomUUID() }));
+      const authUrlPreview = buildAuthUrl(dummyState);
+
+      return new Response(
+        JSON.stringify({
+          ok: true,
+          client_key: CLIENT_KEY,
+          redirect_uri: REDIRECT_URI,
+          scopes: SCOPES.split(','),
+          sandbox,
+          auth_url_preview: authUrlPreview
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     // Get the authenticated user's ID from the request
     const userId = await getUserIdFromRequest(req);
     if (!userId) {
