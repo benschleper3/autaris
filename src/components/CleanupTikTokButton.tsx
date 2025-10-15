@@ -18,30 +18,90 @@ export function CleanupTikTokButton() {
   const [loading, setLoading] = useState(false);
 
   const handleCleanup = async () => {
-    if (!confirm('This will delete all your TikTok data (posts, metrics, account info). Continue?')) {
+    if (!confirm('This will disconnect your TikTok account and delete all associated data (posts, metrics). Continue?')) {
       return;
     }
 
     try {
       setLoading(true);
-      const { data, error } = await supabase.rpc('cleanup_tiktok_data');
+      console.log('[Cleanup] Starting TikTok disconnect...');
       
-      if (error) throw error;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Not authenticated');
+      }
 
-      const result = data as unknown as CleanupResult;
+      // Get social account ID first
+      const { data: account } = await supabase
+        .from('social_accounts')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('platform', 'tiktok')
+        .maybeSingle();
+
+      if (!account) {
+        toast({
+          title: 'No Connection',
+          description: 'No TikTok account found to disconnect'
+        });
+        return;
+      }
+
+      console.log('[Cleanup] Found account:', account.id);
+
+      // Delete in correct order due to foreign keys
+      // 1. Get all post IDs first
+      const { data: posts } = await supabase
+        .from('posts')
+        .select('id')
+        .eq('social_account_id', account.id);
+
+      const postIds = posts?.map(p => p.id) || [];
+
+      // 2. Delete post metrics
+      if (postIds.length > 0) {
+        const { error: metricsError } = await supabase
+          .from('post_metrics')
+          .delete()
+          .in('post_id', postIds);
+
+        if (metricsError) {
+          console.warn('[Cleanup] Metrics deletion warning:', metricsError);
+        }
+      }
+
+      // 3. Delete posts
+      const { error: postsError } = await supabase
+        .from('posts')
+        .delete()
+        .eq('social_account_id', account.id);
+
+      if (postsError) {
+        console.warn('[Cleanup] Posts deletion warning:', postsError);
+      }
+
+      // 4. Delete social account
+      const { error: accountError } = await supabase
+        .from('social_accounts')
+        .delete()
+        .eq('id', account.id);
+
+      if (accountError) throw accountError;
+      
+      console.log('[Cleanup] Successfully disconnected TikTok');
       
       toast({
-        title: 'Data Cleaned',
-        description: `Deleted ${result.deleted.posts} posts, ${result.deleted.metrics} metrics, ${result.deleted.accounts} accounts`
+        title: 'Disconnected',
+        description: 'TikTok account has been disconnected'
       });
 
-      // Reload to reflect changes
-      setTimeout(() => window.location.reload(), 1000);
+      console.log('[Cleanup] Reloading page...');
+      setTimeout(() => window.location.reload(), 500);
     } catch (error) {
-      console.error('Cleanup error:', error);
+      console.error('[Cleanup] Disconnect error:', error);
       toast({
-        title: 'Cleanup Failed',
-        description: 'Could not clean TikTok data',
+        title: 'Disconnect Failed',
+        description: error instanceof Error ? error.message : 'Could not disconnect TikTok',
         variant: 'destructive'
       });
     } finally {
@@ -58,7 +118,7 @@ export function CleanupTikTokButton() {
       className="flex items-center gap-2"
     >
       <Trash2 className="w-4 h-4" />
-      {loading ? 'Cleaning...' : 'Clean TikTok Data'}
+      {loading ? 'Disconnecting...' : 'Disconnect TikTok'}
     </Button>
   );
 }
