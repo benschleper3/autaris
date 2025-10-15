@@ -62,8 +62,8 @@ export default function OAuthCheck() {
       
       const data = await response.json();
 
-      // Use custom domain as expected base
-      const appBase = 'https://www.autaris.company';
+      // Use Supabase domain as expected base
+      const appBase = SUPABASE_URL;
       const redirectUri = data?.redirect_uri || '';
       const clientId = data?.client_key || '';
       const sandbox = data?.sandbox === true;
@@ -143,7 +143,7 @@ export default function OAuthCheck() {
         }
 
         // 2. Domain match check
-        const appBase = 'https://www.autaris.company';
+        const appBase = SUPABASE_URL;
         const expectedRedirect = `${appBase}/functions/v1/tiktok-callback`;
         const actualRedirect = startData?.redirect_uri || '';
         const match = expectedRedirect === actualRedirect;
@@ -315,10 +315,9 @@ export default function OAuthCheck() {
           <AlertTitle>Required Configuration Steps</AlertTitle>
           <AlertDescription>
             <ul className="list-disc list-inside space-y-1 mt-2 text-sm">
-              <li>Set <strong>APP_BASE_URL=https://www.autaris.company</strong> in Supabase Edge Function secrets</li>
-              <li>Set <strong>TIKTOK_REDIRECT_URI=https://www.autaris.company/functions/v1/tiktok-callback</strong> in secrets</li>
-              <li>Update TikTok Developer Portal → App Info → Redirect URI to match above</li>
-              <li>Ensure DNS TXT record for domain verification is added (if required by TikTok)</li>
+              <li>Set <strong>APP_BASE_URL={SUPABASE_URL}</strong> in Supabase Edge Function secrets</li>
+              <li>Set <strong>TIKTOK_REDIRECT_URI={SUPABASE_URL}/functions/v1/tiktok-callback</strong> in secrets</li>
+              <li>Update TikTok Developer Portal → App Info → Redirect URI to: <strong>{SUPABASE_URL}/functions/v1/tiktok-callback</strong></li>
               <li>Add tester accounts in TikTok Developer Portal → Sandbox → Testers</li>
             </ul>
           </AlertDescription>
