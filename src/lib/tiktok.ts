@@ -1,34 +1,47 @@
-import { SUPABASE_URL } from '@/integrations/supabase/config';
 import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Navigate to TikTok OAuth
- * Calls the edge function first to get the auth URL, then navigates
+ * Builds the auth URL client-side and redirects directly to TikTok
  */
 export async function connectTikTok() {
   try {
-    // Call edge function with auth to get the TikTok auth URL
-    const { data, error } = await supabase.functions.invoke('tiktok-start', {
-      method: 'GET',
-    });
-
-    if (error) {
-      console.error('Error getting TikTok auth URL:', error);
-      // Fallback to direct navigation
-      window.location.href = `${SUPABASE_URL}/functions/v1/tiktok-start`;
+    // Get authenticated user ID for state
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.error('User not authenticated');
       return;
     }
 
-    // If we got a redirect URL, navigate to it
-    if (data?.redirect_url) {
-      window.location.href = data.redirect_url;
-    } else {
-      // Fallback to direct navigation
-      window.location.href = `${SUPABASE_URL}/functions/v1/tiktok-start`;
+    // Build state with user ID
+    const stateData = { userId: user.id, timestamp: Date.now(), nonce: crypto.randomUUID() };
+    const state = btoa(JSON.stringify(stateData));
+
+    // Get environment variables
+    const clientKey = import.meta.env.VITE_TIKTOK_CLIENT_KEY;
+    const redirectUri = import.meta.env.VITE_TIKTOK_REDIRECT_URI;
+    const scopes = import.meta.env.VITE_TIKTOK_SCOPES || 'user.info.basic,user.info.stats';
+
+    if (!clientKey) {
+      console.error('VITE_TIKTOK_CLIENT_KEY not set in environment');
+      alert('TikTok Client Key not configured. Please add VITE_TIKTOK_CLIENT_KEY to your environment variables.');
+      return;
     }
+
+    // Build TikTok OAuth URL
+    const params = new URLSearchParams({
+      client_key: clientKey,
+      scope: scopes,
+      response_type: 'code',
+      redirect_uri: redirectUri,
+      state: state,
+    });
+
+    const authUrl = `https://www.tiktok.com/v2/auth/authorize/?${params.toString()}`;
+    
+    console.log('[TikTok] Redirecting to OAuth:', authUrl);
+    window.location.href = authUrl;
   } catch (err) {
     console.error('Error connecting to TikTok:', err);
-    // Fallback to direct navigation
-    window.location.href = `${SUPABASE_URL}/functions/v1/tiktok-start`;
   }
 }
