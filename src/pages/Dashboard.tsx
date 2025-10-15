@@ -8,6 +8,7 @@ export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     // Check for successful TikTok connection
@@ -15,6 +16,8 @@ export default function Dashboard() {
       toast.success('TikTok account connected successfully!');
       // Remove the query param
       setSearchParams({});
+      // Trigger refresh of connection status
+      setRefreshKey(prev => prev + 1);
     }
   }, [searchParams, setSearchParams]);
 
@@ -59,5 +62,5 @@ export default function Dashboard() {
     return <Navigate to="/" replace />;
   }
 
-  return <UnifiedAnalyticsDashboard />;
+  return <UnifiedAnalyticsDashboard key={refreshKey} />;
 }
