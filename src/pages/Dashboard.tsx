@@ -13,11 +13,27 @@ export default function Dashboard() {
   useEffect(() => {
     // Check for successful TikTok connection
     if (searchParams.get('connected') === 'tiktok') {
+      console.log('[Dashboard] TikTok connected successfully');
       toast.success('TikTok account connected successfully!');
       // Remove the query param
       setSearchParams({});
       // Trigger refresh of connection status
       setRefreshKey(prev => prev + 1);
+    }
+    
+    // Check for TikTok connection errors
+    const error = searchParams.get('error');
+    if (error) {
+      console.error('[Dashboard] TikTok connection error:', error);
+      const errorMessages: Record<string, string> = {
+        'tiktok_denied': 'You denied the TikTok authorization',
+        'tiktok_invalid': 'Invalid TikTok authorization parameters',
+        'tiktok_invalid_state': 'Invalid TikTok authorization state',
+        'tiktok_save_failed': 'Failed to save TikTok connection',
+        'tiktok_oauth': 'TikTok authorization failed'
+      };
+      toast.error(errorMessages[error] || 'Failed to connect TikTok');
+      setSearchParams({});
     }
   }, [searchParams, setSearchParams]);
 
