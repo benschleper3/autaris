@@ -1,19 +1,10 @@
 const SANDBOX = (Deno.env.get('SANDBOX_TIKTOK') ?? 'true').toLowerCase() === 'true';
 
-// Always use v2 auth endpoint (sandbox mode affects behavior, not URL)
+// Always use v2 endpoints for both sandbox and production
 const AUTH_BASE = 'https://www.tiktok.com/v2/auth/authorize/';
-
-const TOKEN_BASE = SANDBOX
-  ? 'https://open-sandbox.tiktok.com/oauth/access_token/'
-  : 'https://open.tiktokapis.com/v2/oauth/token/';
-
-const USER_INFO_BASE = SANDBOX
-  ? 'https://open-sandbox.tiktok.com/api/user/info/'
-  : 'https://open.tiktokapis.com/v2/user/info/';
-
-const USER_STATS_BASE = SANDBOX
-  ? 'https://open-sandbox.tiktok.com/api/user/stats/'
-  : 'https://open.tiktokapis.com/v2/user/stats/';
+const TOKEN_BASE = 'https://open.tiktokapis.com/v2/oauth/token/';
+const USER_INFO_BASE = 'https://open.tiktokapis.com/v2/user/info/';
+const USER_STATS_BASE = 'https://open.tiktokapis.com/v2/user/stats/';
 
 export function buildAuthUrl(state: string) {
   // Prefer TIKTOK_CLIENT_KEY, fallback to TIKTOK_CLIENT_ID for backward compatibility
