@@ -33,20 +33,8 @@ export function getSandboxMode() {
 
 /** Token exchange (production or sandbox) */
 export async function exchangeCode(code: string) {
-  // In sandbox mode, return mock tokens
-  if (SANDBOX) {
-    console.log('[TikTok] Sandbox mode - returning mock tokens');
-    return {
-      data: {
-        open_id: 'sandbox_' + code.slice(0, 16),
-        access_token: 'sandbox_access_' + Date.now(),
-        refresh_token: 'sandbox_refresh_' + Date.now(),
-        expires_in: 86400 // 24 hours
-      }
-    };
-  }
-
-  // Production mode - call real API
+  // Always call TikTok API (sandbox or production endpoint based on SANDBOX flag)
+  // This ensures we get real OAuth tokens and user info
   const res = await fetch(TOKEN_BASE, {
     method: 'POST',
     headers: { 'Content-Type':'application/x-www-form-urlencoded' },
@@ -63,6 +51,7 @@ export async function exchangeCode(code: string) {
     console.error('[TikTok] Token exchange failed:', res.status, errorText);
     throw new Error(`Token exchange failed: ${res.status}`);
   }
+  console.log(`[TikTok] Token exchange successful (sandbox=${SANDBOX})`);
   return res.json() as Promise<{ data: {
     open_id: string; access_token: string; refresh_token: string; expires_in: number;
   }}>;
@@ -154,8 +143,7 @@ export async function getUserStatsSandbox(userId: string) {
 }
 
 export async function getUserInfo(accessToken: string, openId: string, userIdForSandbox?: string) {
-  if (SANDBOX) return getUserInfoSandbox(userIdForSandbox!);
-  
+  // Always call TikTok API (sandbox or production) to get real user info
   const res = await fetch(`${USER_INFO_BASE}?fields=display_name,avatar_url`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
@@ -165,12 +153,12 @@ export async function getUserInfo(accessToken: string, openId: string, userIdFor
     throw new Error(`getUserInfo failed: ${res.status}`);
   }
   const json = await res.json() as { data: { user: { display_name: string; avatar_url: string } } };
+  console.log(`[TikTok] Got user info: ${json.data.user.display_name} (sandbox=${SANDBOX})`);
   return json.data.user;
 }
 
 export async function getUserStats(accessToken: string, openId: string, userIdForSandbox?: string) {
-  if (SANDBOX) return getUserStatsSandbox(userIdForSandbox!);
-  
+  // Always call TikTok API (sandbox or production) to get real user stats
   const res = await fetch(`${USER_STATS_BASE}?fields=follower_count,following_count,likes_count,video_count`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
@@ -180,5 +168,6 @@ export async function getUserStats(accessToken: string, openId: string, userIdFo
     throw new Error(`getUserStats failed: ${res.status}`);
   }
   const json = await res.json() as { data: { user: { follower_count: number; following_count: number; likes_count: number; video_count: number } } };
+  console.log(`[TikTok] Got user stats: ${json.data.user.follower_count} followers (sandbox=${SANDBOX})`);
   return json.data.user;
 }
