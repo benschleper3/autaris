@@ -16,14 +16,10 @@ import AIInsightsList from './AIInsightsList';
 import ReportGeneratorModal from './ReportGeneratorModal';
 import PortfolioManagerModal from './PortfolioManagerModal';
 import ExportAppJsonModal from './ExportAppJsonModal';
-import { FixTikTokConnection } from '../FixTikTokConnection';
 
 export default function UnifiedAnalyticsDashboard() {
   const { isOwnerOrAdmin } = useUserRole();
   const { toast } = useToast();
-
-  // Auto-fix incomplete TikTok connection on mount
-  FixTikTokConnection();
   
   const [filters, setFilters] = useState({
     from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
