@@ -3,8 +3,8 @@ const SANDBOX = (Deno.env.get('SANDBOX_TIKTOK') ?? 'true').toLowerCase() === 'tr
 // Always use v2 endpoints for both sandbox and production
 const AUTH_BASE = 'https://www.tiktok.com/v2/auth/authorize/';
 const TOKEN_BASE = 'https://open.tiktokapis.com/v2/oauth/token/';
+// Note: v2 API combines user info and stats in a single endpoint
 const USER_INFO_BASE = 'https://open.tiktokapis.com/v2/user/info/';
-const USER_STATS_BASE = 'https://open.tiktokapis.com/v2/user/stats/';
 
 export function buildAuthUrl(state: string) {
   // Prefer TIKTOK_CLIENT_KEY, fallback to TIKTOK_CLIENT_ID for backward compatibility
@@ -148,8 +148,13 @@ export async function getUserStatsSandbox(userId: string) {
 export async function getUserInfo(accessToken: string, openId: string, userIdForSandbox?: string) {
   console.log(`[TikTok] Fetching user info (sandbox=${SANDBOX})`);
   
-  const res = await fetch(`${USER_INFO_BASE}?fields=display_name,avatar_url`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
+  // v2 API: request all fields including stats in one call
+  const fields = 'open_id,display_name,avatar_url,follower_count,following_count,likes_count,video_count';
+  const res = await fetch(`${USER_INFO_BASE}?fields=${fields}`, {
+    headers: { 
+      Authorization: `Bearer ${accessToken}`,
+      Accept: 'application/json'
+    },
   });
   
   if (!res.ok) {
@@ -158,15 +163,27 @@ export async function getUserInfo(accessToken: string, openId: string, userIdFor
     throw new Error(`getUserInfo failed: ${res.status} - ${errorText}`);
   }
   
-  const json = await res.json() as { data: { user: { display_name: string; avatar_url: string } } };
+  const json = await res.json() as { data: { user: { 
+    display_name: string; 
+    avatar_url: string;
+    follower_count?: number;
+    following_count?: number;
+    likes_count?: number;
+    video_count?: number;
+  } } };
   return json.data.user;
 }
 
 export async function getUserStats(accessToken: string, openId: string, userIdForSandbox?: string) {
   console.log(`[TikTok] Fetching user stats (sandbox=${SANDBOX})`);
   
-  const res = await fetch(`${USER_STATS_BASE}?fields=follower_count,following_count,likes_count,video_count`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
+  // v2 API: stats are fetched from the same /v2/user/info/ endpoint
+  const fields = 'follower_count,following_count,likes_count,video_count';
+  const res = await fetch(`${USER_INFO_BASE}?fields=${fields}`, {
+    headers: { 
+      Authorization: `Bearer ${accessToken}`,
+      Accept: 'application/json'
+    },
   });
   
   if (!res.ok) {
@@ -175,6 +192,11 @@ export async function getUserStats(accessToken: string, openId: string, userIdFo
     throw new Error(`getUserStats failed: ${res.status} - ${errorText}`);
   }
   
-  const json = await res.json() as { data: { user: { follower_count: number; following_count: number; likes_count: number; video_count: number } } };
+  const json = await res.json() as { data: { user: { 
+    follower_count: number; 
+    following_count: number; 
+    likes_count: number; 
+    video_count: number;
+  } } };
   return json.data.user;
 }
