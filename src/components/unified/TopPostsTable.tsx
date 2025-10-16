@@ -78,7 +78,10 @@ export default function TopPostsTable({ filters }: TopPostsTableProps) {
         .limit(20);
 
       if (error) throw error;
-      setPosts(data || []);
+      
+      // Filter out posts without a valid platform
+      const validPosts = (data || []).filter(post => post.platform && post.platform !== 'unknown');
+      setPosts(validPosts);
     } catch (error) {
       console.error('Error fetching top posts:', error);
       setPosts([]);
