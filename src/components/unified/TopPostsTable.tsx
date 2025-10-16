@@ -78,10 +78,7 @@ export default function TopPostsTable({ filters }: TopPostsTableProps) {
         .limit(20);
 
       if (error) throw error;
-      
-      // Filter out posts without a valid platform
-      const validPosts = (data || []).filter(post => post.platform && post.platform !== 'unknown');
-      setPosts(validPosts);
+      setPosts(data || []);
     } catch (error) {
       console.error('Error fetching top posts:', error);
       setPosts([]);
@@ -181,14 +178,13 @@ export default function TopPostsTable({ filters }: TopPostsTableProps) {
   };
 
   const getPlatformColor = (platform: string | null) => {
-    if (!platform) return 'bg-gray-500';
     const colors = {
       tiktok: 'bg-pink-500',
       instagram: 'bg-purple-500',
       youtube: 'bg-red-500',
       twitter: 'bg-blue-500'
     };
-    return colors[platform.toLowerCase() as keyof typeof colors] || 'bg-gray-500';
+    return colors[(platform || 'tiktok').toLowerCase() as keyof typeof colors] || 'bg-pink-500';
   };
 
   if (loading) {
@@ -259,7 +255,7 @@ export default function TopPostsTable({ filters }: TopPostsTableProps) {
                   </TableCell>
                   <TableCell>
                     <Badge className={`${getPlatformColor(post.platform)} text-white`}>
-                      {post.platform}
+                      {post.platform || 'TikTok'}
                     </Badge>
                   </TableCell>
                   <TableCell>
