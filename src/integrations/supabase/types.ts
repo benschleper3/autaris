@@ -845,32 +845,38 @@ export type Database = {
       }
       weekly_insights: {
         Row: {
-          confidence: number | null
+          best_times: Json | null
           created_at: string | null
+          experiments: Json | null
           id: string
-          insight: string | null
-          narrative: string | null
+          key_metrics: Json | null
+          patterns: Json | null
           recommendations: string | null
+          summary: string | null
           user_id: string
           week_start: string
         }
         Insert: {
-          confidence?: number | null
+          best_times?: Json | null
           created_at?: string | null
+          experiments?: Json | null
           id?: string
-          insight?: string | null
-          narrative?: string | null
+          key_metrics?: Json | null
+          patterns?: Json | null
           recommendations?: string | null
+          summary?: string | null
           user_id: string
           week_start: string
         }
         Update: {
-          confidence?: number | null
+          best_times?: Json | null
           created_at?: string | null
+          experiments?: Json | null
           id?: string
-          insight?: string | null
-          narrative?: string | null
+          key_metrics?: Json | null
+          patterns?: Json | null
           recommendations?: string | null
+          summary?: string | null
           user_id?: string
           week_start?: string
         }
