@@ -101,7 +101,23 @@ serve(async (req: Request) => {
       });
     }
 
-    const { access_token, refresh_token, expires_in, open_id } = tokenData.data;
+    // Safely extract token data - handle both {data: {...}} and flat {...} structures
+    const data = tokenData?.data ?? tokenData ?? {};
+    const access_token = data.access_token;
+    const refresh_token = data.refresh_token;
+    const expires_in = data.expires_in;
+    const open_id = data.open_id;
+
+    // Validate we got the required tokens
+    if (!access_token || !open_id) {
+      const reason = data?.message || data?.error || 'missing_tokens';
+      const detail = JSON.stringify(data).slice(0, 240);
+      console.error("[tiktok-callback] Invalid token response:", detail);
+      return new Response(null, { 
+        status: 302, 
+        headers: { Location: `${APP_BASE_URL}/dashboard?error=${encodeURIComponent(`token_invalid:${reason}:${detail}`)}` } 
+      });
+    }
     console.log(`[tiktok-callback] Token exchange successful, open_id=${open_id}`);
 
     // Fetch user info and stats
