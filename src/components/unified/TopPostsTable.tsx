@@ -3,11 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Brain, ExternalLink, FolderPlus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import SyncTikTokButton from '@/components/SyncTikTokButton';
 
 interface TopPostsTableProps {
   filters: {
@@ -34,8 +36,20 @@ interface PostInsight {
   next_test: string;
 }
 
+interface TikTokVideo {
+  video_id: string;
+  title: string | null;
+  view_count: number | null;
+  like_count: number | null;
+  comment_count: number | null;
+  share_count: number | null;
+  create_time: string | null;
+  cover_image_url: string | null;
+}
+
 export default function TopPostsTable({ filters }: TopPostsTableProps) {
   const [posts, setPosts] = useState<PostData[]>([]);
+  const [tiktokVideos, setTiktokVideos] = useState<TikTokVideo[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPost, setSelectedPost] = useState<PostData | null>(null);
   const [insights, setInsights] = useState<PostInsight | null>(null);
@@ -45,6 +59,7 @@ export default function TopPostsTable({ filters }: TopPostsTableProps) {
 
   useEffect(() => {
     fetchTopPosts();
+    fetchTikTokVideos();
   }, [filters]);
 
   const fetchTopPosts = async () => {
@@ -84,6 +99,27 @@ export default function TopPostsTable({ filters }: TopPostsTableProps) {
       setPosts([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchTikTokVideos = async () => {
+    try {
+      const { data: auth } = await supabase.auth.getUser();
+      const uid = auth.user?.id;
+      if (!uid) return;
+
+      const { data, error } = await supabase
+        .from("tiktok_videos")
+        .select("video_id,title,view_count,like_count,comment_count,share_count,create_time,cover_image_url")
+        .eq("user_id", uid)
+        .order("create_time", { ascending: false })
+        .limit(50);
+
+      if (!error && data) {
+        setTiktokVideos(data as any);
+      }
+    } catch (error) {
+      console.error('Error fetching TikTok videos:', error);
     }
   };
 
@@ -233,69 +269,134 @@ export default function TopPostsTable({ filters }: TopPostsTableProps) {
     <>
       <Card id="table-top-posts">
         <CardHeader>
-          <CardTitle>Top Performing Posts</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Content Performance</CardTitle>
+            <SyncTikTokButton />
+          </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Platform</TableHead>
-                <TableHead>Published</TableHead>
-                <TableHead>Views</TableHead>
-                <TableHead>ER%</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {posts.map((post) => (
-                <TableRow key={post.post_id} className="hover:bg-muted/50">
-                  <TableCell className="font-medium max-w-[200px] truncate">
-                    {post.title || 'Untitled'}
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={`${getPlatformColor(post.platform)} text-white`}>
-                      {post.platform || 'TikTok'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {new Date(post.published_at || post.created_at).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>{post.views?.toLocaleString() || '0'}</TableCell>
-                  <TableCell>{post.engagement_rate?.toFixed(2) || '0.00'}%</TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleAIExplain(post)}
-                        className="flex items-center gap-1"
-                      >
-                        <Brain className="w-3 h-3" />
-                        AI Explain
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleAddToPortfolio(post)}
-                        className="flex items-center gap-1"
-                      >
-                        <FolderPlus className="w-3 h-3" />
-                        Add to Portfolio
-                      </Button>
-                      {post.url && (
-                        <Button size="sm" variant="ghost" asChild>
-                          <a href={post.url} target="_blank" rel="noopener noreferrer">
-                            <ExternalLink className="w-3 h-3" />
+          <Tabs defaultValue="posts" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="posts">Top Posts</TabsTrigger>
+              <TabsTrigger value="videos">TikTok Videos ({tiktokVideos.length})</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="posts" className="mt-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Platform</TableHead>
+                    <TableHead>Published</TableHead>
+                    <TableHead>Views</TableHead>
+                    <TableHead>ER%</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {posts.map((post) => (
+                    <TableRow key={post.post_id} className="hover:bg-muted/50">
+                      <TableCell className="font-medium max-w-[200px] truncate">
+                        {post.title || 'Untitled'}
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={`${getPlatformColor(post.platform)} text-white`}>
+                          {post.platform || 'TikTok'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(post.published_at || post.created_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>{post.views?.toLocaleString() || '0'}</TableCell>
+                      <TableCell>{post.engagement_rate?.toFixed(2) || '0.00'}%</TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleAIExplain(post)}
+                            className="flex items-center gap-1"
+                          >
+                            <Brain className="w-3 h-3" />
+                            AI Explain
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleAddToPortfolio(post)}
+                            className="flex items-center gap-1"
+                          >
+                            <FolderPlus className="w-3 h-3" />
+                            Add to Portfolio
+                          </Button>
+                          {post.url && (
+                            <Button size="sm" variant="ghost" asChild>
+                              <a href={post.url} target="_blank" rel="noopener noreferrer">
+                                <ExternalLink className="w-3 h-3" />
+                              </a>
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TabsContent>
+
+            <TabsContent value="videos" className="mt-4">
+              {tiktokVideos.length === 0 ? (
+                <div className="text-center text-muted-foreground py-8">
+                  No videos yet. Click "Sync TikTok Videos" to fetch your content.
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Video</TableHead>
+                      <TableHead>Views</TableHead>
+                      <TableHead>Likes</TableHead>
+                      <TableHead>Comments</TableHead>
+                      <TableHead>Shares</TableHead>
+                      <TableHead>Posted</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {tiktokVideos.map((video) => (
+                      <TableRow key={video.video_id} className="hover:bg-muted/50">
+                        <TableCell className="flex items-center gap-2">
+                          {video.cover_image_url && (
+                            <img
+                              src={video.cover_image_url}
+                              alt=""
+                              className="h-10 w-8 object-cover rounded"
+                            />
+                          )}
+                          <a
+                            href={`https://www.tiktok.com/@/video/${video.video_id}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="underline hover:text-primary max-w-[200px] truncate"
+                          >
+                            {video.title || video.video_id}
                           </a>
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                        </TableCell>
+                        <TableCell>{video.view_count?.toLocaleString() ?? "–"}</TableCell>
+                        <TableCell>{video.like_count?.toLocaleString() ?? "–"}</TableCell>
+                        <TableCell>{video.comment_count?.toLocaleString() ?? "–"}</TableCell>
+                        <TableCell>{video.share_count?.toLocaleString() ?? "–"}</TableCell>
+                        <TableCell>
+                          {video.create_time
+                            ? new Date(video.create_time).toLocaleDateString()
+                            : "–"}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 

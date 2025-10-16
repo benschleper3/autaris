@@ -16,7 +16,6 @@ import PortfolioManagerModal from './PortfolioManagerModal';
 import ExportAppJsonModal from './ExportAppJsonModal';
 import InsightsPanel from '@/components/InsightsPanel';
 import SyncTikTokButton from '@/components/SyncTikTokButton';
-import TikTokVideosTable from '@/components/TikTokVideosTable';
 import { CleanupTikTokButton } from '../CleanupTikTokButton';
 import { UpdateTikTokUsername } from '../UpdateTikTokUsername';
 
@@ -147,11 +146,6 @@ export default function UnifiedAnalyticsDashboard() {
 
         {/* Main Dashboard Grid */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* AI Insights Panel - Full Width */}
-          <div className="xl:col-span-3">
-            <InsightsPanel />
-          </div>
-
           {/* Performance Trends - Full Width */}
           <div className="xl:col-span-3">
             <TrendChart filters={filters} />
@@ -167,18 +161,14 @@ export default function UnifiedAnalyticsDashboard() {
             <PostingHeatmap filters={filters} />
           </div>
 
-          {/* Top Posts Table - Full Width */}
+          {/* Content Performance (Posts + Videos) - Full Width */}
           <div className="xl:col-span-3">
             <TopPostsTable filters={filters} />
           </div>
 
-          {/* TikTok Videos - Full Width */}
-          <div className="xl:col-span-3 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">TikTok Videos</h2>
-              <SyncTikTokButton />
-            </div>
-            <TikTokVideosTable />
+          {/* AI Insights Panel - Full Width */}
+          <div className="xl:col-span-3">
+            <InsightsPanel />
           </div>
         </div>
       </div>
