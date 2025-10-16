@@ -60,7 +60,10 @@ export default function PlatformBreakdown({ filters }: PlatformBreakdownProps) {
       const platformMap = new Map<string, { total_views: number; total_er: number; count: number }>();
 
       posts?.forEach(post => {
-        const platform = post.platform || 'unknown';
+        const platform = post.platform;
+        // Skip posts without a valid platform
+        if (!platform || platform === 'unknown') return;
+        
         const existing = platformMap.get(platform) || { total_views: 0, total_er: 0, count: 0 };
         
         platformMap.set(platform, {
