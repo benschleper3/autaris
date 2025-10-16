@@ -851,7 +851,7 @@ export type Database = {
           id: string
           key_metrics: Json | null
           patterns: Json | null
-          recommendations: string | null
+          recommendations: Json | null
           summary: string | null
           user_id: string
           week_start: string
@@ -863,7 +863,7 @@ export type Database = {
           id?: string
           key_metrics?: Json | null
           patterns?: Json | null
-          recommendations?: string | null
+          recommendations?: Json | null
           summary?: string | null
           user_id: string
           week_start: string
@@ -875,7 +875,7 @@ export type Database = {
           id?: string
           key_metrics?: Json | null
           patterns?: Json | null
-          recommendations?: string | null
+          recommendations?: Json | null
           summary?: string | null
           user_id?: string
           week_start?: string
