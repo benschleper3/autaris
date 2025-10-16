@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { AuthModal } from '@/components/AuthModal';
 import { supabase } from '@/integrations/supabase/client';
+import { useTikTokAccount } from '@/hooks/useTikTokAccount';
 
 interface ConnectTikTokButtonProps {
   variant?: 'default' | 'outline' | 'ghost';
@@ -10,8 +11,8 @@ interface ConnectTikTokButtonProps {
   children?: React.ReactNode;
 }
 
-function nonce() {
-  return Array.from(crypto.getRandomValues(new Uint8Array(12)))
+function nonce(bytes = 12) {
+  return Array.from(crypto.getRandomValues(new Uint8Array(bytes)))
     .map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
@@ -24,6 +25,7 @@ export function ConnectTikTokButton({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { account } = useTikTokAccount();
 
   useEffect(() => {
     checkAuth();
@@ -58,14 +60,28 @@ export function ConnectTikTokButton({
       return;
     }
 
+    // Check if we should force consent (after disconnect)
+    let forceConsent = false;
+    try { 
+      forceConsent = localStorage.getItem('tiktok_force_consent') === '1';
+      if (forceConsent) {
+        localStorage.removeItem('tiktok_force_consent');
+      }
+    } catch {}
+
     const clientKey = import.meta.env.VITE_TIKTOK_CLIENT_KEY;
     const redirectUri = encodeURIComponent('https://gjfbxqsjxasubvnpeeie.supabase.co/functions/v1/tiktok-callback');
     const scopes = encodeURIComponent('user.info.basic,user.info.stats');
-    const state = btoa(JSON.stringify({ userId: user.id, n: nonce(), ts: Date.now() }));
+    const state = btoa(JSON.stringify({ userId: user.id, n: nonce(), ts: Date.now(), force: forceConsent }));
     
-    const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${clientKey}&scope=${scopes}&response_type=code&redirect_uri=${redirectUri}&state=${state}`;
+    let authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${clientKey}&scope=${scopes}&response_type=code&redirect_uri=${redirectUri}&state=${state}`;
     
-    console.log('[ConnectTikTok] Redirecting to TikTok OAuth');
+    // Force consent prompt after disconnect
+    if (forceConsent) {
+      authUrl += '&prompt=consent';
+    }
+    
+    console.log('[ConnectTikTok] Redirecting to TikTok OAuth', forceConsent ? '(forcing consent)' : '');
     window.location.href = authUrl;
   };
 
@@ -73,6 +89,9 @@ export function ConnectTikTokButton({
     setShowAuthModal(false);
     setTimeout(() => handleClick(), 100);
   };
+
+  // If already connected, don't show connect button
+  if (account) return null;
 
   return (
     <>
@@ -83,7 +102,7 @@ export function ConnectTikTokButton({
         className={className}
         disabled={loading}
       >
-        {children}
+        {loading ? 'Checking...' : children}
       </Button>
       <AuthModal 
         open={showAuthModal} 

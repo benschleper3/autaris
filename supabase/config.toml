@@ -49,6 +49,9 @@ verify_jwt = false
 [functions.tiktok-sync]
 verify_jwt = false
 
+[functions.tiktok-revoke]
+verify_jwt = true
+
 [functions.analytics-kpis]
 verify_jwt = true
 

@@ -5,10 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Settings, User, Link2, Plus } from 'lucide-react';
+import { Settings, User, Link2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import { ConnectTikTokButton } from '@/components/ConnectTikTokButton';
+import DisconnectTikTok from '@/components/DisconnectTikTok';
+import { useTikTokAccount } from '@/hooks/useTikTokAccount';
 
 interface SocialAccount {
   platform: string;
@@ -25,9 +27,9 @@ interface UserProfile {
 
 export default function UserSettings() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [socialAccounts, setSocialAccounts] = useState<SocialAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { account: tiktokAccount } = useTikTokAccount();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -41,15 +43,6 @@ export default function UserSettings() {
             avatar_url: user.user_metadata?.avatar_url
           });
         }
-
-        // Fetch social accounts
-        const { data: accountsData, error: accountsError } = await supabase
-          .from('social_accounts')
-          .select('platform, handle, status, last_synced_at')
-          .order('created_at', { ascending: false });
-
-        if (accountsError) throw accountsError;
-        setSocialAccounts(accountsData || []);
       } catch (error) {
         console.error('Error fetching user data:', error);
       } finally {
@@ -60,30 +53,6 @@ export default function UserSettings() {
     fetchUserData();
   }, []);
 
-  const addSocialAccount = async () => {
-    toast({
-      title: "Coming Soon",
-      description: "Social account integration will be available soon",
-    });
-  };
-
-  const getPlatformColor = (platform: string) => {
-    switch (platform?.toLowerCase()) {
-      case 'tiktok': return 'bg-pink-500/10 text-pink-700 dark:text-pink-300';
-      case 'instagram': return 'bg-purple-500/10 text-purple-700 dark:text-purple-300';
-      case 'youtube': return 'bg-red-500/10 text-red-700 dark:text-red-300';
-      default: return 'bg-gray-500/10 text-gray-700 dark:text-gray-300';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'connected': return 'bg-green-500/10 text-green-700 dark:text-green-300';
-      case 'pending': return 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-300';
-      case 'error': return 'bg-red-500/10 text-red-700 dark:text-red-300';
-      default: return 'bg-gray-500/10 text-gray-700 dark:text-gray-300';
-    }
-  };
 
   if (loading) {
     return (
@@ -160,70 +129,49 @@ export default function UserSettings() {
           </CardContent>
         </Card>
 
-        {/* Social Accounts */}
+        {/* TikTok Integration */}
         <Card className="rounded-2xl border-0 bg-card/50 shadow-sm backdrop-blur-sm">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Link2 className="w-5 h-5" />
-                Social Accounts
-              </CardTitle>
-              <Button onClick={addSocialAccount} size="sm" variant="outline">
-                <Plus className="w-4 h-4 mr-1" />
-                Add Account
-              </Button>
-            </div>
+            <CardTitle className="flex items-center gap-2">
+              <Link2 className="w-5 h-5" />
+              TikTok Integration
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            {socialAccounts.length === 0 ? (
-              <div className="text-center py-8">
-                <Link2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p className="text-lg font-medium mb-2">No social accounts connected</p>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Connect your social media accounts to track performance
-                </p>
-                <Button onClick={addSocialAccount} variant="outline">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Your First Account
-                </Button>
+            {tiktokAccount ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-4 p-4 rounded-lg border bg-muted/30">
+                  {tiktokAccount.avatar_url && (
+                    <img 
+                      src={tiktokAccount.avatar_url} 
+                      className="h-12 w-12 rounded-full" 
+                      alt="TikTok avatar" 
+                    />
+                  )}
+                  <div className="flex-1">
+                    <div className="font-semibold">{tiktokAccount.display_name || 'TikTok Account'}</div>
+                    <div className="text-sm text-muted-foreground">
+                      @{tiktokAccount.handle || 'connected'}
+                    </div>
+                    <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
+                      <span>{tiktokAccount.follower_count?.toLocaleString() || 0} followers</span>
+                      <span>{tiktokAccount.video_count || 0} videos</span>
+                    </div>
+                  </div>
+                  <DisconnectTikTok />
+                </div>
+                <Badge variant="secondary" className="bg-green-500/10 text-green-700 dark:text-green-300">
+                  Connected
+                </Badge>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Platform</TableHead>
-                      <TableHead>Handle</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Last Sync</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {socialAccounts.map((account, index) => (
-                      <TableRow key={index}>
-                        <TableCell>
-                          <Badge variant="secondary" className={getPlatformColor(account.platform)}>
-                            {account.platform}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="font-mono">
-                          @{account.handle}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary" className={getStatusColor(account.status)}>
-                            {account.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {account.last_synced_at 
-                            ? new Date(account.last_synced_at).toLocaleDateString()
-                            : 'Never'
-                          }
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+              <div className="text-center py-8">
+                <Link2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p className="text-lg font-medium mb-2">Connect your TikTok account</p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Track your TikTok performance and analytics
+                </p>
+                <ConnectTikTokButton />
               </div>
             )}
           </CardContent>
