@@ -17,6 +17,8 @@ import PortfolioManagerModal from './PortfolioManagerModal';
 import ExportAppJsonModal from './ExportAppJsonModal';
 import GenerateInsightsButton from '@/components/GenerateInsightsButton';
 import InsightsPanel from '@/components/InsightsPanel';
+import SyncTikTokButton from '@/components/SyncTikTokButton';
+import TikTokVideosTable from '@/components/TikTokVideosTable';
 import { CleanupTikTokButton } from '../CleanupTikTokButton';
 import { UpdateTikTokUsername } from '../UpdateTikTokUsername';
 
@@ -177,6 +179,15 @@ export default function UnifiedAnalyticsDashboard() {
           {/* AI Insights List - Full Width */}
           <div className="xl:col-span-3">
             <AIInsightsList filters={filters} />
+          </div>
+
+          {/* TikTok Videos - Full Width */}
+          <div className="xl:col-span-3 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">TikTok Videos</h2>
+              <SyncTikTokButton />
+            </div>
+            <TikTokVideosTable />
           </div>
         </div>
       </div>

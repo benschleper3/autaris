@@ -732,6 +732,69 @@ export type Database = {
         }
         Relationships: []
       }
+      tiktok_videos: {
+        Row: {
+          comment_count: number | null
+          cover_image_url: string | null
+          create_time: string | null
+          duration_seconds: number | null
+          embed_link: string | null
+          height: number | null
+          id: string
+          last_synced_at: string
+          like_count: number | null
+          open_id: string | null
+          share_count: number | null
+          share_url: string | null
+          title: string | null
+          user_id: string
+          video_description: string | null
+          video_id: string
+          view_count: number | null
+          width: number | null
+        }
+        Insert: {
+          comment_count?: number | null
+          cover_image_url?: string | null
+          create_time?: string | null
+          duration_seconds?: number | null
+          embed_link?: string | null
+          height?: number | null
+          id?: string
+          last_synced_at?: string
+          like_count?: number | null
+          open_id?: string | null
+          share_count?: number | null
+          share_url?: string | null
+          title?: string | null
+          user_id: string
+          video_description?: string | null
+          video_id: string
+          view_count?: number | null
+          width?: number | null
+        }
+        Update: {
+          comment_count?: number | null
+          cover_image_url?: string | null
+          create_time?: string | null
+          duration_seconds?: number | null
+          embed_link?: string | null
+          height?: number | null
+          id?: string
+          last_synced_at?: string
+          like_count?: number | null
+          open_id?: string | null
+          share_count?: number | null
+          share_url?: string | null
+          title?: string | null
+          user_id?: string
+          video_description?: string | null
+          video_id?: string
+          view_count?: number | null
+          width?: number | null
+        }
+        Relationships: []
+      }
       user_meta: {
         Row: {
           created_at: string | null

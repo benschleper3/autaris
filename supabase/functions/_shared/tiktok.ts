@@ -9,7 +9,7 @@ const USER_INFO_BASE = 'https://open.tiktokapis.com/v2/user/info/';
 export function buildAuthUrl(state: string) {
   // Prefer TIKTOK_CLIENT_KEY, fallback to TIKTOK_CLIENT_ID for backward compatibility
   const CLIENT_KEY = Deno.env.get('TIKTOK_CLIENT_KEY') || Deno.env.get('TIKTOK_CLIENT_ID') || '';
-  const scopes = Deno.env.get('TIKTOK_SCOPES') || 'user.info.basic,user.info.stats';
+  const scopes = Deno.env.get('TIKTOK_SCOPES') || 'user.info.basic,user.info.stats,video.list';
   const qs = new URLSearchParams({
     client_key: CLIENT_KEY,
     scope: scopes,
