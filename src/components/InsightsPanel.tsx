@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { TrendingUp, Clock, Lightbulb, TestTube, Target } from "lucide-react";
+import GenerateInsightsButton from "@/components/GenerateInsightsButton";
 
 type Insight = {
   week_start: string;
@@ -24,13 +25,13 @@ type Insight = {
 
 const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-export default function InsightsPanel({ refreshTrigger }: { refreshTrigger?: number }) {
+export default function InsightsPanel() {
   const [items, setItems] = useState<Insight[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchInsights();
-  }, [refreshTrigger]);
+  }, []);
 
   const fetchInsights = async () => {
     setLoading(true);
@@ -58,10 +59,13 @@ export default function InsightsPanel({ refreshTrigger }: { refreshTrigger?: num
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5" />
-            AI Insights
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5" />
+              AI Insights
+            </CardTitle>
+            <GenerateInsightsButton onSuccess={fetchInsights} />
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <Skeleton className="h-20 w-full" />
@@ -79,10 +83,13 @@ export default function InsightsPanel({ refreshTrigger }: { refreshTrigger?: num
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5" />
-            AI Insights
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5" />
+              AI Insights
+            </CardTitle>
+            <GenerateInsightsButton onSuccess={fetchInsights} />
+          </div>
         </CardHeader>
         <CardContent>
           <div className="text-center text-muted-foreground py-8">
@@ -99,13 +106,16 @@ export default function InsightsPanel({ refreshTrigger }: { refreshTrigger?: num
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5" />
-          AI Insights
-          <Badge variant="secondary" className="ml-2">
-            Week of {new Date(latest.week_start).toLocaleDateString()}
-          </Badge>
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5" />
+            AI Insights
+            <Badge variant="secondary" className="ml-2">
+              Week of {new Date(latest.week_start).toLocaleDateString()}
+            </Badge>
+          </CardTitle>
+          <GenerateInsightsButton onSuccess={fetchInsights} />
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="p-4 bg-muted/50 rounded-lg">

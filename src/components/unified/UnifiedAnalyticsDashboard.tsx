@@ -11,11 +11,9 @@ import TrendChart from './TrendChart';
 import PlatformBreakdown from './PlatformBreakdown';
 import PostingHeatmap from './PostingHeatmap';
 import TopPostsTable from './TopPostsTable';
-import AIInsightsList from './AIInsightsList';
 import ReportGeneratorModal from './ReportGeneratorModal';
 import PortfolioManagerModal from './PortfolioManagerModal';
 import ExportAppJsonModal from './ExportAppJsonModal';
-import GenerateInsightsButton from '@/components/GenerateInsightsButton';
 import InsightsPanel from '@/components/InsightsPanel';
 import SyncTikTokButton from '@/components/SyncTikTokButton';
 import TikTokVideosTable from '@/components/TikTokVideosTable';
@@ -38,7 +36,6 @@ export default function UnifiedAnalyticsDashboard() {
   const [syncing, setSyncing] = useState(false);
   const [tiktokConnected, setTiktokConnected] = useState(false);
   const [checkingConnection, setCheckingConnection] = useState(true);
-  const [insightsRefresh, setInsightsRefresh] = useState(0);
 
   useEffect(() => {
     checkTikTokConnection();
@@ -118,7 +115,6 @@ export default function UnifiedAnalyticsDashboard() {
             </p>
           </div>
           <div className="flex gap-2">
-            <GenerateInsightsButton onSuccess={() => setInsightsRefresh(prev => prev + 1)} />
             {tiktokConnected && (
               <Button onClick={handleSyncData} disabled={syncing} variant="default" className="flex items-center gap-2">
                 <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
@@ -153,7 +149,7 @@ export default function UnifiedAnalyticsDashboard() {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           {/* AI Insights Panel - Full Width */}
           <div className="xl:col-span-3">
-            <InsightsPanel refreshTrigger={insightsRefresh} />
+            <InsightsPanel />
           </div>
 
           {/* Performance Trends - Full Width */}
@@ -174,11 +170,6 @@ export default function UnifiedAnalyticsDashboard() {
           {/* Top Posts Table - Full Width */}
           <div className="xl:col-span-3">
             <TopPostsTable filters={filters} />
-          </div>
-
-          {/* AI Insights List - Full Width */}
-          <div className="xl:col-span-3">
-            <AIInsightsList filters={filters} />
           </div>
 
           {/* TikTok Videos - Full Width */}
