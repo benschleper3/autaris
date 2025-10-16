@@ -96,14 +96,14 @@ export default function UGCDashboard() {
         // Fetch insights
         const { data: insightsData } = await supabase
           .from('weekly_insights')
-          .select('week_start, narrative, recommendations')
+          .select('week_start, summary, recommendations')
           .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
           .order('week_start', { ascending: false })
           .limit(5);
 
         setInsights(insightsData?.map(item => ({
           week_start: item.week_start,
-          insight: item.narrative || 'No insights available',
+          insight: item.summary || 'No insights available',
           confidence: 85 // Mock confidence score
         })) || []);
 

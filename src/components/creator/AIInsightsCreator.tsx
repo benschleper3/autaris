@@ -6,7 +6,7 @@ import { Brain, Sparkles } from 'lucide-react';
 
 interface Insight {
   week_start: string;
-  narrative: string;
+  summary: string;
   confidence: number;
 }
 
@@ -19,7 +19,7 @@ export default function AIInsightsCreator() {
       try {
         const { data, error } = await supabase
           .from('weekly_insights')
-          .select('week_start, narrative')
+          .select('week_start, summary')
           .order('week_start', { ascending: false })
           .limit(5);
 
@@ -86,7 +86,7 @@ export default function AIInsightsCreator() {
                     {insight.confidence}% confidence
                   </span>
                 </div>
-                <p className="text-sm">{insight.narrative}</p>
+                <p className="text-sm">{insight.summary}</p>
               </div>
             ))
           )}

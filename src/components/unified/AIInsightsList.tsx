@@ -16,8 +16,8 @@ interface AIInsightsListProps {
 
 interface InsightData {
   week_start: string;
-  narrative: string;
-  recommendations: string;
+  summary: string;
+  recommendations: any;
 }
 
 export default function AIInsightsList({ filters }: AIInsightsListProps) {
@@ -35,7 +35,7 @@ export default function AIInsightsList({ filters }: AIInsightsListProps) {
       setLoading(true);
       const { data, error } = await supabase
         .from('weekly_insights')
-        .select('week_start, narrative, recommendations')
+        .select('week_start, summary, recommendations')
         .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
         .order('week_start', { ascending: false })
         .limit(5);
@@ -148,7 +148,7 @@ export default function AIInsightsList({ filters }: AIInsightsListProps) {
                   </span>
                 </div>
                 <div className="space-y-2">
-                  <p className="text-sm font-medium">{insight.narrative}</p>
+                  <p className="text-sm font-medium">{insight.summary}</p>
                   <div className="text-sm text-muted-foreground">
                     <p className="whitespace-pre-line">{insight.recommendations}</p>
                   </div>

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 type Row = { title: string|null; url: string|null; published_at: string|null; views: number|null; likes: number|null; comments: number|null; shares: number|null; engagement_rate: number|null; };
-type Insight = { week_start: string; narrative: string|null; recommendations: string|null; };
+type Insight = { week_start: string; summary: string|null; recommendations: any; };
 
 const fmt = (n: number) => Intl.NumberFormat().format(Math.max(0, Math.floor(n)));
 
@@ -83,7 +83,7 @@ export default function Platform() {
     })();
 
     supabase.from('weekly_insights')
-      .select('week_start,narrative,recommendations')
+      .select('week_start,summary,recommendations')
       .eq('week_start', mondayISO)
       .maybeSingle()
       .then(({ data, error }) => {
@@ -157,8 +157,8 @@ export default function Platform() {
         <h2 className="text-lg font-semibold">This week's recommendations</h2>
         {insight ? (
           <div className="rounded-2xl border p-4 space-y-2">
-            <p className="font-medium">Narrative</p>
-            <p className="text-sm">{insight.narrative}</p>
+            <p className="font-medium">Summary</p>
+            <p className="text-sm">{insight.summary}</p>
             <p className="font-medium mt-2">Recommendations</p>
             <p className="text-sm whitespace-pre-wrap">{insight.recommendations}</p>
           </div>

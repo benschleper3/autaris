@@ -40,7 +40,7 @@ export default function UGCInsights({ filters }: Props) {
 
       const { data: insightsData, error } = await supabase
         .from('weekly_insights')
-        .select('week_start, narrative, recommendations')
+        .select('week_start, summary, recommendations')
         .eq('user_id', user.user.id)
         .order('week_start', { ascending: false })
         .limit(5);
@@ -51,7 +51,7 @@ export default function UGCInsights({ filters }: Props) {
       } else {
         const formatted = (insightsData || []).map(item => ({
           week_start: item.week_start,
-          insight: item.narrative || item.recommendations || 'No insights available',
+          insight: item.summary || (Array.isArray(item.recommendations) ? item.recommendations.join(', ') : String(item.recommendations || '')) || 'No insights available',
           confidence: 85 // Mock confidence score
         }));
         setData(formatted);

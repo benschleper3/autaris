@@ -25,7 +25,7 @@ export default function AIInsightsPanel() {
 
         const { data: insightsData, error } = await supabase
           .from('weekly_insights')
-          .select('week_start, narrative, recommendations')
+          .select('week_start, summary, recommendations')
           .eq('user_id', user.id)
           .order('week_start', { ascending: false })
           .limit(5);
@@ -34,7 +34,7 @@ export default function AIInsightsPanel() {
         
         const formattedInsights = (insightsData || []).map(insight => ({
           week_start: insight.week_start,
-          insight: insight.narrative || insight.recommendations || 'No insights available',
+          insight: insight.summary || (Array.isArray(insight.recommendations) ? insight.recommendations.join(', ') : String(insight.recommendations || '')) || 'No insights available',
           confidence: 90 // Mock confidence score
         }));
         
@@ -64,7 +64,7 @@ export default function AIInsightsPanel() {
 
       const { data: newInsightsData, error } = await supabase
         .from('weekly_insights')
-        .select('week_start, narrative, recommendations')
+        .select('week_start, summary, recommendations')
         .eq('user_id', user.id)
         .order('week_start', { ascending: false })
         .limit(5);
@@ -72,7 +72,7 @@ export default function AIInsightsPanel() {
       if (!error) {
         const formattedInsights = (newInsightsData || []).map(insight => ({
           week_start: insight.week_start,
-          insight: insight.narrative || insight.recommendations || 'No insights available',
+          insight: insight.summary || (Array.isArray(insight.recommendations) ? insight.recommendations.join(', ') : String(insight.recommendations || '')) || 'No insights available',
           confidence: 90
         }));
         
