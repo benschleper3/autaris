@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { WaitlistForm } from './WaitlistForm';
-import { ArrowRight } from 'lucide-react';
-import { ConnectTikTokButton } from '@/components/ConnectTikTokButton';
 
 export function Hero() {
   const [showWaitlist, setShowWaitlist] = useState(false);
@@ -34,18 +32,10 @@ export function Hero() {
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          <ConnectTikTokButton 
-            size="lg" 
-            className="bg-gradient-to-r from-primary to-autaris-accent hover:opacity-90 transition-all text-lg px-8 py-6 glow-effect"
-          >
-            Login with TikTok
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </ConnectTikTokButton>
-          
+        <div className="flex justify-center animate-fade-in" style={{ animationDelay: '0.2s' }}>
           <Dialog open={showWaitlist} onOpenChange={setShowWaitlist}>
             <DialogTrigger asChild>
-              <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2">
+              <Button size="lg" className="bg-gradient-to-r from-primary to-autaris-accent hover:opacity-90 transition-all text-lg px-8 py-6 glow-effect">
                 Join Waitlist
               </Button>
             </DialogTrigger>
