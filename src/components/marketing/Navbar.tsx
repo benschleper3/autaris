@@ -77,6 +77,37 @@ export function Navbar() {
         </div>
 
         <div className="flex flex-1 items-center justify-end space-x-4">
+          {/* Auth Button */}
+          {session ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="hidden md:flex">
+                  <User className="h-4 w-4 mr-2" />
+                  Account
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                  Dashboard
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut}>
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button
+              onClick={handleSignIn}
+              size="sm"
+              className="hidden md:flex bg-gradient-to-r from-primary to-autaris-accent hover:opacity-90"
+            >
+              Sign In
+            </Button>
+          )}
+
           {/* Mobile Menu */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild className="md:hidden">
@@ -86,7 +117,7 @@ export function Navbar() {
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
               <div className="flex flex-col space-y-6 mt-8">
-                {navLinks.map((link) => 
+                {navLinks.map((link) =>
                   link.isRoute ? (
                     <Link
                       key={link.name}
@@ -107,6 +138,33 @@ export function Navbar() {
                     </a>
                   )
                 )}
+                <div className="pt-4 border-t">
+                  {session ? (
+                    <>
+                      <Button
+                        onClick={() => { navigate('/dashboard'); setIsOpen(false); }}
+                        variant="ghost"
+                        className="w-full justify-start text-lg font-medium"
+                      >
+                        Dashboard
+                      </Button>
+                      <Button
+                        onClick={() => { handleSignOut(); setIsOpen(false); }}
+                        variant="ghost"
+                        className="w-full justify-start text-lg font-medium"
+                      >
+                        Sign Out
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      onClick={() => { handleSignIn(); setIsOpen(false); }}
+                      className="w-full bg-gradient-to-r from-primary to-autaris-accent"
+                    >
+                      Sign In
+                    </Button>
+                  )}
+                </div>
               </div>
             </SheetContent>
           </Sheet>
