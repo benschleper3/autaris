@@ -14,29 +14,28 @@ serve(async (req) => {
   try {
     const user_id = await getUserIdFromRequest(req);
     if (!user_id) {
-      return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { 
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { 
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
-    const url = new URL(req.url);
-    const p_from = url.searchParams.get('from');
-    const p_to = url.searchParams.get('to');
-    const p_platform = url.searchParams.get('platform') ?? 'all';
+    const body = await req.json();
+    const { from, to, platforms } = body;
+    const p_platform = (platforms && platforms.length > 0) ? platforms[0] : 'all';
 
-    console.log('[analytics-kpis] Fetching KPIs for user:', user_id, { p_from, p_to, p_platform });
+    console.log('[analytics-kpis] Fetching KPIs for user:', user_id, { from, to, p_platform });
 
-    const { data, error } = await supaAdmin.rpc('get_ugc_kpis', { 
+    const { data, error } = await supaAdmin.rpc('get_ugc_kpis', {
       p_user_id: user_id,
-      p_from, 
-      p_to, 
-      p_platform 
+      p_from: from || null,
+      p_to: to || null,
+      p_platform
     });
 
     if (error) {
       console.error('[analytics-kpis] RPC error:', error);
-      return new Response(JSON.stringify({ ok: false, error: error.message }), { 
+      return new Response(JSON.stringify({ error: error.message }), { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
@@ -52,13 +51,13 @@ serve(async (req) => {
 
     console.log('[analytics-kpis] Result:', result);
 
-    return new Response(JSON.stringify({ ok: true, ...result }), {
+    return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   } catch (error) {
     console.error('[analytics-kpis] Error:', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ ok: false, error: message }), {
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

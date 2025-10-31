@@ -14,28 +14,31 @@ serve(async (req) => {
   try {
     const user_id = await getUserIdFromRequest(req);
     if (!user_id) {
-      return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { 
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { 
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
-    const url = new URL(req.url);
-    const limit = Math.min(Number(url.searchParams.get('limit') ?? 20), 50);
+    const body = await req.json();
+    const { from, to, platforms, sort = 'views', dir = 'desc', page = 1, pageSize = 20 } = body;
 
-    console.log('[analytics-top-posts] Fetching top', limit, 'posts for user:', user_id);
+    console.log('[analytics-top-posts] Fetching top posts for user:', user_id, { from, to, platforms, sort, dir, page, pageSize });
 
-    const { data, error } = await supaAdmin
-      .from('v_posts_with_latest')
-      .select('post_id,title,platform,published_at,views,engagement_rate,url,likes,comments,shares,saves')
-      .eq('user_id', user_id)
-      .order('engagement_rate', { ascending: false, nullsFirst: false })
-      .order('views', { ascending: false, nullsFirst: false })
-      .limit(limit);
+    const { data, error } = await supaAdmin.rpc('get_top_posts', {
+      p_user_id: user_id,
+      p_from: from || null,
+      p_to: to || null,
+      p_platforms: platforms || null,
+      p_sort: sort,
+      p_dir: dir,
+      p_page: page,
+      p_page_size: pageSize
+    });
 
     if (error) {
       console.error('[analytics-top-posts] Query error:', error);
-      return new Response(JSON.stringify({ ok: false, error: error.message }), { 
+      return new Response(JSON.stringify({ error: error.message }), { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
@@ -43,13 +46,13 @@ serve(async (req) => {
 
     console.log('[analytics-top-posts] Found', data?.length ?? 0, 'posts');
 
-    return new Response(JSON.stringify({ ok: true, rows: data ?? [] }), { 
+    return new Response(JSON.stringify({ rows: data ?? [] }), { 
       headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
     });
   } catch (error) {
     console.error('[analytics-top-posts] Error:', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ ok: false, error: message }), {
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

@@ -14,40 +14,31 @@ serve(async (req) => {
   try {
     const user_id = await getUserIdFromRequest(req);
     if (!user_id) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), { 
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
-    const body = await req.json();
-    const { from, to, platforms } = body;
-    const p_platform = (platforms && platforms.length > 0) ? platforms[0] : 'all';
-
-    console.log('[analytics-trend] Fetching trends for user:', user_id, { from, to, p_platform });
-
-    const { data, error } = await supaAdmin.rpc('get_daily_perf', {
-      p_user_id: user_id,
-      p_from: from || null,
-      p_to: to || null,
-      p_platform
-    });
+    const { data, error } = await supaAdmin
+      .from('profiles')
+      .select('*')
+      .eq('user_id', user_id)
+      .maybeSingle();
 
     if (error) {
-      console.error('[analytics-trend] RPC error:', error);
-      return new Response(JSON.stringify({ error: error.message }), { 
+      console.error('[profile-me] Error:', error);
+      return new Response(JSON.stringify({ error: error.message }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
-    console.log('[analytics-trend] Found', data?.length ?? 0, 'trend rows');
-
-    return new Response(JSON.stringify({ rows: data ?? [] }), { 
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+    return new Response(JSON.stringify({ profile: data }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error('[analytics-trend] Error:', error);
+    console.error('[profile-me] Exception:', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
     return new Response(JSON.stringify({ error: message }), {
       status: 500,

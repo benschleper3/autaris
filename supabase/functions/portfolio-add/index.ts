@@ -14,40 +14,48 @@ serve(async (req) => {
   try {
     const user_id = await getUserIdFromRequest(req);
     if (!user_id) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), { 
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
     const body = await req.json();
-    const { from, to, platforms } = body;
-    const p_platform = (platforms && platforms.length > 0) ? platforms[0] : 'all';
+    const { post_id, title, image_url, description, featured } = body;
 
-    console.log('[analytics-trend] Fetching trends for user:', user_id, { from, to, p_platform });
+    if (!title || !image_url) {
+      return new Response(JSON.stringify({ error: 'title and image_url are required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
 
-    const { data, error } = await supaAdmin.rpc('get_daily_perf', {
-      p_user_id: user_id,
-      p_from: from || null,
-      p_to: to || null,
-      p_platform
-    });
+    const { data, error } = await supaAdmin
+      .from('portfolio_items')
+      .insert({
+        user_id,
+        post_id: post_id || null,
+        title,
+        image_url,
+        description: description || null,
+        featured: featured || false,
+      })
+      .select()
+      .single();
 
     if (error) {
-      console.error('[analytics-trend] RPC error:', error);
-      return new Response(JSON.stringify({ error: error.message }), { 
+      console.error('[portfolio-add] Error:', error);
+      return new Response(JSON.stringify({ error: error.message }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
-    console.log('[analytics-trend] Found', data?.length ?? 0, 'trend rows');
-
-    return new Response(JSON.stringify({ rows: data ?? [] }), { 
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+    return new Response(JSON.stringify({ portfolio_item: data }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error('[analytics-trend] Error:', error);
+    console.error('[portfolio-add] Exception:', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
     return new Response(JSON.stringify({ error: message }), {
       status: 500,
